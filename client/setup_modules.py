@@ -27,7 +27,7 @@ except ImportError:
 
 check_version.check_python_version()
 
-import new
+import types
 import imp
 
 
@@ -37,7 +37,7 @@ def _create_module(name):
 
     :param name: Module name, such as 'autotest'.
     """
-    module = new.module(name)
+    module = types.ModuleType(name)
     sys.modules[name] = module
     return module
 
@@ -56,7 +56,7 @@ def _create_module_and_parents(name):
     # now, create any remaining child modules
     while parts:
         child_name = parts.pop(0)
-        module = new.module(child_name)
+        module = types.ModuleType(child_name)
         setattr(parent, child_name, module)
         created_parts.append(child_name)
         sys.modules[".".join(created_parts)] = module
