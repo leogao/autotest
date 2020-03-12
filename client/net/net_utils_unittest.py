@@ -8,7 +8,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client import utils
 from autotest.client.net import net_utils, net_utils_mock
 from autotest.client.shared.test_utils import mock
@@ -95,13 +95,13 @@ class TestNetUtils(unittest.TestCase):
         s.bind.expect_call(('eth0', net_utils.raw_socket.ETH_P_ALL))
         mock_netif = self.network_interface_mock(iface='eth0', test_init=True)
         self.god.check_playback()
-        self.assertEquals(mock_netif.ethtool, 'ethtool')
-        self.assertEquals(mock_netif._name, 'eth0')
-        self.assertEquals(mock_netif.was_down, 'is_down')
-        self.assertEquals(mock_netif.orig_ipaddr, 'get_ipaddr')
-        self.assertEquals(mock_netif.was_loopback_enabled,
+        self.assertEqual(mock_netif.ethtool, 'ethtool')
+        self.assertEqual(mock_netif._name, 'eth0')
+        self.assertEqual(mock_netif.was_down, 'is_down')
+        self.assertEqual(mock_netif.orig_ipaddr, 'get_ipaddr')
+        self.assertEqual(mock_netif.was_loopback_enabled,
                           'is_loopback_enabled')
-        self.assertEquals(mock_netif._socket, s)
+        self.assertEqual(mock_netif._socket, s)
 
     def test_network_interface_restore(self):
         mock_netif = self.network_interface_mock('eth0')
@@ -183,24 +183,24 @@ class TestNetUtils(unittest.TestCase):
 
     def test_network_interface_get_name(self):
         mock_netif = self.network_interface_mock(iface='eth0')
-        self.assertEquals(mock_netif.get_name(), 'eth0')
+        self.assertEqual(mock_netif.get_name(), 'eth0')
 
     def test_network_interface_parse_ethtool(self):
         mock_netif = self.network_interface_mock()
         cmd = '%s %s %s' % (mock_netif.ethtool, '', mock_netif._name)
 
         utils.system_output.expect_call(cmd).and_return('\n field: match')
-        self.assertEquals(mock_netif.parse_ethtool('field', 'some|match'),
+        self.assertEqual(mock_netif.parse_ethtool('field', 'some|match'),
                           'match')
 
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(None)
-        self.assertEquals(mock_netif.parse_ethtool('field',
+        self.assertEqual(mock_netif.parse_ethtool('field',
                                                    'some|match'), '')
 
         utils.system_output.expect_call(cmd).and_return(' field: match')
-        self.assertEquals(mock_netif.parse_ethtool('field',
+        self.assertEqual(mock_netif.parse_ethtool('field',
                                                    'some|match'), '')
         self.god.check_playback()
 
@@ -211,14 +211,14 @@ class TestNetUtils(unittest.TestCase):
 
         # no stat found
         os.listdir.expect_call(stat_path).and_return(())
-        self.assertEquals(mock_netif.get_stats(), {})
+        self.assertEqual(mock_netif.get_stats(), {})
         self.god.check_playback()
 
         # can not open stat file
         os.listdir.expect_call(stat_path).and_return(('some_stat',))
         f = self.god.create_mock_class(file, 'file')
         net_utils.open.expect_call(stat_path + 'some_stat', 'r').and_return(None)
-        self.assertEquals(mock_netif.get_stats(), {})
+        self.assertEqual(mock_netif.get_stats(), {})
         self.god.check_playback()
 
         # found a single stat
@@ -227,7 +227,7 @@ class TestNetUtils(unittest.TestCase):
         net_utils.open.expect_call(stat_path + 'some_stat', 'r').and_return(f)
         f.read.expect_call().and_return(1234)
         f.close.expect_call()
-        self.assertEquals(mock_netif.get_stats(), {'some_stat': 1234})
+        self.assertEqual(mock_netif.get_stats(), {'some_stat': 1234})
         self.god.check_playback()
 
         # found multiple stats
@@ -240,7 +240,7 @@ class TestNetUtils(unittest.TestCase):
         f.read.expect_call().and_return(5678)
         f.close.expect_call()
 
-        self.assertEquals(mock_netif.get_stats(), {'stat1': 1234, 'stat2': 5678})
+        self.assertEqual(mock_netif.get_stats(), {'stat1': 1234, 'stat2': 5678})
         self.god.check_playback()
 
     def test_network_interface_get_stats_diff(self):
@@ -259,7 +259,7 @@ class TestNetUtils(unittest.TestCase):
         net_utils.open.expect_call(stat_path + 'stat4', 'r').and_return(f)
         f.read.expect_call().and_return(10)
         f.close.expect_call()
-        self.assertEquals(mock_netif.get_stats_diff({'stat1': 1, 'stat2': 2,
+        self.assertEqual(mock_netif.get_stats_diff({'stat1': 1, 'stat2': 2,
                                                      'stat3': 0}),
                           {'stat1': 1233, 'stat2': -2, 'stat4': 10})
         self.god.check_playback()
@@ -271,7 +271,7 @@ class TestNetUtils(unittest.TestCase):
         stat_path = '/sys/class/net/%s/device/driver' % mock_netif._name
         os.readlink.expect_call(stat_path).and_return((
                                                       stat_path + '/driver_name'))
-        self.assertEquals(mock_netif.get_driver(mock_netif), 'driver_name')
+        self.assertEqual(mock_netif.get_driver(mock_netif), 'driver_name')
         self.god.check_playback()
 
     def test_network_interface_get_carrier(self):
@@ -282,23 +282,23 @@ class TestNetUtils(unittest.TestCase):
         net_utils.open.expect_call(stat_path).and_return(f)
         f.read.expect_call().and_return(' 1 ')
         f.close.expect_call()
-        self.assertEquals(mock_netif.get_carrier(), '1')
+        self.assertEqual(mock_netif.get_carrier(), '1')
         self.god.check_playback()
 
         net_utils.open.expect_call(stat_path).and_return(f)
         f.read.expect_call().and_return(' 0 ')
         f.close.expect_call()
-        self.assertEquals(mock_netif.get_carrier(), '0')
+        self.assertEqual(mock_netif.get_carrier(), '0')
         self.god.check_playback()
 
         net_utils.open.expect_call(stat_path).and_return(f)
         f.read.expect_call().and_return('')
         f.close.expect_call()
-        self.assertEquals(mock_netif.get_carrier(), '')
+        self.assertEqual(mock_netif.get_carrier(), '')
         self.god.check_playback()
 
         net_utils.open.expect_call(stat_path).and_return(None)
-        self.assertEquals(mock_netif.get_carrier(), '')
+        self.assertEqual(mock_netif.get_carrier(), '')
         self.god.check_playback()
 
     def test_network_interface_is_autoneg_advertised(self):
@@ -307,16 +307,16 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Advertised auto-negotiation: Yes')
-        self.assertEquals(mock_netif.is_autoneg_advertised(), True)
+        self.assertEqual(mock_netif.is_autoneg_advertised(), True)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Advertised auto-negotiation: No')
-        self.assertEquals(mock_netif.is_autoneg_advertised(), False)
+        self.assertEqual(mock_netif.is_autoneg_advertised(), False)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_autoneg_advertised(), False)
+        self.assertEqual(mock_netif.is_autoneg_advertised(), False)
         self.god.check_playback()
 
     def test_network_interface_get_speed(self):
@@ -325,12 +325,12 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Speed: 1000')
-        self.assertEquals(mock_netif.get_speed(), 1000)
+        self.assertEqual(mock_netif.get_speed(), 1000)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Speed: 10000')
-        self.assertEquals(mock_netif.get_speed(), 10000)
+        self.assertEqual(mock_netif.get_speed(), 10000)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
@@ -340,7 +340,7 @@ class TestNetUtils(unittest.TestCase):
         except ValueError:
             pass
         else:
-            self.assertEquals(0, 1)
+            self.assertEqual(0, 1)
         self.god.check_playback()
 
     def test_network_interface_is_full_duplex(self):
@@ -349,16 +349,16 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Duplex: Full')
-        self.assertEquals(mock_netif.is_full_duplex(), True)
+        self.assertEqual(mock_netif.is_full_duplex(), True)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Duplex: Half')
-        self.assertEquals(mock_netif.is_full_duplex(), False)
+        self.assertEqual(mock_netif.is_full_duplex(), False)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_full_duplex(), False)
+        self.assertEqual(mock_netif.is_full_duplex(), False)
         self.god.check_playback()
 
     def test_network_interface_is_autoneg_on(self):
@@ -367,16 +367,16 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Auto-negotiation: on')
-        self.assertEquals(mock_netif.is_autoneg_on(), True)
+        self.assertEqual(mock_netif.is_autoneg_on(), True)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Auto-negotiation: off')
-        self.assertEquals(mock_netif.is_autoneg_on(), False)
+        self.assertEqual(mock_netif.is_autoneg_on(), False)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_autoneg_on(), False)
+        self.assertEqual(mock_netif.is_autoneg_on(), False)
         self.god.check_playback()
 
     def test_network_interface_get_wakeon(self):
@@ -385,7 +385,7 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Wake-on: g')
-        self.assertEquals(mock_netif.get_wakeon(), 'g')
+        self.assertEqual(mock_netif.get_wakeon(), 'g')
         self.god.check_playback()
 
     def test_network_interface_is_rx_summing_on(self):
@@ -394,16 +394,16 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n rx-checksumming: on')
-        self.assertEquals(mock_netif.is_rx_summing_on(), True)
+        self.assertEqual(mock_netif.is_rx_summing_on(), True)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n rx-checksumming: off')
-        self.assertEquals(mock_netif.is_rx_summing_on(), False)
+        self.assertEqual(mock_netif.is_rx_summing_on(), False)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_rx_summing_on(), False)
+        self.assertEqual(mock_netif.is_rx_summing_on(), False)
         self.god.check_playback()
 
     def test_network_interface_is_tx_summing_on(self):
@@ -412,16 +412,16 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n tx-checksumming: on')
-        self.assertEquals(mock_netif.is_tx_summing_on(), True)
+        self.assertEqual(mock_netif.is_tx_summing_on(), True)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n tx-checksumming: off')
-        self.assertEquals(mock_netif.is_tx_summing_on(), False)
+        self.assertEqual(mock_netif.is_tx_summing_on(), False)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_tx_summing_on(), False)
+        self.assertEqual(mock_netif.is_tx_summing_on(), False)
         self.god.check_playback()
 
     def test_network_interface_is_scatter_gather_on(self):
@@ -430,16 +430,16 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n scatter-gather: on')
-        self.assertEquals(mock_netif.is_scatter_gather_on(), True)
+        self.assertEqual(mock_netif.is_scatter_gather_on(), True)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n scatter-gather: off')
-        self.assertEquals(mock_netif.is_scatter_gather_on(), False)
+        self.assertEqual(mock_netif.is_scatter_gather_on(), False)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_scatter_gather_on(), False)
+        self.assertEqual(mock_netif.is_scatter_gather_on(), False)
         self.god.check_playback()
 
     def test_network_interface_is_tso_on(self):
@@ -448,16 +448,16 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n tcp segmentation offload: on')
-        self.assertEquals(mock_netif.is_tso_on(), True)
+        self.assertEqual(mock_netif.is_tso_on(), True)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n tcp segmentation offload: off')
-        self.assertEquals(mock_netif.is_tso_on(), False)
+        self.assertEqual(mock_netif.is_tso_on(), False)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_tso_on(), False)
+        self.assertEqual(mock_netif.is_tso_on(), False)
         self.god.check_playback()
 
     def test_network_interface_is_pause_autoneg_on(self):
@@ -466,16 +466,16 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Autonegotiate: on')
-        self.assertEquals(mock_netif.is_pause_autoneg_on(), True)
+        self.assertEqual(mock_netif.is_pause_autoneg_on(), True)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n Autonegotiate: off')
-        self.assertEquals(mock_netif.is_pause_autoneg_on(), False)
+        self.assertEqual(mock_netif.is_pause_autoneg_on(), False)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_pause_autoneg_on(), False)
+        self.assertEqual(mock_netif.is_pause_autoneg_on(), False)
         self.god.check_playback()
 
     def test_network_interface_is_tx_pause_on(self):
@@ -484,16 +484,16 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n TX: on')
-        self.assertEquals(mock_netif.is_tx_pause_on(), True)
+        self.assertEqual(mock_netif.is_tx_pause_on(), True)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n TX: off')
-        self.assertEquals(mock_netif.is_tx_pause_on(), False)
+        self.assertEqual(mock_netif.is_tx_pause_on(), False)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_tx_pause_on(), False)
+        self.assertEqual(mock_netif.is_tx_pause_on(), False)
         self.god.check_playback()
 
     def test_network_interface_is_rx_pause_on(self):
@@ -502,16 +502,16 @@ class TestNetUtils(unittest.TestCase):
 
         utils.system_output.expect_call(cmd).and_return(
             '\n RX: on')
-        self.assertEquals(mock_netif.is_rx_pause_on(), True)
+        self.assertEqual(mock_netif.is_rx_pause_on(), True)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return(
             '\n RX: off')
-        self.assertEquals(mock_netif.is_rx_pause_on(), False)
+        self.assertEqual(mock_netif.is_rx_pause_on(), False)
         self.god.check_playback()
 
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_rx_pause_on(), False)
+        self.assertEqual(mock_netif.is_rx_pause_on(), False)
         self.god.check_playback()
 
     def test_network_interface_enable_loopback(self):
@@ -555,7 +555,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(0, 1)
+            self.assertEqual(0, 1)
         self.god.check_playback()
 
         # catch exception on bond enabled
@@ -565,7 +565,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(0, 1)
+            self.assertEqual(0, 1)
         self.god.check_playback()
 
         # check that setting tg3 and bnx2x driver have a sleep call
@@ -623,7 +623,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(0, 1)
+            self.assertEqual(0, 1)
         self.god.check_playback()
 
     def test_network_interface_is_loopback_enabled(self):
@@ -635,7 +635,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(0, 1)
+            self.assertEqual(0, 1)
         self.god.check_playback()
 
         self.god.stub_function(net_utils.bonding, 'is_enabled')
@@ -643,7 +643,7 @@ class TestNetUtils(unittest.TestCase):
         net_utils.bonding.is_enabled.expect_call().and_return(False)
         cmd = '%s -l %s' % (mock_netif.ethtool, mock_netif._name)
         utils.system_output.expect_call(cmd).and_return('')
-        self.assertEquals(mock_netif.is_loopback_enabled(mock_netif), False)
+        self.assertEqual(mock_netif.is_loopback_enabled(mock_netif), False)
         self.god.check_playback()
 
         for ifname in ('eth0', 'eth1', 'eth2', 'eth3', 'eth4'):
@@ -656,7 +656,7 @@ class TestNetUtils(unittest.TestCase):
                     net_utils.bonding.is_enabled.expect_call().and_return(
                         bond_enable)
                     if bond_enable:
-                        self.assertEquals(mock_netif.is_loopback_enabled(
+                        self.assertEqual(mock_netif.is_loopback_enabled(
                             mock_netif), False)
                     else:
                         cmd = '%s -l %s' % (mock_netif.ethtool, mock_netif._name)
@@ -665,7 +665,7 @@ class TestNetUtils(unittest.TestCase):
                               'PHY external loopback is %s' % (
                                   state[0], state[1], state[2])
                         utils.system_output.expect_call(cmd).and_return(out)
-                        self.assertEquals(mock_netif.is_loopback_enabled(
+                        self.assertEqual(mock_netif.is_loopback_enabled(
                             mock_netif), 'enabled' in state)
                     self.god.check_playback()
 
@@ -691,7 +691,7 @@ class TestNetUtils(unittest.TestCase):
         hw_addr = '00:0e:0c:c3:7d:a8'
         f.read.expect_call().and_return(' ' + hw_addr + ' ')
         f.close.expect_call()
-        self.assertEquals(mock_netif.get_hwaddr(), hw_addr)
+        self.assertEqual(mock_netif.get_hwaddr(), hw_addr)
         self.god.check_playback()
 
     def test_network_interface_set_hwaddr(self):
@@ -737,24 +737,24 @@ class TestNetUtils(unittest.TestCase):
 
         cmd = 'ifconfig %s' % mock_netif._name
         utils.system_output.expect_call(cmd).and_return(out)
-        self.assertEquals(mock_netif.get_ipaddr(), ip_addr)
+        self.assertEqual(mock_netif.get_ipaddr(), ip_addr)
         self.god.check_playback()
 
         cmd = 'ifconfig %s' % mock_netif._name
         utils.system_output.expect_call(cmd).and_return('some output')
-        self.assertEquals(mock_netif.get_ipaddr(), '0.0.0.0')
+        self.assertEqual(mock_netif.get_ipaddr(), '0.0.0.0')
         self.god.check_playback()
 
         cmd = 'ifconfig %s' % mock_netif._name
         utils.system_output.expect_call(cmd).and_return(None)
-        self.assertEquals(mock_netif.get_ipaddr(), '0.0.0.0')
+        self.assertEqual(mock_netif.get_ipaddr(), '0.0.0.0')
         self.god.check_playback()
 
         ip_addr = '1.2.3.4'
         out = out_format % ip_addr
         cmd = 'ifconfig %s' % mock_netif._name
         utils.system_output.expect_call(cmd).and_return(out)
-        self.assertEquals(mock_netif.get_ipaddr(), ip_addr)
+        self.assertEqual(mock_netif.get_ipaddr(), ip_addr)
         self.god.check_playback()
 
     def test_network_interface_set_ipaddr(self):
@@ -782,12 +782,12 @@ class TestNetUtils(unittest.TestCase):
             out = out_format % state
             cmd = 'ifconfig %s' % mock_netif._name
             utils.system_output.expect_call(cmd).and_return(out)
-            self.assertEquals(mock_netif.is_down(), state != 'UP')
+            self.assertEqual(mock_netif.is_down(), state != 'UP')
             self.god.check_playback()
 
         cmd = 'ifconfig %s' % mock_netif._name
         utils.system_output.expect_call(cmd).and_return(None)
-        self.assertEquals(mock_netif.is_down(), False)
+        self.assertEqual(mock_netif.is_down(), False)
         self.god.check_playback()
 
     def test_network_interface_up(self):
@@ -815,7 +815,7 @@ class TestNetUtils(unittest.TestCase):
         for y in (0, 1, 100):
             max_timeout = y
             if y:
-                for x in xrange(max_timeout - 1):
+                for x in range(max_timeout - 1):
                     net_utils.open.expect_call(spath).and_return(f)
                     f.read.expect_call().and_return(' ' + '0' + ' ')
                     f.close.expect_call()
@@ -830,20 +830,20 @@ class TestNetUtils(unittest.TestCase):
                 pass
             else:
                 if not y:
-                    self.assertEquals(0, 1)
+                    self.assertEqual(0, 1)
             self.god.check_playback()
 
     def test_network_interface_send(self):
         mock_netif = self.network_interface_mock()
         mock_netif.send('test buffer')
-        self.assertEquals(mock_netif._socket.send_val, 'test buffer')
+        self.assertEqual(mock_netif._socket.send_val, 'test buffer')
 
     def test_network_interface_recv(self):
         mock_netif = self.network_interface_mock()
         test_str = 'test string'
         mock_netif._socket.recv_val = test_str
         rcv_str = mock_netif.recv(len(test_str))
-        self.assertEquals(rcv_str, test_str)
+        self.assertEqual(rcv_str, test_str)
 
     def test_network_interface_flush(self):
         mock_netif = self.network_interface_mock()
@@ -865,7 +865,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
 
     def test_bonding_is_bondable(self):
         try:
@@ -873,7 +873,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
 
     def test_bonding_enable(self):
         try:
@@ -881,7 +881,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
 
     def test_bonding_disable(self):
         try:
@@ -889,43 +889,43 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
 
     def test_bonding_get_mii_status(self):
-        self.assertEquals(net_utils.bond().get_mii_status(), {})
+        self.assertEqual(net_utils.bond().get_mii_status(), {})
 
     def test_get_mode_bonding(self):
-        self.assertEquals(net_utils.bond().get_mode(), net_utils.bonding.NO_MODE)
+        self.assertEqual(net_utils.bond().get_mode(), net_utils.bonding.NO_MODE)
 
     def test_bonding_wait_for_state_change(self):
         self.god.stub_function(utils, "ping_default_gateway")
 
         time.sleep.expect_call(10)
         utils.ping_default_gateway.expect_call().and_return(False)
-        self.assertEquals(net_utils.bond().wait_for_state_change(), True)
+        self.assertEqual(net_utils.bond().wait_for_state_change(), True)
 
-        for x in xrange(9):
+        for x in range(9):
             time.sleep.expect_call(10)
             utils.ping_default_gateway.expect_call().and_return(True)
 
         time.sleep.expect_call(10)
         utils.ping_default_gateway.expect_call().and_return(False)
-        self.assertEquals(net_utils.bond().wait_for_state_change(), True)
+        self.assertEqual(net_utils.bond().wait_for_state_change(), True)
 
-        for x in xrange(10):
+        for x in range(10):
             time.sleep.expect_call(10)
             utils.ping_default_gateway.expect_call().and_return(True)
 
-        self.assertEquals(net_utils.bond().wait_for_state_change(), False)
+        self.assertEqual(net_utils.bond().wait_for_state_change(), False)
 
         self.god.check_playback()
 
     def test_bonding_get_active_interfaces(self):
-        self.assertEquals(net_utils.bond().get_active_interfaces(), [])
+        self.assertEqual(net_utils.bond().get_active_interfaces(), [])
         self.god.check_playback()
 
     def test_bonding_get_slave_interfaces(self):
-        self.assertEquals(net_utils.bond().get_slave_interfaces(), [])
+        self.assertEqual(net_utils.bond().get_slave_interfaces(), [])
         self.god.check_playback()
 
     #
@@ -946,7 +946,7 @@ class TestNetUtils(unittest.TestCase):
         protocol = 2030
         payload = 'some payload'
         frame = struct.pack("!6s6sH", dst, src, protocol) + payload
-        self.assertEquals(net_utils.ethernet.pack(dst, src, protocol, payload),
+        self.assertEqual(net_utils.ethernet.pack(dst, src, protocol, payload),
                           frame)
 
     def test_ethernet_unpack(self):
@@ -956,10 +956,10 @@ class TestNetUtils(unittest.TestCase):
         payload = 'some payload'
         frame = net_utils.ethernet.pack(dst, src, protocol, payload)
         uframe = net_utils.ethernet.unpack(frame)
-        self.assertEquals(uframe[net_utils.ethernet.FRAME_KEY_DST_MAC], dst)
-        self.assertEquals(uframe[net_utils.ethernet.FRAME_KEY_SRC_MAC], src)
-        self.assertEquals(uframe[net_utils.ethernet.FRAME_KEY_PROTO], protocol)
-        self.assertEquals(uframe[net_utils.ethernet.FRAME_KEY_PAYLOAD], payload)
+        self.assertEqual(uframe[net_utils.ethernet.FRAME_KEY_DST_MAC], dst)
+        self.assertEqual(uframe[net_utils.ethernet.FRAME_KEY_SRC_MAC], src)
+        self.assertEqual(uframe[net_utils.ethernet.FRAME_KEY_PROTO], protocol)
+        self.assertEqual(uframe[net_utils.ethernet.FRAME_KEY_PAYLOAD], payload)
 
     # raw_socket tests
     #
@@ -986,7 +986,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
 
         self.god.check_playback()
 
@@ -1016,7 +1016,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
 
         # close after open
         socket.setdefaulttimeout.expect_call(1)
@@ -1045,7 +1045,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
 
         self.god.check_playback()
 
@@ -1064,35 +1064,35 @@ class TestNetUtils(unittest.TestCase):
         sock.open(protocol=1234)
 
         s.recv_val = ''
-        self.assertEquals(sock.recv(1), (None, 0))
+        self.assertEqual(sock.recv(1), (None, 0))
 
         s.recv_val = '\xFF' * (net_utils.ethernet.ETH_PACKET_MIN_SIZE - 5)
-        self.assertEquals(sock.recv(1), (None, 0))
+        self.assertEqual(sock.recv(1), (None, 0))
 
         # when receiving a packet, make sure the timeout is not change
         s.recv_val = '\xEE' * (net_utils.ethernet.ETH_PACKET_MIN_SIZE - 4)
-        self.assertEquals(sock.recv(1), (s.recv_val, 1))
+        self.assertEqual(sock.recv(1), (s.recv_val, 1))
 
         s.recv_val = '\xDD' * (net_utils.ethernet.ETH_PACKET_MIN_SIZE)
-        self.assertEquals(sock.recv(1), (s.recv_val, 1))
+        self.assertEqual(sock.recv(1), (s.recv_val, 1))
 
         s.recv_val = '\xCC' * (net_utils.ethernet.ETH_PACKET_MAX_SIZE)
-        self.assertEquals(sock.recv(1), (s.recv_val, 1))
+        self.assertEqual(sock.recv(1), (s.recv_val, 1))
 
         s.recv_val = '\xBB' * (net_utils.ethernet.ETH_PACKET_MAX_SIZE + 1)
         packet, time_left = sock.recv(1)
-        self.assertEquals(len(packet), net_utils.ethernet.ETH_PACKET_MAX_SIZE)
-        self.assertEquals(packet,
+        self.assertEqual(len(packet), net_utils.ethernet.ETH_PACKET_MAX_SIZE)
+        self.assertEqual(packet,
                           s.recv_val[:net_utils.ethernet.ETH_PACKET_MAX_SIZE])
 
         # test timeout
         s.recv_val = ''
         s.throw_timeout = False
         sock.recv(5)
-        self.assertEquals(sock.recv(1), (None, 0))
+        self.assertEqual(sock.recv(1), (None, 0))
         s.throw_timeout = True
         sock.recv(5)
-        self.assertEquals(sock.recv(1), (None, 0))
+        self.assertEqual(sock.recv(1), (None, 0))
 
         self.god.check_playback()
 
@@ -1110,7 +1110,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
         self.god.check_playback()
 
         # open a protocol and try to send a packet
@@ -1142,7 +1142,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
         self.god.check_playback()
 
         # open a protocol and try to send a packet
@@ -1162,7 +1162,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
         self.god.check_playback()
 
         dst_mac = '\x00\x01\x02\x03\x04\x05'
@@ -1192,7 +1192,7 @@ class TestNetUtils(unittest.TestCase):
         except error.TestError:
             pass
         else:
-            self.assertEquals(1, 0)
+            self.assertEqual(1, 0)
 
         self.god.check_playback()
 
@@ -1219,44 +1219,44 @@ class TestNetUtils(unittest.TestCase):
         data = '\xEE' * (net_utils.ethernet.ETH_PACKET_MIN_SIZE)
 
         # no data to receive at socket
-        self.assertEquals(sock.recv_from(None, None, None), None)
-        self.assertEquals(sock.recv_from(dst_mac, None, None), None)
-        self.assertEquals(sock.recv_from(None, src_mac, None), None)
-        self.assertEquals(sock.recv_from(None, None, protocol), None)
+        self.assertEqual(sock.recv_from(None, None, None), None)
+        self.assertEqual(sock.recv_from(dst_mac, None, None), None)
+        self.assertEqual(sock.recv_from(None, src_mac, None), None)
+        self.assertEqual(sock.recv_from(None, None, protocol), None)
 
         # receive packet < min size
         s.recv_val = (struct.pack("!6s6sH", dst_mac, src_mac, protocol) +
                       'packet_to_short')
-        self.assertEquals(sock.recv_from(None, None, None), None)
+        self.assertEqual(sock.recv_from(None, None, None), None)
 
         # receive packet, filtering on mac address and protocol
         s.recv_val = struct.pack("!6s6sH", dst_mac, t_mac, t_protocol) + data
         frame = net_utils.ethernet.unpack(s.recv_val)
-        self.assertEquals(sock.recv_from(None, None, None), frame)
-        self.assertEquals(sock.recv_from(dst_mac, None, None), frame)
+        self.assertEqual(sock.recv_from(None, None, None), frame)
+        self.assertEqual(sock.recv_from(dst_mac, None, None), frame)
 
         # use time clock to speed up the timeout in send_to()
         self.god.stub_function(time, 'clock')
         __set_clock(sock)
-        self.assertEquals(sock.recv_from(dst_mac, src_mac, None), None)
+        self.assertEqual(sock.recv_from(dst_mac, src_mac, None), None)
         __set_clock(sock)
-        self.assertEquals(sock.recv_from(dst_mac, None, protocol), None)
+        self.assertEqual(sock.recv_from(dst_mac, None, protocol), None)
         __set_clock(sock)
-        self.assertEquals(sock.recv_from(dst_mac, src_mac, protocol), None)
+        self.assertEqual(sock.recv_from(dst_mac, src_mac, protocol), None)
         self.god.unstub(time, 'clock')
 
         s.recv_val = struct.pack("!6s6sH", dst_mac, src_mac, protocol) + data
         frame = net_utils.ethernet.unpack(s.recv_val)
-        self.assertEquals(sock.recv_from(dst_mac, None, None), frame)
-        self.assertEquals(sock.recv_from(dst_mac, src_mac, None), frame)
-        self.assertEquals(sock.recv_from(dst_mac, src_mac, protocol), frame)
-        self.assertEquals(sock.recv_from(None, None, protocol), frame)
-        self.assertEquals(sock.recv_from(None, src_mac, None), frame)
+        self.assertEqual(sock.recv_from(dst_mac, None, None), frame)
+        self.assertEqual(sock.recv_from(dst_mac, src_mac, None), frame)
+        self.assertEqual(sock.recv_from(dst_mac, src_mac, protocol), frame)
+        self.assertEqual(sock.recv_from(None, None, protocol), frame)
+        self.assertEqual(sock.recv_from(None, src_mac, None), frame)
         self.god.stub_function(time, 'clock')
         __set_clock(sock)
-        self.assertEquals(sock.recv_from(None, None, t_protocol), None)
+        self.assertEqual(sock.recv_from(None, None, t_protocol), None)
         __set_clock(sock)
-        self.assertEquals(sock.recv_from(None, t_mac, None), None)
+        self.assertEqual(sock.recv_from(None, t_mac, None), None)
         self.god.unstub(time, 'clock')
 
         self.god.check_playback()

@@ -1,6 +1,6 @@
 __author__ = """Copyright Andy Whitcroft, Martin J. Bligh - 2006, 2007"""
 
-import cPickle
+import pickle
 import logging
 import os
 import signal
@@ -44,7 +44,7 @@ def parallel(tasklist, timeout=None, return_results=False):
             if status != 0:
                 run_error = True
 
-        results.append(cPickle.load(task.result_pickle))
+        results.append(pickle.load(task.result_pickle))
         task.result_pickle.close()
 
     if return_results:
@@ -175,12 +175,12 @@ class subcommand(object):
             for hook in self.fork_hooks:
                 hook(self)
             result = self.lambda_function()
-            os.write(w, cPickle.dumps(result, cPickle.HIGHEST_PROTOCOL))
+            os.write(w, pickle.dumps(result, pickle.HIGHEST_PROTOCOL))
             exit_code = 0
         except Exception as e:
             logging.exception('function failed')
             exit_code = 1
-            os.write(w, cPickle.dumps(e, cPickle.HIGHEST_PROTOCOL))
+            os.write(w, pickle.dumps(e, pickle.HIGHEST_PROTOCOL))
 
         os.close(w)
 
@@ -205,16 +205,16 @@ class subcommand(object):
             raise RuntimeError("Unknown child exit status!")
 
         if self.returncode != 0:
-            print "subcommand failed pid %d" % self.pid
-            print "%s" % (self.func,)
-            print "rc=%d" % self.returncode
-            print
+            print("subcommand failed pid %d" % self.pid)
+            print("%s" % (self.func,))
+            print("rc=%d" % self.returncode)
+            print()
             if self.debug:
                 stderr_file = os.path.join(self.debug, 'autoserv.stderr')
                 if os.path.exists(stderr_file):
                     for line in open(stderr_file).readlines():
-                        print line,
-            print "\n--------------------------------------------\n"
+                        print(line, end=' ')
+            print("\n--------------------------------------------\n")
             raise error.AutoservSubcommandError(self.func, self.returncode)
 
     def poll(self):
@@ -251,8 +251,8 @@ class subcommand(object):
                 time.sleep(1)
 
             utils.nuke_pid(self.pid)
-            print "subcommand failed pid %d" % self.pid
-            print "%s" % (self.func,)
-            print "timeout after %ds" % timeout
-            print
+            print("subcommand failed pid %d" % self.pid)
+            print("%s" % (self.func,))
+            print("timeout after %ds" % timeout)
+            print()
             return None

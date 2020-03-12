@@ -27,7 +27,7 @@ from glob import glob
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 try:
     next(iter(''), '')
@@ -121,9 +121,9 @@ def make_path_searcher(path_generator, target_predicate, target_normalizer, extr
     """
 
     def path_searcher(target, extra_dirs=extra_paths):
-        matches = itertools.ifilter(
+        matches = filter(
             target_predicate, path_generator(target, extra_dirs, **kwargs))
-        paths = itertools.imap(target_normalizer, matches)
+        paths = map(target_normalizer, matches)
         return next(paths, '')
     return path_searcher
 

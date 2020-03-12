@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import StringIO
+import io
 import logging
 import os
 import shutil
@@ -10,7 +10,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client import job, config, sysinfo, harness
 from autotest.client import xen, kernel, utils
@@ -147,7 +147,7 @@ class test_base_job(unittest.TestCase):
         self.jobtag = "jobtag"
 
         # get rid of stdout and logging
-        sys.stdout = StringIO.StringIO()
+        sys.stdout = io.StringIO()
         logging_manager.configure_logging(logging_config.TestingConfig())
         logging.disable(logging.CRITICAL)
 
@@ -328,13 +328,13 @@ class test_base_job(unittest.TestCase):
         self.construct_job(True)
         dummy = "asdf"
         ret = self.job.relative_path(os.path.join(self.job.resultdir, dummy))
-        self.assertEquals(ret, dummy)
+        self.assertEqual(ret, dummy)
 
     def test_control_functions(self):
         self.construct_job(True)
         control_file = "blah"
         self.job.control_set(control_file)
-        self.assertEquals(self.job.control_get(), os.path.abspath(control_file))
+        self.assertEqual(self.job.control_get(), os.path.abspath(control_file))
 
     def test_harness_select(self):
         self.construct_job(True)
@@ -436,7 +436,7 @@ class test_base_job(unittest.TestCase):
         # run job and check
         axen = self.job.xen(base_tree, results, tmp)
         self.god.check_playback()
-        self.assertEquals(myxen, axen)
+        self.assertEqual(myxen, axen)
 
     def test_kernel_rpm(self):
         self.construct_job(True)
@@ -467,7 +467,7 @@ class test_base_job(unittest.TestCase):
         # check
         akernel = self.job.kernel(path, results, tmp)
         self.god.check_playback()
-        self.assertEquals(mykernel, akernel)
+        self.assertEqual(mykernel, akernel)
 
     def test_kernel(self):
         self.construct_job(True)
@@ -491,7 +491,7 @@ class test_base_job(unittest.TestCase):
         # check
         akernel = self.job.kernel(path, results, tmp)
         self.god.check_playback()
-        self.assertEquals(mykernel, akernel)
+        self.assertEqual(mykernel, akernel)
 
     def test_run_test_logs_test_error_from_unhandled_error(self):
         self.construct_job(True)
@@ -590,7 +590,7 @@ class test_base_job(unittest.TestCase):
                                        type=bool).and_return(abort_value)
         job.partition_lib.get_partition_list.expect_call(
             self.job, exclude_swap=False).and_return(part_list)
-        for i in xrange(len(part_list)):
+        for i in range(len(part_list)):
             part_list[i].get_mountpoint.expect_call().and_return(mount_list[i])
         if cpu_count is not None:
             utils.count_cpus.expect_call().and_return(cpu_count)

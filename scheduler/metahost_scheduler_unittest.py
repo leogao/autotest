@@ -3,7 +3,7 @@
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 import unittest
 from autotest.client.shared.test_utils import mock
 from autotest.frontend import setup_django_environment  # pylint: disable=W0611
@@ -32,7 +32,7 @@ class LabelMetahostSchedulerTest(unittest.TestCase):
         self.assertFalse(self.metahost_scheduler.can_schedule_metahost(entry))
 
         entry.meta_host = 1
-        self.assert_(self.metahost_scheduler.can_schedule_metahost(entry))
+        self.assertTrue(self.metahost_scheduler.can_schedule_metahost(entry))
 
     def test_schedule_metahost(self):
         entry = self.entry()

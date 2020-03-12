@@ -1,3 +1,3 @@
 __all__ = ['client', 'common']
-import client
-import common
+from . import client
+from . import common

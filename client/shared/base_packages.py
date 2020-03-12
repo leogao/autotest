@@ -524,7 +524,7 @@ class BasePackageManager(object):
             self.upload_paths = list(upload_paths)
 
     def add_repository(self, repo):
-        if isinstance(repo, basestring):
+        if isinstance(repo, str):
             self.repositories.append(self.get_fetcher(repo))
         elif isinstance(repo, RepositoryFetcher):
             self.repositories.append(repo)
@@ -728,7 +728,7 @@ class BasePackageManager(object):
         results = subcommand.parallel(commands, timeout, return_results=True)
         for result in results:
             if result:
-                print str(result)
+                print(str(result))
 
     # TODO(aganti): Fix the bug with the current checksum logic where
     # packages' checksums that are not present consistently in all the
@@ -784,7 +784,7 @@ class BasePackageManager(object):
             else:
                 shutil.copy(file_path, upload_path)
                 os.chmod(os.path.join(upload_path,
-                                      os.path.basename(file_path)), 0644)
+                                      os.path.basename(file_path)), 0o644)
         except (IOError, os.error) as why:
             logging.error("Upload of %s to %s failed: %s", file_path,
                           upload_path, why)
@@ -932,7 +932,7 @@ class BasePackageManager(object):
         self._checksum_dict = checksum_dict.copy()
         checksum_contents = '\n'.join(checksum + ' ' + pkg_name
                                       for pkg_name, checksum in
-                                      checksum_dict.iteritems())
+                                      checksum_dict.items())
         # Write the checksum file back to disk
         self._run_command('echo "%s" > %s' % (checksum_contents,
                                               checksum_path),

@@ -8,7 +8,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client.shared.test_utils import mock
 from autotest.client.shared import boottool
@@ -55,7 +55,7 @@ class TestBoottool(unittest.TestCase):
         args = [self.bt_mock.path, '--bootloader-probe']
         self.bt_mock._run_get_output_err.expect_call(args).and_return('lilo')
         # run the test
-        self.assertEquals(self.bt_mock.get_bootloader(), 'lilo')
+        self.assertEqual(self.bt_mock.get_bootloader(), 'lilo')
         self.god.check_playback()
 
     def test_get_architecture(self):
@@ -66,14 +66,14 @@ class TestBoottool(unittest.TestCase):
                                            '#1 SMP Tue Feb 21 01:40:47 UTC 2012',
                                            'x86_64'))
         # run the test
-        self.assertEquals(self.bt_mock.get_architecture(), 'x86_64')
+        self.assertEqual(self.bt_mock.get_architecture(), 'x86_64')
         self.god.check_playback()
 
     def test_get_default_index(self):
         # set up the recording
         self.bt_mock._run_grubby_get_output.expect_call(['--default-index']).and_return(0)
         # run the test
-        self.assertEquals(self.bt_mock.get_default_index(), 0)
+        self.assertEqual(self.bt_mock.get_default_index(), 0)
         self.god.check_playback()
 
     def test_get_titles(self):
@@ -81,7 +81,7 @@ class TestBoottool(unittest.TestCase):
         output = ['index=0', 'title=title #1', 'index=1', 'title=title #2']
         self.bt_mock.get_info_lines.expect_call().and_return(output)
         # run the test
-        self.assertEquals(self.bt_mock.get_titles(),
+        self.assertEqual(self.bt_mock.get_titles(),
                           ['title #1', 'title #2'])
         self.god.check_playback()
 
@@ -104,7 +104,7 @@ initrd=/boot/initramfs-3.2.6-3.fc16.x86_64.img
                          'kernel': '/vmlinuz-3.2.6-3.fc16.x86_64',
                          'root': '/dev/mapper/vg_foo-lv_root',
                          'title': '"Fedora 16, kernel 3.2.6-3"'}
-        self.assertEquals(expected_info, actual_info)
+        self.assertEqual(expected_info, actual_info)
 
     def test_get_entry_missing_result(self):
         index = 4
@@ -114,7 +114,7 @@ initrd=/boot/initramfs-3.2.6-3.fc16.x86_64.img
         self.bt_mock.get_info.expect_call(index).and_return(RESULT)
         actual_info = self.bt_mock.get_entry(index)
         expected_info = {}
-        self.assertEquals(expected_info, actual_info)
+        self.assertEqual(expected_info, actual_info)
 
     def test_get_entries(self):
         self.god.stub_function(self.bt_mock, '_get_entry_indexes')
@@ -161,7 +161,7 @@ initrd=/boot/initramfs-3.2.6-3.fc16.x86_64.img
                              'kernel': '/vmlinuz-3.2.6-3.fc16.x86_64',
                              'root': '/dev/mapper/vg_freedom-lv_root'}}
 
-        self.assertEquals(expected_info, actual_info)
+        self.assertEqual(expected_info, actual_info)
 
         self.god.check_playback()
 

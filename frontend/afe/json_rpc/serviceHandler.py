@@ -32,13 +32,13 @@ def customConvertJson(value):
     """
     if isinstance(value, float):
         return int(value)
-    elif isinstance(value, unicode):
+    elif isinstance(value, str):
         return str(value)
     elif isinstance(value, list):
         return [customConvertJson(item) for item in value]
     elif isinstance(value, dict):
         new_dict = {}
-        for key, val in value.iteritems():
+        for key, val in value.items():
             new_key = customConvertJson(key)
             new_val = customConvertJson(val)
             new_dict[new_key] = new_val
@@ -156,7 +156,7 @@ class ServiceHandler(object):
             data = json_encoder.encode(json_dict)
         except TypeError:
             err_traceback = traceback.format_exc()
-            print err_traceback
+            print(err_traceback)
             err = {"name": "JSONEncodeException",
                    "message": "Result Object Not Serializable",
                    "traceback": err_traceback}

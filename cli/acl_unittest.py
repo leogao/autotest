@@ -10,7 +10,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.cli import acl, cli_mock
 
 
@@ -45,7 +45,7 @@ class acl_list_unittest(cli_mock.cli_unittest):
         self.assertRaises(cli_mock.ExitException, acl_list.parse)
         (out, err) = self.god.unmock_io()
         self.god.check_playback()
-        self.assert_(err.find('usage'))
+        self.assertTrue(err.find('usage'))
 
     def test_parse_list_acl_user(self):
         sys.argv = ['atest', 'acl0', '-u', 'user']
@@ -74,7 +74,7 @@ class acl_list_unittest(cli_mock.cli_unittest):
     def test_execute_list_all_acls(self):
         self.run_cmd(argv=['atest', 'acl', 'list', '-v'],
                      rpcs=[('get_acl_groups', {}, True,
-                            [{'id': 1L,
+                            [{'id': 1,
                               'name': 'Everyone',
                               'description': '',
                               'users': ['debug_user'],
@@ -84,7 +84,7 @@ class acl_list_unittest(cli_mock.cli_unittest):
     def test_execute_list_acls_for_acl(self):
         self.run_cmd(argv=['atest', 'acl', 'list', 'acl0'],
                      rpcs=[('get_acl_groups', {'name__in': ['acl0']}, True,
-                            [{'id': 1L,
+                            [{'id': 1,
                               'name': 'Everyone',
                               'description': '',
                               'users': ['user0'],
@@ -94,7 +94,7 @@ class acl_list_unittest(cli_mock.cli_unittest):
     def test_execute_list_acls_for_user(self):
         self.run_cmd(argv=['atest', 'acl', 'list', '-v', '--user', 'user0'],
                      rpcs=[('get_acl_groups', {'users__login': 'user0'}, True,
-                            [{'id': 1L,
+                            [{'id': 1,
                               'name': 'Everyone',
                               'description': '',
                               'users': ['user0'],
@@ -105,7 +105,7 @@ class acl_list_unittest(cli_mock.cli_unittest):
         self.run_cmd(argv=['atest', 'acl', 'list', '-m', 'host0'],
                      rpcs=[('get_acl_groups', {'hosts__hostname': 'host0'},
                             True,
-                            [{'id': 1L,
+                            [{'id': 1,
                               'name': 'Everyone',
                               'description': '',
                               'users': ['user0'],
@@ -117,7 +117,7 @@ class acl_list_unittest(cli_mock.cli_unittest):
         self.run_cmd(argv=['atest', 'acl', 'list', '-m', 'host0', '-v'],
                      rpcs=[('get_acl_groups', {'hosts__hostname': 'host0'},
                             True,
-                            [{'id': 1L,
+                            [{'id': 1,
                               'name': 'Everyone',
                               'description': '',
                               'users': ['user0'],
@@ -169,7 +169,7 @@ class acl_create_unittest(cli_mock.cli_unittest):
                             {'description': 'my_favorite_acl',
                              'name': 'acl0'},
                             True,
-                            3L)],
+                            3)],
                      out_words_ok=['acl0'])
 
     def test_acl_create_duplicate_acl(self):

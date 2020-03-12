@@ -11,7 +11,7 @@ import os
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 
 class harness(object):
@@ -39,7 +39,7 @@ class harness(object):
 
         configd = os.path.join(os.environ['AUTODIR'], 'configs')
         if os.path.isdir(configd):
-            (name, dirs, files) = os.walk(configd).next()
+            (name, dirs, files) = next(os.walk(configd))
             job.config_set('kernel.default_config_set',
                            [configd + '/'] + files)
 

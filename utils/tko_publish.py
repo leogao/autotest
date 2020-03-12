@@ -16,7 +16,7 @@ import sys
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import utils
 from autotest.server import frontend
 
@@ -59,7 +59,7 @@ def publish_job(jobdir):
     # mark the jobdir as published
     fd = open(os.path.join(jobdir, PUBLISH_FLAGFILE), 'w')
     fd.close()
-    print 'Published', jobdir
+    print('Published', jobdir)
 
 
 def main():
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     options, args = parser.parse_args()
 
     if len(args) < 2:
-        print USAGE
+        print(USAGE)
         sys.exit(-1)
 
     options.resultsdir = args[0]

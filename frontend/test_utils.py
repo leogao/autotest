@@ -2,7 +2,7 @@ import datetime
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.frontend import setup_test_environment  # pylint: disable=W0611
 from autotest.frontend import thread_local
 from autotest.frontend.afe import models, model_attributes
@@ -58,11 +58,11 @@ class FrontendTestMixin(object):
         self.label8 = self.labels[7]
         self.label8.atomic_group = atomic_group2
         self.label8.save()
-        for hostnum in xrange(4, 7):  # host5..host7
+        for hostnum in range(4, 7):  # host5..host7
             self.hosts[hostnum].labels.add(self.label4)  # an atomic group lavel
             self.hosts[hostnum].labels.add(self.label6)  # a normal label
         self.hosts[6].labels.add(self.label7)
-        for hostnum in xrange(7, 9):  # host8..host9
+        for hostnum in range(7, 9):  # host8..host9
             self.hosts[hostnum].labels.add(self.label5)  # an atomic group lavel
             self.hosts[hostnum].labels.add(self.label6)  # a normal label
             self.hosts[hostnum].labels.add(self.label7)

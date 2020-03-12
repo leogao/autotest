@@ -3,20 +3,20 @@ import os
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 # High level way of installing each autotest component
-import client.setup
-import shared.setup
-import frontend.setup
-import cli.setup
-import server.setup
-import scheduler.setup
-import database_legacy.setup
-import tko.setup
-import utils.setup
-import mirror.setup
-import installation_support.setup
+from . import client.setup
+from . import shared.setup
+from . import frontend.setup
+from . import cli.setup
+from . import server.setup
+from . import scheduler.setup
+from . import database_legacy.setup
+from . import tko.setup
+from . import utils.setup
+from . import mirror.setup
+from . import installation_support.setup
 
 # pylint: disable=E0611
 from distutils.core import setup
@@ -51,7 +51,7 @@ def _fix_data_paths(package_data_dict):
     that condition and adjusts (strips) the 1st directory name.
     '''
     result = {}
-    for package_name, package_content in package_data_dict.items():
+    for package_name, package_content in list(package_data_dict.items()):
         package_structure = package_name.split('.')
         package_structure_1st_level = package_structure[1]
 

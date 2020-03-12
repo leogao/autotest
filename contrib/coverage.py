@@ -64,6 +64,7 @@ import re
 import string
 import symbol
 import sys
+import atexit
 import threading
 import token
 import types
@@ -71,7 +72,7 @@ from socket import gethostname
 
 # Python version compatibility
 try:
-    strclass = basestring   # new to 2.3
+    strclass = str   # new to 2.3
 except Exception:
     strclass = str
 
@@ -220,8 +221,8 @@ class StatementFindingAstVisitor(compiler.visitor.ASTVisitor):
         lastprev = self.getLastLine(prevsuite)
         firstelse = self.getFirstLine(suite)
         for l in range(lastprev + 1, firstelse):
-            if self.suite_spots.has_key(l):
-                self.doSuite(None, suite, exclude=self.excluded.has_key(l))
+            if l in self.suite_spots:
+                self.doSuite(None, suite, exclude=l in self.excluded)
                 break
         else:
             self.doSuite(None, suite)
@@ -334,9 +335,9 @@ class coverage:
 
     def help(self, error=None):  # pragma: no cover
         if error:
-            print error
-            print
-        print __doc__
+            print(error)
+            print()
+        print(__doc__)
         sys.exit(1)
 
     def command_line(self, argv, help_fn=None):
@@ -356,14 +357,14 @@ class coverage:
             '-x': 'execute',
             '-o:': 'omit=',
         }
-        short_opts = string.join(map(lambda o: o[1:], optmap.keys()), '')
-        long_opts = optmap.values()
+        short_opts = string.join([o[1:] for o in list(optmap.keys())], '')
+        long_opts = list(optmap.values())
         options, args = getopt.getopt(argv, short_opts, long_opts)
 
         for o, a in options:
-            if optmap.has_key(o):
+            if o in optmap:
                 settings[optmap[o]] = 1
-            elif optmap.has_key(o + ':'):
+            elif o + ':' in optmap:
                 settings[optmap[o + ':']] = a
             elif o[2:] in long_opts:
                 settings[o[2:]] = 1
@@ -406,11 +407,11 @@ class coverage:
             sys.path[0] = os.path.dirname(sys.argv[0])
             # the line below is needed since otherwise __file__ gets fucked
             __main__.__dict__["__file__"] = sys.argv[0]
-            execfile(sys.argv[0], __main__.__dict__)
+            exec(compile(open(sys.argv[0], "rb").read(), sys.argv[0], 'exec'), __main__.__dict__)
         if settings.get('collect'):
             self.collect()
         if not args:
-            args = self.cexecuted.keys()
+            args = list(self.cexecuted.keys())
 
         ignore_errors = settings.get('ignore-errors')
         show_missing = settings.get('show-missing')
@@ -501,7 +502,7 @@ class coverage:
             import marshal
             cexecuted = marshal.load(cache)
             cache.close()
-            if isinstance(cexecuted, types.DictType):
+            if isinstance(cexecuted, dict):
                 return cexecuted
             else:
                 return {}
@@ -521,15 +522,15 @@ class coverage:
             self.merge_data(cexecuted)
 
     def merge_data(self, new_data):
-        for file_name, file_data in new_data.items():
-            if self.cexecuted.has_key(file_name):
+        for file_name, file_data in list(new_data.items()):
+            if file_name in self.cexecuted:
                 self.merge_file_data(self.cexecuted[file_name], file_data)
             else:
                 self.cexecuted[file_name] = file_data
 
     def merge_file_data(self, cache_data, new_data):
-        for line_number in new_data.keys():
-            if not cache_data.has_key(line_number):
+        for line_number in list(new_data.keys()):
+            if line_number not in cache_data:
                 cache_data[line_number] = new_data[line_number]
 
     # canonical_filename(filename).  Return a canonical filename for the
@@ -537,7 +538,7 @@ class coverage:
     # normalized case).  See [GDR 2001-12-04b, 3.3].
 
     def canonical_filename(self, filename):
-        if not self.canonical_filename_cache.has_key(filename):
+        if filename not in self.canonical_filename_cache:
             f = filename
             if os.path.isabs(f) and not os.path.exists(f):
                 f = os.path.basename(f)
@@ -555,12 +556,12 @@ class coverage:
     # canonicalizing filenames on the way.  Clear the "c" map.
 
     def canonicalize_filenames(self):
-        for filename, lineno in self.c.keys():
+        for filename, lineno in list(self.c.keys()):
             if filename == '<string>':
                 # Can't do anything useful with exec'd strings, so skip them.
                 continue
             f = self.canonical_filename(filename)
-            if not self.cexecuted.has_key(f):
+            if f not in self.cexecuted:
                 self.cexecuted[f] = {}
             self.cexecuted[f][lineno] = 1
         self.c = {}
@@ -585,7 +586,7 @@ class coverage:
     # statements that cross lines.
 
     def analyze_morf(self, morf):
-        if self.analysis_cache.has_key(morf):
+        if morf in self.analysis_cache:
             return self.analysis_cache[morf]
         filename = self.morf_filename(morf)
         ext = os.path.splitext(filename)[1]
@@ -612,13 +613,13 @@ class coverage:
 
     def first_line_of_tree(self, tree):
         while True:
-            if len(tree) == 3 and isinstance(tree[2], types.IntType):
+            if len(tree) == 3 and isinstance(tree[2], int):
                 return tree[2]
             tree = tree[1]
 
     def last_line_of_tree(self, tree):
         while True:
-            if len(tree) == 3 and isinstance(tree[2], types.IntType):
+            if len(tree) == 3 and isinstance(tree[2], int):
                 return tree[2]
             tree = tree[-1]
 
@@ -650,7 +651,7 @@ class coverage:
             of lines.
         """
         for i in range(1, len(tree)):
-            if isinstance(tree[i], types.TupleType):
+            if isinstance(tree[i], tuple):
                 if tree[i][0] == symbol.suite:
                     # Found a suite, look back for the colon and keyword.
                     lineno_colon = lineno_word = None
@@ -719,9 +720,9 @@ class coverage:
         visitor = StatementFindingAstVisitor(statements, excluded, suite_spots)
         compiler.walk(ast, visitor, walker=visitor)
 
-        lines = statements.keys()
+        lines = list(statements.keys())
         lines.sort()
-        excluded_lines = excluded.keys()
+        excluded_lines = list(excluded.keys())
         excluded_lines.sort()
         return lines, excluded_lines, suite_spots
 
@@ -757,7 +758,7 @@ class coverage:
                 return "%d" % start
             else:
                 return "%d-%d" % (start, end)
-        ret = string.join(map(stringify, pairs), ", ")
+        ret = string.join(list(map(stringify, pairs)), ", ")
         return ret
 
     # Backward compatibility with version 1.
@@ -768,13 +769,13 @@ class coverage:
     def analysis2(self, morf):
         filename, statements, excluded, line_map = self.analyze_morf(morf)
         self.canonicalize_filenames()
-        if not self.cexecuted.has_key(filename):
+        if filename not in self.cexecuted:
             self.cexecuted[filename] = {}
         missing = []
         for line in statements:
             lines = line_map.get(line, [line, line])
             for l in range(lines[0], lines[1] + 1):
-                if self.cexecuted[filename].has_key(l):
+                if l in self.cexecuted[filename]:
                     break
             else:
                 missing.append(line)
@@ -812,7 +813,7 @@ class coverage:
         return cmp(self.morf_name(x), self.morf_name(y))
 
     def report(self, morfs, show_missing=1, ignore_errors=0, file=None, omit_prefixes=[]):
-        if not isinstance(morfs, types.ListType):
+        if not isinstance(morfs, list):
             morfs = [morfs]
         # On windows, the shell doesn't expand wildcards.  Do it here.
         globbed = []
@@ -826,7 +827,7 @@ class coverage:
         morfs = self.filter_by_prefix(morfs, omit_prefixes)
         morfs.sort(self.morf_name_compare)
 
-        max_name = max([5, ] + map(len, map(self.morf_name, morfs)))
+        max_name = max([5, ] + list(map(len, list(map(self.morf_name, morfs)))))
         fmt_name = "%%- %ds  " % max_name
         fmt_err = fmt_name + "%s: %s"
         header = fmt_name % "Name" + " Stmts   Exec  Cover"
@@ -836,8 +837,8 @@ class coverage:
             fmt_coverage = fmt_coverage + "   %s"
         if not file:
             file = sys.stdout
-        print >>file, header
-        print >>file, "-" * len(header)
+        print(header, file=file)
+        print("-" * len(header), file=file)
         total_statements = 0
         total_executed = 0
         for morf in morfs:
@@ -853,7 +854,7 @@ class coverage:
                 args = (name, n, m, pc)
                 if show_missing:
                     args = args + (readable,)
-                print >>file, fmt_coverage % args
+                print(fmt_coverage % args, file=file)
                 total_statements = total_statements + n
                 total_executed = total_executed + m
             except KeyboardInterrupt:  # pragma: no cover
@@ -861,9 +862,9 @@ class coverage:
             except Exception:
                 if not ignore_errors:
                     typ, msg = sys.exc_info()[:2]
-                    print >>file, fmt_err % (name, typ, msg)
+                    print(fmt_err % (name, typ, msg), file=file)
         if len(morfs) > 1:
-            print >>file, "-" * len(header)
+            print("-" * len(header), file=file)
             if total_statements > 0:
                 pc = 100.0 * total_executed / total_statements
             else:
@@ -871,7 +872,7 @@ class coverage:
             args = ("TOTAL", total_statements, total_executed, pc)
             if show_missing:
                 args = args + ("",)
-            print >>file, fmt_coverage % args
+            print(fmt_coverage % args, file=file)
 
     # annotate(morfs, ignore_errors).
 
@@ -998,7 +999,7 @@ try:
     import atexit
     atexit.register(the_coverage.save)
 except ImportError:
-    sys.exitfunc = the_coverage.save
+    atexit.register(the_coverage.save)
 
 # Command-line interface.
 if __name__ == '__main__':

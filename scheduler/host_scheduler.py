@@ -154,7 +154,7 @@ class BaseHostScheduler(metahost_scheduler.HostSchedulingUtility):
         self._ineligible_hosts = self._get_job_ineligible_hosts(relevant_jobs)
         self._job_dependencies = self._get_job_dependencies(relevant_jobs)
 
-        host_ids = self._hosts_available.keys()
+        host_ids = list(self._hosts_available.keys())
         self._host_acls = self._get_host_acls(host_ids)
         self._label_hosts, self._host_labels = self._get_label_hosts(host_ids)
 
@@ -261,7 +261,7 @@ class BaseHostScheduler(metahost_scheduler.HostSchedulingUtility):
 
         :return: A generator yielding Label ids for this atomic group.
         """
-        return (a_id for a_id, label in self._labels.iteritems() if
+        return (a_id for a_id, label in self._labels.items() if
                 label.atomic_group_id == atomic_group_id and not
                 label.invalid)
 

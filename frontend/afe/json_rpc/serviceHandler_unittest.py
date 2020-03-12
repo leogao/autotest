@@ -4,8 +4,8 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
-import serviceHandler
+    from . import common  # pylint: disable=W0611
+from . import serviceHandler
 
 
 class RpcMethodHolder(object):
@@ -57,16 +57,16 @@ class TestServiceHandler(unittest.TestCase):
 
     def test_handleRequest1(self):
         response = self.serviceHandler.handleRequest(json_request1)
-        self.assertEquals(response, expected_response1)
+        self.assertEqual(response, expected_response1)
 
     def test_handleRequest2(self):
         response = self.serviceHandler.handleRequest(json_request2)
-        self.assertEquals(response, expected_response2)
+        self.assertEqual(response, expected_response2)
 
     def test_handleRequest3(self):
         response = self.serviceHandler.handleRequest(json_request3)
         response_obj = eval(response.replace('null', 'None'))
-        self.assertNotEquals(response_obj['error'], 'None')
+        self.assertNotEqual(response_obj['error'], 'None')
 
 
 if __name__ == "__main__":

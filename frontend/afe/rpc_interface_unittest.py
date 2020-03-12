@@ -5,7 +5,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.frontend import setup_django_environment  # pylint: disable=W0611
 from autotest.frontend import test_utils
 from autotest.frontend.afe import models, rpc_interface
@@ -47,11 +47,11 @@ class RpcInterfaceTest(unittest.TestCase,
         # make sure the platform didn't get added
         platforms = rpc_interface.get_labels(
             host__hostname__in=['host1', 'host2'], platform=True)
-        self.assertEquals(len(platforms), 1)
-        self.assertEquals(platforms[0]['name'], 'myplatform')
+        self.assertEqual(len(platforms), 1)
+        self.assertEqual(platforms[0]['name'], 'myplatform')
 
     def _check_hostnames(self, hosts, expected_hostnames):
-        self.assertEquals(set(host['hostname'] for host in hosts),
+        self.assertEqual(set(host['hostname'] for host in hosts),
                           set(expected_hostnames))
 
     def test_get_hosts(self):
@@ -61,11 +61,11 @@ class RpcInterfaceTest(unittest.TestCase,
         hosts = rpc_interface.get_hosts(hostname='host1')
         self._check_hostnames(hosts, ['host1'])
         host = hosts[0]
-        self.assertEquals(sorted(host['labels']), ['label1', 'myplatform'])
-        self.assertEquals(host['platform'], 'myplatform')
-        self.assertEquals(host['atomic_group'], None)
-        self.assertEquals(host['acls'], ['my_acl'])
-        self.assertEquals(host['attributes'], {})
+        self.assertEqual(sorted(host['labels']), ['label1', 'myplatform'])
+        self.assertEqual(host['platform'], 'myplatform')
+        self.assertEqual(host['atomic_group'], None)
+        self.assertEqual(host['acls'], ['my_acl'])
+        self.assertEqual(host['attributes'], {})
 
     def test_get_hosts_multiple_labels(self):
         hosts = rpc_interface.get_hosts(
@@ -103,11 +103,11 @@ class RpcInterfaceTest(unittest.TestCase,
                                           profiles=['debian'],
                                           keyvals=keyval_dict)
         jobs = rpc_interface.get_jobs(id=job_id)
-        self.assertEquals(len(jobs), 1)
-        self.assertEquals(jobs[0]['keyvals'], keyval_dict)
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0]['keyvals'], keyval_dict)
 
     def test_get_jobs_summary(self):
-        job = self._create_job(hosts=xrange(1, 4))
+        job = self._create_job(hosts=range(1, 4))
         entries = list(job.hostqueueentry_set.all())
         entries[1].status = _hqe_status.FAILED
         entries[1].save()
@@ -116,9 +116,9 @@ class RpcInterfaceTest(unittest.TestCase,
         entries[2].save()
 
         job_summaries = rpc_interface.get_jobs_summary(id=job.id)
-        self.assertEquals(len(job_summaries), 1)
+        self.assertEqual(len(job_summaries), 1)
         summary = job_summaries[0]
-        self.assertEquals(summary['status_counts'], {'Queued': 1,
+        self.assertEqual(summary['status_counts'], {'Queued': 1,
                                                      'Failed': 2})
 
     def test_get_jobs_filters(self):
@@ -153,7 +153,7 @@ class RpcInterfaceTest(unittest.TestCase,
         set_hqe_statuses(parsing, HqeStatus.PARSING, HqeStatus.PARSING)
 
         def check_job_ids(actual_job_dicts, expected_jobs):
-            self.assertEquals(
+            self.assertEqual(
                 set(job_dict['id'] for job_dict in actual_job_dicts),
                 set(job.id for job in expected_jobs))
 
@@ -171,9 +171,9 @@ class RpcInterfaceTest(unittest.TestCase,
         job = self._create_job_helper(one_time_hosts=['testhost'],
                                       profiles=['rhel6'])
         host = models.Host.objects.get(hostname='testhost')
-        self.assertEquals(host.invalid, True)
-        self.assertEquals(host.labels.count(), 0)
-        self.assertEquals(host.aclgroup_set.count(), 0)
+        self.assertEqual(host.invalid, True)
+        self.assertEqual(host.labels.count(), 0)
+        self.assertEqual(host.aclgroup_set.count(), 0)
 
     def test_create_job_duplicate_hosts(self):
         self.assertRaises(model_logic.ValidationError, self._create_job_helper,
@@ -183,10 +183,10 @@ class RpcInterfaceTest(unittest.TestCase,
         job_id = self._create_job_helper(hostless=True)
         job = models.Job.objects.get(pk=job_id)
         queue_entries = job.hostqueueentry_set.all()
-        self.assertEquals(len(queue_entries), 1)
-        self.assertEquals(queue_entries[0].host, None)
-        self.assertEquals(queue_entries[0].meta_host, None)
-        self.assertEquals(queue_entries[0].atomic_group, None)
+        self.assertEqual(len(queue_entries), 1)
+        self.assertEqual(queue_entries[0].host, None)
+        self.assertEqual(queue_entries[0].meta_host, None)
+        self.assertEqual(queue_entries[0].atomic_group, None)
 
     def _setup_special_tasks(self):
         host = self.hosts[0]
@@ -217,10 +217,10 @@ class RpcInterfaceTest(unittest.TestCase,
         self._setup_special_tasks()
         tasks = rpc_interface.get_special_tasks(host__hostname='host1',
                                                 queue_entry__isnull=True)
-        self.assertEquals(len(tasks), 2)
-        self.assertEquals(tasks[0]['task'], models.SpecialTask.Task.VERIFY)
-        self.assertEquals(tasks[0]['is_active'], False)
-        self.assertEquals(tasks[0]['is_complete'], True)
+        self.assertEqual(len(tasks), 2)
+        self.assertEqual(tasks[0]['task'], models.SpecialTask.Task.VERIFY)
+        self.assertEqual(tasks[0]['is_active'], False)
+        self.assertEqual(tasks[0]['is_complete'], True)
 
     def test_get_latest_special_task(self):
         # a particular usage of get_special_tasks()
@@ -232,12 +232,12 @@ class RpcInterfaceTest(unittest.TestCase,
             host__hostname='host1', task=models.SpecialTask.Task.VERIFY,
             time_started__isnull=False, sort_by=['-time_started'],
             query_limit=1)
-        self.assertEquals(len(tasks), 1)
-        self.assertEquals(tasks[0]['id'], 2)
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]['id'], 2)
 
     def _common_entry_check(self, entry_dict):
-        self.assertEquals(entry_dict['host']['hostname'], 'host1')
-        self.assertEquals(entry_dict['job']['id'], 2)
+        self.assertEqual(entry_dict['host']['hostname'], 'host1')
+        self.assertEqual(entry_dict['job']['id'], 2)
 
     def test_get_host_queue_entries_and_special_tasks(self):
         self._setup_special_tasks()
@@ -246,7 +246,7 @@ class RpcInterfaceTest(unittest.TestCase,
             rpc_interface.get_host_queue_entries_and_special_tasks('host1'))
 
         paths = [entry['execution_path'] for entry in entries_and_tasks]
-        self.assertEquals(paths, ['hosts/host1/3-verify',
+        self.assertEqual(paths, ['hosts/host1/3-verify',
                                   '2-autotest_system/host1',
                                   'hosts/host1/2-verify',
                                   '1-autotest_system/host1',
@@ -254,49 +254,49 @@ class RpcInterfaceTest(unittest.TestCase,
 
         verify2 = entries_and_tasks[2]
         self._common_entry_check(verify2)
-        self.assertEquals(verify2['type'], 'Verify')
-        self.assertEquals(verify2['status'], 'Running')
-        self.assertEquals(verify2['execution_path'], 'hosts/host1/2-verify')
+        self.assertEqual(verify2['type'], 'Verify')
+        self.assertEqual(verify2['status'], 'Running')
+        self.assertEqual(verify2['execution_path'], 'hosts/host1/2-verify')
 
         entry2 = entries_and_tasks[1]
         self._common_entry_check(entry2)
-        self.assertEquals(entry2['type'], 'Job')
-        self.assertEquals(entry2['status'], 'Queued')
-        self.assertEquals(entry2['started_on'], '2009-01-03 00:00:00')
+        self.assertEqual(entry2['type'], 'Job')
+        self.assertEqual(entry2['status'], 'Queued')
+        self.assertEqual(entry2['started_on'], '2009-01-03 00:00:00')
 
     def test_view_invalid_host(self):
         # RPCs used by View Host page should work for invalid hosts
         self._create_job_helper(hosts=[1], profiles=['N/A'])
         self.hosts[0].delete()
 
-        self.assertEquals(1, rpc_interface.get_num_hosts(hostname='host1',
+        self.assertEqual(1, rpc_interface.get_num_hosts(hostname='host1',
                                                          valid_only=False))
         data = rpc_interface.get_hosts(hostname='host1', valid_only=False)
-        self.assertEquals(1, len(data))
+        self.assertEqual(1, len(data))
 
-        self.assertEquals(1, rpc_interface.get_num_host_queue_entries(
+        self.assertEqual(1, rpc_interface.get_num_host_queue_entries(
             host__hostname='host1'))
         data = rpc_interface.get_host_queue_entries(host__hostname='host1')
-        self.assertEquals(1, len(data))
+        self.assertEqual(1, len(data))
 
         count = rpc_interface.get_num_host_queue_entries_and_special_tasks(
             hostname='host1')
-        self.assertEquals(1, count)
+        self.assertEqual(1, count)
         data = rpc_interface.get_host_queue_entries_and_special_tasks(
             hostname='host1')
-        self.assertEquals(1, len(data))
+        self.assertEqual(1, len(data))
 
     def test_reverify_hosts(self):
         hostname_list = rpc_interface.reverify_hosts(id__in=[1, 2])
-        self.assertEquals(hostname_list, ['host1', 'host2'])
+        self.assertEqual(hostname_list, ['host1', 'host2'])
         tasks = rpc_interface.get_special_tasks()
-        self.assertEquals(len(tasks), 2)
-        self.assertEquals(set(task['host']['id'] for task in tasks),
+        self.assertEqual(len(tasks), 2)
+        self.assertEqual(set(task['host']['id'] for task in tasks),
                           set([1, 2]))
 
         task = tasks[0]
-        self.assertEquals(task['task'], models.SpecialTask.Task.VERIFY)
-        self.assertEquals(task['requested_by'], 'autotest_system')
+        self.assertEqual(task['task'], models.SpecialTask.Task.VERIFY)
+        self.assertEqual(task['requested_by'], 'autotest_system')
 
     def test_parameterized_job(self):
         settings.settings.override_value(

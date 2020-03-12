@@ -4,19 +4,19 @@
 
 """Tests for thread."""
 
-import Queue
+import queue
 import threading
 import unittest
 
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.cli import cli_mock, threads
 
 
 class thread_unittest(cli_mock.cli_unittest):
-    results = Queue.Queue()
+    results = queue.Queue()
 
     def _workload(self, i):
         self.results.put(i * i)
@@ -33,7 +33,7 @@ class thread_unittest(cli_mock.cli_unittest):
 
     def test_one_thread(self):
         th = threads.ThreadPool(self._workload, numthreads=1)
-        th.queue_work(range(10))
+        th.queue_work(list(range(10)))
         th.wait()
         res = []
         while not self.results.empty():
@@ -42,12 +42,12 @@ class thread_unittest(cli_mock.cli_unittest):
 
     def _threading(self, numthreads, count):
         th = threads.ThreadPool(self._workload, numthreads=numthreads)
-        th.queue_work(range(count))
+        th.queue_work(list(range(count)))
         th.wait()
         res = []
         while not self.results.empty():
             res.append(self.results.get())
-        self.assertEqualNoOrder([i * i for i in xrange(count)], res)
+        self.assertEqualNoOrder([i * i for i in range(count)], res)
 
     def test_threading(self):
         self._threading(10, 10)
@@ -57,13 +57,13 @@ class thread_unittest(cli_mock.cli_unittest):
 
     def test_threading_multi_queueing(self):
         th = threads.ThreadPool(self._workload, numthreads=5)
-        th.queue_work(range(5))
-        th.queue_work(range(5, 10))
+        th.queue_work(list(range(5)))
+        th.queue_work(list(range(5, 10)))
         th.wait()
         res = []
         while not self.results.empty():
             res.append(self.results.get())
-        self.assertEqualNoOrder([i * i for i in xrange(10)], res)
+        self.assertEqualNoOrder([i * i for i in range(10)], res)
 
 
 if __name__ == '__main__':

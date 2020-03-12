@@ -10,7 +10,7 @@ import sys
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client import job as client_job
 from autotest.client.shared import base_job, error, packages
@@ -73,7 +73,7 @@ def init_test(options, testdir):
             import_stmt = 'import %s' % test_name
             init_stmt = ('auto_test = %s.%s(job, testdir, outputdir)' %
                          (test_name, test_name))
-            exec import_stmt + '\n' + init_stmt in locals_dict, globals_dict
+            exec(import_stmt + '\n' + init_stmt, locals_dict, globals_dict)
             client_test = globals_dict['auto_test']
         except ImportError as e:
             # skips error if test is control file without python test

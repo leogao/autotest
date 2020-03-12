@@ -1,6 +1,7 @@
 from django import db as django_db
 from django.conf import settings
 from django.core import signals
+import importlib
 
 
 class ReadOnlyConnection(object):
@@ -60,7 +61,7 @@ class ReadOnlyConnection(object):
         _default_db['HOST'] = _default_db['READONLY_HOST']
         _default_db['USER'] = _default_db['READONLY_USER']
         _default_db['PASSWORD'] = _default_db['READONLY_PASSWORD']
-        reload(django_db)
+        importlib.reload(django_db)
         # cursor() causes a new connection to be created
         cursor = django_db.connection.cursor()
         assert django_db.connection.connection is not None

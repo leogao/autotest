@@ -7,11 +7,12 @@ __author__ = 'gps@google.com (Gregory P. Smith)'
 import os
 import sys
 import unittest
-from cStringIO import StringIO
+from io import StringIO
+import importlib
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.test_utils import mock
 from autotest.client import partition
 
@@ -31,11 +32,11 @@ class FsOptions_common(object):
 
     def test__str__(self):
         str_obj = str(partition.FsOptions('abc', 'def', 'ghi', 'jkl'))
-        self.assert_('FsOptions' in str_obj)
-        self.assert_('abc' in str_obj)
-        self.assert_('def' in str_obj)
-        self.assert_('ghi' in str_obj)
-        self.assert_('jkl' in str_obj)
+        self.assertTrue('FsOptions' in str_obj)
+        self.assertTrue('abc' in str_obj)
+        self.assertTrue('def' in str_obj)
+        self.assertTrue('ghi' in str_obj)
+        self.assertTrue('jkl' in str_obj)
 
 
 # Test data used in GetPartitionTest below.
@@ -78,7 +79,7 @@ class get_partition_list_common(object):
         self.god.unstub_all()
 
     def test_is_linux_fs_type(self):
-        for unused in xrange(4):
+        for unused in range(4):
             os.popen.expect_call(SAMPLE_FDISK).and_return(
                 StringIO(SAMPLE_FDISK_OUTPUT))
         self.assertFalse(partition.is_linux_fs_type('/dev/hdc1'))
@@ -138,14 +139,14 @@ class FSOptions_base_test(FsOptions_common, unittest.TestCase):
 
     def setUp(self):
         sys.modules['autotest.client.site_partition'] = None
-        reload(partition)
+        importlib.reload(partition)
 
 
 class get_partition_list_base_test(get_partition_list_common, unittest.TestCase):
 
     def setUp(self):
         sys.modules['autotest.client.site_partition'] = None
-        reload(partition)
+        importlib.reload(partition)
         get_partition_list_common.setUp(self)
 
 
@@ -154,7 +155,7 @@ class FSOptions_test(FsOptions_common, unittest.TestCase):
     def setUp(self):
         if 'autotest.client.site_partition' in sys.modules:
             del sys.modules['autotest.client.site_partition']
-        reload(partition)
+        importlib.reload(partition)
 
 
 class get_partition_list_test(get_partition_list_common, unittest.TestCase):
@@ -162,7 +163,7 @@ class get_partition_list_test(get_partition_list_common, unittest.TestCase):
     def setUp(self):
         if 'autotest.client.site_partition' in sys.modules:
             del sys.modules['autotest.client.site_partition']
-        reload(partition)
+        importlib.reload(partition)
         get_partition_list_common.setUp(self)
 
 

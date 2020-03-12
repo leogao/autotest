@@ -4,7 +4,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.test_utils import mock
 from autotest.database_legacy import migrate, db_utils
 
@@ -55,10 +55,10 @@ class UtilsTest(unittest.TestCase):
             'table1': 'new_table1',
             'table2': 'new_table2',
         }
-        self._setup_exists_expects((name for name, _ in mapping.iteritems()),
+        self._setup_exists_expects((name for name, _ in mapping.items()),
                                    'TABLES')
 
-        for name, new_name in mapping.iteritems():
+        for name, new_name in mapping.items():
             self.manager.execute.expect_call(
                 'RENAME TABLE `%s` TO `%s`' % (name, new_name))
 

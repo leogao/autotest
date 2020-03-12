@@ -88,7 +88,7 @@ class base_test(object):
     @staticmethod
     def _append_type_to_keys(dictionary, typename):
         new_dict = {}
-        for key, value in dictionary.iteritems():
+        for key, value in dictionary.items():
             new_key = "%s{%s}" % (key, typename)
             new_dict[new_key] = value
         return new_dict
@@ -117,7 +117,7 @@ class base_test(object):
                                tap_report=tap_report)
 
         keyval_path = os.path.join(self.resultsdir, "keyval")
-        print >> open(keyval_path, "a"), ""
+        print("", file=open(keyval_path, "a"))
 
     def analyze_perf_constraints(self, constraints):
         if not self._new_keyval:
@@ -283,7 +283,7 @@ class base_test(object):
             if iterations > 1:
                 logging.debug('Test started. Specified %d iterations',
                               iterations)
-            for self.iteration in xrange(1, iterations + 1):
+            for self.iteration in range(1, iterations + 1):
                 if iterations > 1:
                     logging.debug('Executing iteration %d of %d',
                                   self.iteration, iterations)
@@ -366,7 +366,7 @@ class base_test(object):
             keyvals['version'] = self.version
             for i, arg in enumerate(args):
                 keyvals['param-%d' % i] = repr(arg)
-            for name, arg in dargs.iteritems():
+            for name, arg in dargs.items():
                 keyvals['param-%s' % name] = repr(arg)
             self.write_test_keyval(keyvals)
 
@@ -469,7 +469,7 @@ def subtest_fatal(function):
         self.decored()
         result = function(self, *args, **kwds)
         return result
-    wrapped.func_name = function.func_name
+    wrapped.__name__ = function.__name__
     return wrapped
 
 
@@ -483,7 +483,7 @@ def subtest_nocleanup(function):
         self.decored()
         result = function(self, *args, **kwds)
         return result
-    wrapped.func_name = function.func_name
+    wrapped.__name__ = function.__name__
     return wrapped
 
 
@@ -693,7 +693,7 @@ def _get_nonstar_args(func):
 
     :return: A tuple of parameters accepted by the function.
     """
-    return func.func_code.co_varnames[:func.func_code.co_argcount]
+    return func.__code__.co_varnames[:func.__code__.co_argcount]
 
 
 def _cherry_pick_args(func, args, dargs):
@@ -711,14 +711,14 @@ def _cherry_pick_args(func, args, dargs):
       A tuple of: (args tuple, keyword arguments dictionary)
     """
     # Cherry pick args:
-    if func.func_code.co_flags & 0x04:
+    if func.__code__.co_flags & 0x04:
         # func accepts *args, so return the entire args.
         p_args = args
     else:
         p_args = ()
 
     # Cherry pick dargs:
-    if func.func_code.co_flags & 0x08:
+    if func.__code__.co_flags & 0x08:
         # func accepts **dargs, so return the entire dargs.
         p_dargs = dargs
     else:
@@ -757,8 +757,8 @@ def _validate_args(args, dargs, *funcs):
     all_co_flags = 0
     all_varnames = ()
     for func in funcs:
-        all_co_flags |= func.func_code.co_flags
-        all_varnames += func.func_code.co_varnames[:func.func_code.co_argcount]
+        all_co_flags |= func.__code__.co_flags
+        all_varnames += func.__code__.co_varnames[:func.__code__.co_argcount]
 
     # Check if given args belongs to at least one of the methods below.
     if len(args) > 0:

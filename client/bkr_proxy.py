@@ -26,8 +26,8 @@ import logging
 import os
 import re
 import time
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
 from autotest.client.shared import utils
 
@@ -193,7 +193,7 @@ def copy_remote(data, dest, use_put=None):
     """
 
     ret = None
-    req = urllib2.Request(dest, data=data)
+    req = urllib.request.Request(dest, data=data)
     if use_put:
         req.add_header('Content-Type', 'application/octet-stream')
         end = use_put['start'] + use_put['size'] - 1
@@ -206,7 +206,7 @@ def copy_remote(data, dest, use_put=None):
         res = utils.urlopen(req)
         ret = res.info()
         res.close()
-    except urllib2.HTTPError as e:
+    except urllib.error.HTTPError as e:
         if e.code == 500:
             # the server aborted this recipe DIE DIE DIE
             raise BkrProxyException("We have been aborted!!!")
@@ -261,7 +261,7 @@ def copy_data(data, dest, header=None, use_put=None):
     if use_put:
         udata = data
     else:
-        udata = urllib.urlencode(data)
+        udata = urllib.parse.urlencode(data)
 
     if utils.is_url(dest):
         ret = copy_remote(udata, dest, use_put)

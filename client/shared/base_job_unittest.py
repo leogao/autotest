@@ -10,7 +10,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import base_job, error
 from autotest.client import job, utils
 
@@ -276,7 +276,7 @@ class test_execution_context(unittest.TestCase):
         sub2 = os.path.join(self.resultdir, 'sub2')
         self.job.push_execution_context('sub2')
         self.assertEqual(self.job.resultdir, sub2)
-        self.assert_(os.path.exists(sub2))
+        self.assertTrue(os.path.exists(sub2))
 
     def test_push_handles_absolute_paths(self):
         otherresults = tempfile.mkdtemp(suffix='unittest')
@@ -319,63 +319,63 @@ class test_job_directory(unittest.TestCase):
 
     def test_passes_if_dir_exists(self):
         os.mkdir('testing')
-        self.assert_(os.path.isdir('testing'))
+        self.assertTrue(os.path.isdir('testing'))
         jd = base_job.job_directory('testing')
-        self.assert_(os.path.isdir('testing'))
+        self.assertTrue(os.path.isdir('testing'))
 
     def test_fails_if_not_writable_and_dir_doesnt_exist(self):
-        self.assert_(not os.path.isdir('testing2'))
+        self.assertTrue(not os.path.isdir('testing2'))
         self.assertRaises(base_job.job_directory.MissingDirectoryException,
                           base_job.job_directory, 'testing2')
 
     def test_fails_if_file_already_exists(self):
         open('testing3', 'w').close()
-        self.assert_(os.path.isfile('testing3'))
+        self.assertTrue(os.path.isfile('testing3'))
         self.assertRaises(base_job.job_directory.MissingDirectoryException,
                           base_job.job_directory, 'testing3')
 
     def test_passes_if_writable_and_dir_exists(self):
         os.mkdir('testing4')
-        self.assert_(os.path.isdir('testing4'))
+        self.assertTrue(os.path.isdir('testing4'))
         jd = base_job.job_directory('testing4', True)
-        self.assert_(os.path.isdir('testing4'))
+        self.assertTrue(os.path.isdir('testing4'))
 
     def test_creates_dir_if_writable_and_dir_doesnt_exist(self):
-        self.assert_(not os.path.isdir('testing5'))
+        self.assertTrue(not os.path.isdir('testing5'))
         jd = base_job.job_directory('testing5', True)
-        self.assert_(os.path.isdir('testing5'))
+        self.assertTrue(os.path.isdir('testing5'))
 
     def test_recursive_creates_dir_if_writable_and_dir_doesnt_exist(self):
-        self.assert_(not os.path.isdir('testing6'))
+        self.assertTrue(not os.path.isdir('testing6'))
         base_job.job_directory('testing6/subdir', True)
-        self.assert_(os.path.isdir('testing6/subdir'))
+        self.assertTrue(os.path.isdir('testing6/subdir'))
 
     def test_fails_if_writable_and_file_exists(self):
         open('testing7', 'w').close()
-        self.assert_(os.path.isfile('testing7'))
-        self.assert_(not os.path.isdir('testing7'))
+        self.assertTrue(os.path.isfile('testing7'))
+        self.assertTrue(not os.path.isdir('testing7'))
         self.assertRaises(base_job.job_directory.UncreatableDirectoryException,
                           base_job.job_directory, 'testing7', True)
 
     def test_fails_if_writable_and_no_permission_to_create(self):
         if os.getuid() != 0:
-            os.mkdir('testing8', 0555)
-            self.assert_(os.path.isdir('testing8'))
+            os.mkdir('testing8', 0o555)
+            self.assertTrue(os.path.isdir('testing8'))
             self.assertRaises(base_job.job_directory.UncreatableDirectoryException,
                               base_job.job_directory, 'testing8/subdir', True)
 
     def test_passes_if_not_is_writable_and_dir_not_writable(self):
         if os.getuid() != 0:
-            os.mkdir('testing9', 0555)
-            self.assert_(os.path.isdir('testing9'))
-            self.assert_(not os.access('testing9', os.W_OK))
+            os.mkdir('testing9', 0o555)
+            self.assertTrue(os.path.isdir('testing9'))
+            self.assertTrue(not os.access('testing9', os.W_OK))
             jd = base_job.job_directory('testing9')
 
     def test_fails_if_is_writable_but_dir_not_writable(self):
         if os.getuid() != 0:
-            os.mkdir('testing10', 0555)
-            self.assert_(os.path.isdir('testing10'))
-            self.assert_(not os.access('testing10', os.W_OK))
+            os.mkdir('testing10', 0o555)
+            self.assertTrue(os.path.isdir('testing10'))
+            self.assertTrue(not os.access('testing10', os.W_OK))
             self.assertRaises(base_job.job_directory.UnwritableDirectoryException,
                               base_job.job_directory, 'testing10', True)
 
@@ -385,11 +385,11 @@ class test_job_directory(unittest.TestCase):
 
     def test_no_path_and_and_not_writable_creates_tempdir(self):
         jd = base_job.job_directory(None, True)
-        self.assert_(os.path.isdir(jd.path))
-        self.assert_(os.access(jd.path, os.W_OK))
+        self.assertTrue(os.path.isdir(jd.path))
+        self.assertTrue(os.access(jd.path, os.W_OK))
         temp_path = jd.path
         del jd
-        self.assert_(not os.path.isdir(temp_path))
+        self.assertTrue(not os.path.isdir(temp_path))
 
 
 class test_job_state(unittest.TestCase):
@@ -423,28 +423,28 @@ class test_job_state(unittest.TestCase):
     def test_set_works_with_multiple_names(self):
         self.state.set('ns7', 'name5', 60)
         self.state.set('ns7', 'name6', 70)
-        self.assertEquals(60, self.state.get('ns7', 'name5'))
-        self.assertEquals(70, self.state.get('ns7', 'name6'))
+        self.assertEqual(60, self.state.get('ns7', 'name5'))
+        self.assertEqual(70, self.state.get('ns7', 'name6'))
 
     def test_multiple_sets_override_each_other(self):
         self.state.set('ns8', 'name7', 10)
         self.state.set('ns8', 'name7', 25)
-        self.assertEquals(25, self.state.get('ns8', 'name7'))
+        self.assertEqual(25, self.state.get('ns8', 'name7'))
 
     def test_get_with_default_does_not_set(self):
-        self.assertEquals(100, self.state.get('ns9', 'name8', default=100))
+        self.assertEqual(100, self.state.get('ns9', 'name8', default=100))
         self.assertRaises(KeyError, self.state.get, 'ns9', 'name8')
 
     def test_set_in_one_namespace_ignores_other(self):
         self.state.set('ns10', 'name9', 200)
-        self.assertEquals(200, self.state.get('ns10', 'name9'))
+        self.assertEqual(200, self.state.get('ns10', 'name9'))
         self.assertRaises(KeyError, self.state.get, 'ns11', 'name9')
 
     def test_namespaces_do_not_collide(self):
         self.state.set('ns12', 'name10', 250)
         self.state.set('ns13', 'name10', -150)
-        self.assertEquals(-150, self.state.get('ns13', 'name10'))
-        self.assertEquals(250, self.state.get('ns12', 'name10'))
+        self.assertEqual(-150, self.state.get('ns13', 'name10'))
+        self.assertEqual(250, self.state.get('ns12', 'name10'))
 
     def test_discard_does_nothing_on_undefined_namespace(self):
         self.state.discard('missing_ns', 'missing')
@@ -476,15 +476,15 @@ class test_job_state(unittest.TestCase):
         self.state.set('ns17_1', 'name24', 1)
         self.state.set('ns17_1', 'name25', 2)
         self.state.set('ns17_2', 'name25', 3)
-        self.assert_(self.state.has('ns17_1', 'name24'))
-        self.assert_(self.state.has('ns17_1', 'name25'))
-        self.assert_(self.state.has('ns17_2', 'name25'))
+        self.assertTrue(self.state.has('ns17_1', 'name24'))
+        self.assertTrue(self.state.has('ns17_1', 'name25'))
+        self.assertTrue(self.state.has('ns17_2', 'name25'))
 
     def test_has_is_false_for_all_unset_values(self):
         self.state.set('ns18_1', 'name26', 1)
         self.state.set('ns18_1', 'name27', 2)
         self.state.set('ns18_2', 'name27', 3)
-        self.assert_(not self.state.has('ns18_2', 'name26'))
+        self.assertTrue(not self.state.has('ns18_2', 'name26'))
 
     def test_discard_namespace_drops_all_values(self):
         self.state.set('ns19', 'var1', 10)
@@ -611,7 +611,7 @@ class test_job_state_set_backing_file(unittest.TestCase):
     def test_writes_to_file(self):
         state = base_job.job_state()
         state.set_backing_file('outfile1')
-        self.assert_(os.path.exists('outfile1'))
+        self.assertTrue(os.path.exists('outfile1'))
 
     def test_set_backing_file_updates_existing_file(self):
         state1 = base_job.job_state()
@@ -650,7 +650,7 @@ class test_job_state_set_backing_file(unittest.TestCase):
         state.set_backing_file(None)
         os.remove('outfile2')
         state.set('n2', 'var2', 'value2')
-        self.assert_(not os.path.exists('outfile2'))
+        self.assertTrue(not os.path.exists('outfile2'))
 
     def test_written_files_can_be_reloaded(self):
         state1 = base_job.job_state()
@@ -977,7 +977,7 @@ class test_status_log_entry(unittest.TestCase):
         self.assertEqual(parts[-1], msg)
         fields = dict(f.split('=', 1) for f in parts[3:-1])
         self.assertEqual(int(fields['timestamp']), timestamp)
-        self.assert_('localtime' in fields)  # too flaky to do an exact check
+        self.assertTrue('localtime' in fields)  # too flaky to do an exact check
         del fields['timestamp']
         del fields['localtime']
         self.assertEqual(fields, extra_fields)
@@ -1120,7 +1120,7 @@ class test_status_logger(unittest.TestCase):
         self.assertEqual('\t\tLINE20', self.logger.render_entry(entry))
 
     def test_writes_toplevel_log(self):
-        entries = [self.make_dummy_entry('LINE%d' % x) for x in xrange(3)]
+        entries = [self.make_dummy_entry('LINE%d' % x) for x in range(3)]
         for entry in entries:
             self.logger.record_entry(entry)
         self.assertEqual('LINE0\nLINE1\nLINE2\n', open('status').read())
@@ -1181,7 +1181,7 @@ class test_status_logger(unittest.TestCase):
 
         self.assertEqual('LINE1\nLINE2\nLINE3\nLINE4\n', open('status').read())
         self.assertEqual('LINE2\nLINE4\n', open('sub/status').read())
-        self.assert_(not os.path.exists('sub_nowrite/status'))
+        self.assertTrue(not os.path.exists('sub_nowrite/status'))
 
     def test_indentation(self):
         self.logger.record_entry(self.make_dummy_entry('LINE1', start=True))
@@ -1209,7 +1209,7 @@ class test_status_logger(unittest.TestCase):
         self.assertEqual(expected_log, open('status').read())
 
     def test_hook_is_called(self):
-        entries = [self.make_dummy_entry('LINE%d' % x) for x in xrange(5)]
+        entries = [self.make_dummy_entry('LINE%d' % x) for x in range(5)]
         recorded_entries = []
 
         def hook(entry):
@@ -1361,28 +1361,28 @@ class test_make_outputdir(unittest.TestCase):
 
     def test_raises_test_error_if_outputdir_exists(self):
         os.mkdir('subdir1')
-        self.assert_(os.path.exists('subdir1'))
+        self.assertTrue(os.path.exists('subdir1'))
         self.assertRaises(error.TestError, self.job._make_test_outputdir,
                           'subdir1')
 
     def test_raises_test_error_if_outputdir_uncreatable(self):
         if os.getuid() != 0:
             os.chmod(self.resultdir, stat.S_IRUSR | stat.S_IXUSR)
-            self.assert_(not os.path.exists('subdir2'))
+            self.assertTrue(not os.path.exists('subdir2'))
             self.assertRaises(OSError, os.mkdir, 'subdir2')
             self.assertRaises(error.TestError, self.job._make_test_outputdir,
                               'subdir2')
-            self.assert_(not os.path.exists('subdir2'))
+            self.assertTrue(not os.path.exists('subdir2'))
 
     def test_creates_writable_directory(self):
-        self.assert_(not os.path.exists('subdir3'))
+        self.assertTrue(not os.path.exists('subdir3'))
         self.job._make_test_outputdir('subdir3')
-        self.assert_(os.path.isdir('subdir3'))
+        self.assertTrue(os.path.isdir('subdir3'))
 
         # we can write to the directory afterwards
-        self.assert_(not os.path.exists('subdir3/testfile'))
+        self.assertTrue(not os.path.exists('subdir3/testfile'))
         open('subdir3/testfile', 'w').close()
-        self.assert_(os.path.isfile('subdir3/testfile'))
+        self.assertTrue(os.path.isfile('subdir3/testfile'))
 
 
 if __name__ == "__main__":

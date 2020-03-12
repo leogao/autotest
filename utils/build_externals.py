@@ -20,7 +20,7 @@ import sys
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import logging_config, logging_manager
 from autotest.client.shared import utils
 from autotest.utils import external_packages
@@ -57,7 +57,7 @@ def main():
     """
     logging_manager.configure_logging(BuildExternalsLoggingConfig(),
                                       verbose=True)
-    os.umask(022)
+    os.umask(0o22)
 
     top_of_tree = external_packages.find_top_of_autotest_tree()
     package_dir = os.path.join(top_of_tree, PACKAGE_DIR)

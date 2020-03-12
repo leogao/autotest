@@ -3,8 +3,8 @@
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
-import cStringIO
+    from . import common  # pylint: disable=W0611
+import io
 import os
 import unittest
 
@@ -31,21 +31,21 @@ class ConsolePatternsTestCase(unittest.TestCase):
                                      'console_patterns')
         self._alert_hooks = monitors_util.build_alert_hooks_from_path(
             patterns_path, self._warnfile)
-        self._logfile = cStringIO.StringIO()
+        self._logfile = io.StringIO()
 
     def _process_line(self, line):
-        input_file = cStringIO.StringIO(line + '\n')
+        input_file = io.StringIO(line + '\n')
         monitors_util.process_input(input_file, self._logfile,
                                     alert_hooks=self._alert_hooks)
 
     def _assert_warning_fired(self, type, message):
         key = (type, message)
-        self.assert_(key in self._warnfile.warnings,
+        self.assertTrue(key in self._warnfile.warnings,
                      'Warning %s not found in: %s' % (key,
                                                       self._warnfile.warnings))
 
     def _assert_no_warnings_fired(self):
-        self.assertEquals(self._warnfile.warnings, [])
+        self.assertEqual(self._warnfile.warnings, [])
 
 
 class ConsolePatternsTest(ConsolePatternsTestCase):

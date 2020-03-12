@@ -1,7 +1,7 @@
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.database_legacy import db_utils
 
 UP_SQL = """

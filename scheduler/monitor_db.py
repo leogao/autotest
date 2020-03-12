@@ -4,7 +4,7 @@ Autotest scheduler main library.
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 import datetime
 import gc
 import logging
@@ -14,7 +14,7 @@ import signal
 import sys
 import time
 import traceback
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import django.db
 from autotest.client import os_dep
@@ -39,7 +39,7 @@ AUTOSERV_NICE_LEVEL = 10
 DB_CONFIG_SECTION = 'AUTOTEST_WEB'
 AUTOTEST_PATH = os.path.join(os.path.dirname(__file__), '..')
 
-if os.environ.has_key('AUTOTEST_DIR'):
+if 'AUTOTEST_DIR' in os.environ:
     AUTOTEST_PATH = os.environ['AUTOTEST_DIR']
 AUTOTEST_SERVER_DIR = os.path.join(AUTOTEST_PATH, 'server')
 AUTOTEST_TKO_DIR = os.path.join(AUTOTEST_PATH, 'tko')
@@ -1350,7 +1350,7 @@ class TaskWithJobKeyvals(object):
 
     def _write_keyvals_before_job_helper(self, keyval_dict, keyval_path):
         keyval_contents = '\n'.join(self._format_keyval(key, value)
-                                    for key, value in keyval_dict.iteritems())
+                                    for key, value in keyval_dict.items())
         # always end with a newline to allow additional keyvals to be written
         keyval_contents += '\n'
         _drone_manager.attach_file_to_execution(self._working_directory(),
@@ -1364,7 +1364,7 @@ class TaskWithJobKeyvals(object):
         keyval_path = os.path.join(self._working_directory(), 'host_keyvals',
                                    host.hostname)
         platform, all_labels = host.platform_and_labels()
-        all_labels = [urllib.quote(label) for label in all_labels]
+        all_labels = [urllib.parse.quote(label) for label in all_labels]
         keyval_dict = dict(platform=platform, labels=','.join(all_labels))
         self._write_keyvals_before_job_helper(keyval_dict, keyval_path)
 

@@ -33,7 +33,7 @@ from autotest.client.bkr_proxy import BkrProxy
 from autotest.client.bkr_xml import BeakerXMLParser
 from autotest.client.shared import utils, error
 
-import harness
+from . import harness
 
 '''Use 5 minutes for console heartbeat'''
 BEAKER_CONSOLE_HEARTBEAT = 60 * 5
@@ -250,7 +250,7 @@ class harness_beaker(harness.harness):
         if task is None:
             raise error.HarnessError('No valid task')
 
-        for (name, value) in task.params.items():
+        for (name, value) in list(task.params.items()):
             logging.debug('adding to os.environ: <%s=%s>', name, value)
             os.environ[name] = value
 

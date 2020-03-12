@@ -6,7 +6,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.test_utils import mock
 from autotest.scheduler import gc_stats
 

@@ -11,7 +11,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.cli import cli_mock, action_common, rpc
 
 #
@@ -88,16 +88,16 @@ class atest_list_unittest(cli_mock.cli_unittest):
         self.assertEqual(checks, orig_checks)
 
     def _atest_list_execute(self, filters={}, check_results={}):
-        values = [{u'id': 180,
-                   u'platform': 0,
-                   u'name': u'label0',
-                   u'invalid': 0,
-                   u'kernel_config': u''},
-                  {u'id': 338,
-                   u'platform': 0,
-                   u'name': u'label1',
-                   u'invalid': 0,
-                   u'kernel_config': u''}]
+        values = [{'id': 180,
+                   'platform': 0,
+                   'name': 'label0',
+                   'invalid': 0,
+                   'kernel_config': ''},
+                  {'id': 338,
+                   'platform': 0,
+                   'name': 'label1',
+                   'invalid': 0,
+                   'kernel_config': ''}]
         mytest = action_common.atest_list()
         mytest.afe = rpc.afe_comm()
         self.mock_rpcs([('get_labels',
@@ -131,8 +131,8 @@ class atest_list_unittest(cli_mock.cli_unittest):
         filters['name__in'] = ['label0', 'label1', 'label2']
         check_results['name__in'] = 'name'
         (out, err, errors) = self._atest_list_execute(filters, check_results)
-        K = errors.keys()[0]
-        V = errors.values()[0].keys()[0]
+        K = list(errors.keys())[0]
+        V = list(errors.values())[0].keys()[0]
         self.assertTrue('Unknown' in K)
         self.assertTrue('label2' in V)
 
@@ -149,16 +149,16 @@ class atest_list_unittest(cli_mock.cli_unittest):
         check_results = {}
         filters['name__in'] = ['label*']
         check_results['name__in'] = 'name'
-        values = [{u'id': 180,
-                   u'platform': False,
-                   u'name': u'label0',
-                   u'invalid': False,
-                   u'kernel_config': u''},
-                  {u'id': 338,
-                   u'platform': False,
-                   u'name': u'label1',
-                   u'invalid': False,
-                   u'kernel_config': u''}]
+        values = [{'id': 180,
+                   'platform': False,
+                   'name': 'label0',
+                   'invalid': False,
+                   'kernel_config': ''},
+                  {'id': 338,
+                   'platform': False,
+                   'name': 'label1',
+                   'invalid': False,
+                   'kernel_config': ''}]
         mytest = action_common.atest_list()
         mytest.afe = rpc.afe_comm()
         self.mock_rpcs([('get_labels', {'name__startswith': 'label'},
@@ -198,7 +198,7 @@ class atest_create_or_delete_unittest(cli_mock.cli_unittest):
                          True, 42)])
         ret = acr.execute()
         self.god.check_playback()
-        self.assert_(['label0'], ret)
+        self.assertTrue(['label0'], ret)
 
     def test_execute_create_two_topics(self):
         acr = self._create_cr_del(['label0', 'label1'])

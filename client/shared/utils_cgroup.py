@@ -6,7 +6,7 @@ Helpers for cgroup testing.
 :copyright: 2011 Red Hat Inc.
 :author: Lukas Doktor <ldoktor@redhat.com>
 """
-import commands
+import subprocess
 import logging
 import os
 import random
@@ -174,7 +174,7 @@ class Cgroup(object):
                 args_str = " ".join(args)
             cgexec_cmd = ("cgexec -g %s:%s %s %s" %
                           (self.module, cgroup, cmd, args_str))
-            status, output = commands.getstatusoutput(cgexec_cmd)
+            status, output = subprocess.getstatusoutput(cgexec_cmd)
             return status, output
         except error.CmdError as detail:
             raise error.TestFail("Execute %s in cgroup failed!\n%s" %
@@ -389,7 +389,7 @@ class Cgroup(object):
                      'G': 1073741824,
                      'T': 1099511627776
                      }
-            if human.has_key(value[-1]):
+            if value[-1] in human:
                 value = int(value[:-1]) * human[value[-1]]
         except Exception:
             logging.warn("cg.set_prop() fallback into cg.set_property.")

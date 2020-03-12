@@ -51,7 +51,7 @@ def gwt_forward(request, forward_addr):
         headers, content = httplib2.Http().request(url, 'POST',
                                                    body=request.raw_post_data)
     http_response = HttpResponse(content)
-    for header, value in headers.iteritems():
+    for header, value in headers.items():
         # remove components that could cause hop-by-hop errors
         if header not in ('connection', 'keep-alive', 'proxy-authenticate',
                           'proxy-authorization', 'te', 'trailers',
@@ -64,8 +64,8 @@ def handler500(request):
     t = loader.get_template('500.html')
     trace = traceback.format_exc()
     context = Context({
-        'type': sys.exc_type,
-        'value': sys.exc_value,
+        'type': sys.exc_info()[0],
+        'value': sys.exc_info()[1],
         'traceback': cgi.escape(trace)
     })
     return HttpResponseServerError(t.render(context))

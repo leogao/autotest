@@ -19,7 +19,7 @@ from nose.selector import Selector
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 REQUIRES_DJANGO = set((
     'monitor_db_unittest.py',
@@ -57,7 +57,7 @@ class AutoTestSelector(Selector):
         if self.config.options.skip_dirs != []:
             skip_dirs = re.split(os.sep + "{0,1}\s+|" + os.sep + "{0,1}\Z", self.config.options.skip_dirs)
 
-        skip_dirs = filter(None, skip_dirs)
+        skip_dirs = [_f for _f in skip_dirs if _f]
 
         for dir in skip_dirs:
             if re.match(os.path.abspath(dir), dirname):

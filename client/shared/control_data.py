@@ -31,15 +31,15 @@ class ControlData(object):
                        "%s.") % (self.path, ', '.join(diff))
             if raise_warnings:
                 raise ControlVariableException(warning)
-            print textwrap.wrap(warning, 80)
+            print(textwrap.wrap(warning, 80))
 
-        for key, val in vars.iteritems():
+        for key, val in vars.items():
             try:
                 self.set_attr(key, val, raise_warnings)
             except Exception as e:
                 if raise_warnings:
                     raise
-                print "WARNING: %s; skipping" % e
+                print("WARNING: %s; skipping" % e)
 
     def set_attr(self, attr, val, raise_warnings=False):
         attr = attr.lower()
@@ -128,7 +128,7 @@ class ControlData(object):
 def _extract_const(n):
     assert(n.__class__ == compiler.ast.Assign)
     assert(n.expr.__class__ == compiler.ast.Const)
-    assert(n.expr.value.__class__ in (str, int, float, unicode))
+    assert(n.expr.value.__class__ in (str, int, float, str))
     assert(n.nodes.__class__ == list)
     assert(len(n.nodes) == 1)
     assert(n.nodes[0].__class__ == compiler.ast.AssName)

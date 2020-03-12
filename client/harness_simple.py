@@ -6,7 +6,7 @@ __author__ = """Copyright Andy Whitcroft, Martin J. Bligh 2006"""
 
 import os
 
-import harness
+from . import harness
 
 
 class harness_simple(harness.harness):

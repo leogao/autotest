@@ -7,8 +7,8 @@ Wrapper around ConfigParser to manage testcases configuration.
 import re
 import string
 import types
-from ConfigParser import ConfigParser
-from StringIO import StringIO
+from configparser import ConfigParser
+from io import StringIO
 from os import path
 
 from autotest.client.shared import utils
@@ -42,7 +42,7 @@ class config_loader:
         if hasattr(cfg, 'read'):
             self.cfg = cfg
             self.parser.readfp(self.cfg)
-        elif isinstance(cfg, types.StringTypes):
+        elif isinstance(cfg, (str,)):
             # Config file is a URL. Download it to a temp dir
             if cfg.startswith('http') or cfg.startswith('ftp'):
                 self.cfg = path.join(tmpdir, path.basename(cfg))

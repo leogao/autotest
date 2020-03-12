@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import StringIO
+import io
 import fcntl
 import os
 import subprocess
@@ -9,11 +9,11 @@ import textwrap
 import time
 import unittest
 
-import monitors_util
+from . import monitors_util
 
 
 def InlineStringIO(text):
-    return StringIO.StringIO(textwrap.dedent(text).strip())
+    return io.StringIO(textwrap.dedent(text).strip())
 
 
 class WriteLoglineTestCase(unittest.TestCase):
@@ -34,23 +34,23 @@ class WriteLoglineTestCase(unittest.TestCase):
     def test_prepend_timestamp(self):
         timestamped = monitors_util.prepend_timestamp(
             self.msg, self.format)
-        self.assertEquals(
+        self.assertEqual(
             '%s\t%s' % (self.formatted_time_tuple, self.msg), timestamped)
 
     def test_write_logline_with_timestamp(self):
-        logfile = StringIO.StringIO()
+        logfile = io.StringIO()
         monitors_util.write_logline(logfile, self.msg, self.format)
         logfile.seek(0)
         written = logfile.read()
-        self.assertEquals(
+        self.assertEqual(
             '%s\t%s\n' % (self.formatted_time_tuple, self.msg), written)
 
     def test_write_logline_without_timestamp(self):
-        logfile = StringIO.StringIO()
+        logfile = io.StringIO()
         monitors_util.write_logline(logfile, self.msg)
         logfile.seek(0)
         written = logfile.read()
-        self.assertEquals(
+        self.assertEqual(
             '%s\n' % self.msg, written)
 
 
@@ -68,7 +68,7 @@ class AlertHooksTestCase(unittest.TestCase):
         time.time = self.orig_time
 
     def test_make_alert(self):
-        warnfile = StringIO.StringIO()
+        warnfile = io.StringIO()
         alert = monitors_util.make_alert(warnfile, "MSGTYPE",
                                          self.msg_template)
         alert(*self.params)
@@ -76,10 +76,10 @@ class AlertHooksTestCase(unittest.TestCase):
         written = warnfile.read()
         ts = str(int(self.epoch_seconds))
         expected = '%s\tMSGTYPE\t%s\n' % (ts, self.msg_template % self.params)
-        self.assertEquals(expected, written)
+        self.assertEqual(expected, written)
 
     def test_build_alert_hooks(self):
-        warnfile = StringIO.StringIO()
+        warnfile = io.StringIO()
         patterns_file = InlineStringIO("""
             BUG
             ^.*Kernel panic ?(.*)
@@ -90,7 +90,7 @@ class AlertHooksTestCase(unittest.TestCase):
             machine Oops'd (%s)
             """)
         hooks = monitors_util.build_alert_hooks(patterns_file, warnfile)
-        self.assertEquals(len(hooks), 2)
+        self.assertEqual(len(hooks), 2)
 
 
 class ProcessInputTestCase(unittest.TestCase):
@@ -101,12 +101,12 @@ class ProcessInputTestCase(unittest.TestCase):
             this is a line
             booya
             """)
-        logfile = StringIO.StringIO()
+        logfile = io.StringIO()
         monitors_util.process_input(input, logfile)
         input.seek(0)
         logfile.seek(0)
 
-        self.assertEquals(
+        self.assertEqual(
             '%s\n%s\n' % (input.read(), monitors_util.TERM_MSG),
             logfile.read())
 
@@ -136,15 +136,15 @@ class FollowFilesTestCase(unittest.TestCase):
     def test_lookup_lastlines(self):
         reverse_lineno = monitors_util.lookup_lastlines(
             self.lastlines_dirpath, self.logfile_path)
-        self.assertEquals(reverse_lineno, 3)
+        self.assertEqual(reverse_lineno, 3)
 
     def test_nonblocking(self):
         po = subprocess.Popen('echo', stdout=subprocess.PIPE)
         flags = fcntl.fcntl(po.stdout, fcntl.F_GETFL)
-        self.assertEquals(flags, 0)
+        self.assertEqual(flags, 0)
         monitors_util.nonblocking(po.stdout)
         flags = fcntl.fcntl(po.stdout, fcntl.F_GETFL)
-        self.assertEquals(flags, os.O_NONBLOCK)
+        self.assertEqual(flags, os.O_NONBLOCK)
         po.wait()
 
     def test_follow_files_nostate(self):
@@ -156,8 +156,8 @@ class FollowFilesTestCase(unittest.TestCase):
             pipes, lastlines_dirpath)
         first_shouldmatch = '[%s]\t%s' % (
             self.logfile_path, self.lastline)
-        self.assertEquals(lines[0], first_shouldmatch)
-        monitors_util.snuff(procs.values())
+        self.assertEqual(lines[0], first_shouldmatch)
+        monitors_util.snuff(list(procs.values()))
 
     def test_follow_files(self):
         follow_paths = [self.logfile_path]
@@ -167,10 +167,10 @@ class FollowFilesTestCase(unittest.TestCase):
             pipes, self.lastlines_dirpath)
         first_shouldmatch = '[%s]\t%s' % (
             self.logfile_path, self.line_after_lastline_seen)
-        self.assertEquals(lines[0], first_shouldmatch)
-        monitors_util.snuff(procs.values())
+        self.assertEqual(lines[0], first_shouldmatch)
+        monitors_util.snuff(list(procs.values()))
         last_shouldmatch = '[%s]\t%s' % (self.logfile_path, self.lastline)
-        self.assertEquals(lines[-1], last_shouldmatch)
+        self.assertEqual(lines[-1], last_shouldmatch)
 
 
 if __name__ == '__main__':

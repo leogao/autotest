@@ -6,7 +6,7 @@ import tempfile
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import utils, error, profiler_manager
 from autotest.server import profiler, autotest_remote, standalone_profiler
 from autotest.server import hosts
@@ -75,7 +75,7 @@ class profilers(profiler_manager.profiler_manager):
 
         # determine what valid host objects we already have installed
         profiler_hosts = set()
-        for host, at, profiler_dir in self.installed_hosts.values():
+        for host, at, profiler_dir in list(self.installed_hosts.values()):
             if host.path_exists(profiler_dir):
                 profiler_hosts.add(host.hostname)
             else:
@@ -112,7 +112,7 @@ class profilers(profiler_manager.profiler_manager):
         filtered out of the list.
         """
         if host is None:
-            return self.installed_hosts.values()
+            return list(self.installed_hosts.values())
         if host.hostname in self.installed_hosts:
             return [self.installed_hosts[host.hostname]]
         return []

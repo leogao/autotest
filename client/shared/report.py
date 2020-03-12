@@ -15,7 +15,7 @@ import time
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 try:
     import json
@@ -23,7 +23,7 @@ except ImportError:
     from autotest.client.shared.backports import simplejson as json
 
 try:
-    import jsontemplate
+    from . import jsontemplate
 except ImportError:
     from autotest.client.shared import jsontemplate
 

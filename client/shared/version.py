@@ -41,7 +41,7 @@ import sys
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client import utils
 from autotest.client.shared import error
@@ -110,4 +110,4 @@ def get_version(abbrev=4):
 
 
 if __name__ == "__main__":
-    print get_version()
+    print(get_version())

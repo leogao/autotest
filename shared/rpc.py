@@ -2,7 +2,7 @@
 Basic definitions for the rpc services.
 '''
 
-import frontend
+from . import frontend
 
 __all__ = ['DEFAULT_PATH',
            'AFE_PATH',

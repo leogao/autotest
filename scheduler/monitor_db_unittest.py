@@ -7,7 +7,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.frontend import setup_django_environment  # pylint: disable=W0611
 from autotest.frontend import test_utils
 from autotest.client.shared import mail
@@ -150,14 +150,14 @@ class DispatcherSchedulingTest(BaseSchedulerTest):
 
     def _record_job_scheduled(self, job_id, host_id):
         record = (job_id, host_id)
-        self.assert_(record not in self._jobs_scheduled,
+        self.assertTrue(record not in self._jobs_scheduled,
                      'Job %d scheduled on host %d twice' %
                      (job_id, host_id))
         self._jobs_scheduled.append(record)
 
     def _assert_job_scheduled_on(self, job_id, host_id):
         record = (job_id, host_id)
-        self.assert_(record in self._jobs_scheduled,
+        self.assertTrue(record in self._jobs_scheduled,
                      'Job %d not scheduled on host %d as expected\n'
                      'Jobs scheduled: %s' %
                      (job_id, host_id, self._jobs_scheduled))
@@ -198,7 +198,7 @@ class DispatcherSchedulingTest(BaseSchedulerTest):
         self._jobs_scheduled = []
 
     def _run_scheduler(self):
-        for _ in xrange(2):  # metahost scheduling can take two cycles
+        for _ in range(2):  # metahost scheduling can take two cycles
             self._dispatcher._schedule_new_jobs()
 
     def _test_basic_scheduling_helper(self, use_metahosts):
@@ -403,22 +403,22 @@ class DispatcherSchedulingTest(BaseSchedulerTest):
             orig_logging_error(message, *args)
         mock_logging_error._num_calls = 0
         self.god.stub_with(logging, 'error', mock_logging_error)
-        self.assertNotEquals(None, host_scheduler._get_host_atomic_group_id(
+        self.assertNotEqual(None, host_scheduler._get_host_atomic_group_id(
             [self.label4.id, self.label8.id], queue_entry))
         self.assertTrue(mock_logging_error._num_calls > 0)
         self.god.unstub(logging, 'error')
 
         # Two labels both in the same atomic group, this should not raise an
         # error, it will merely cause the job to schedule on the intersection.
-        self.assertEquals(1, host_scheduler._get_host_atomic_group_id(
+        self.assertEqual(1, host_scheduler._get_host_atomic_group_id(
             [self.label4.id, self.label5.id]))
 
-        self.assertEquals(None, host_scheduler._get_host_atomic_group_id([]))
-        self.assertEquals(None, host_scheduler._get_host_atomic_group_id(
+        self.assertEqual(None, host_scheduler._get_host_atomic_group_id([]))
+        self.assertEqual(None, host_scheduler._get_host_atomic_group_id(
             [self.label3.id, self.label7.id, self.label6.id]))
-        self.assertEquals(1, host_scheduler._get_host_atomic_group_id(
+        self.assertEqual(1, host_scheduler._get_host_atomic_group_id(
             [self.label4.id, self.label7.id, self.label6.id]))
-        self.assertEquals(1, host_scheduler._get_host_atomic_group_id(
+        self.assertEqual(1, host_scheduler._get_host_atomic_group_id(
             [self.label7.id, self.label5.id]))
 
     def test_atomic_group_hosts_blocked_from_non_atomic_jobs(self):
@@ -685,16 +685,16 @@ class DispatcherThrottlingTest(BaseSchedulerTest):
                            fake_max_runnable_processes)
 
     def _setup_some_agents(self, num_agents):
-        self._agents = [DummyAgent() for i in xrange(num_agents)]
+        self._agents = [DummyAgent() for i in range(num_agents)]
         self._dispatcher._agents = list(self._agents)
 
     def _run_a_few_cycles(self):
-        for i in xrange(4):
+        for i in range(4):
             self._dispatcher._handle_agents()
 
     def _assert_agents_started(self, indexes, is_started=True):
         for i in indexes:
-            self.assert_(self._agents[i].started == is_started,
+            self.assertTrue(self._agents[i].started == is_started,
                          'Agent %d %sstarted' %
                          (i, is_started and 'not ' or ''))
 
@@ -802,11 +802,11 @@ class PidfileRunMonitorTest(unittest.TestCase):
     def _check_monitor(self, expected_pid, expected_exit_status,
                        expected_num_tests_failed):
         if expected_pid is None:
-            self.assertEquals(self.monitor._state.process, None)
+            self.assertEqual(self.monitor._state.process, None)
         else:
-            self.assertEquals(self.monitor._state.process.pid, expected_pid)
-        self.assertEquals(self.monitor._state.exit_status, expected_exit_status)
-        self.assertEquals(self.monitor._state.num_tests_failed,
+            self.assertEqual(self.monitor._state.process.pid, expected_pid)
+        self.assertEqual(self.monitor._state.exit_status, expected_exit_status)
+        self.assertEqual(self.monitor._state.num_tests_failed,
                           expected_num_tests_failed)
 
         self.god.check_playback()
@@ -985,14 +985,14 @@ class JobSchedulingTest(BaseSchedulerTest):
         agent = self._dispatcher._agents[0]
 
         actual_status = models.HostQueueEntry.smart_get(1).status
-        self.assertEquals(expected_status, actual_status)
+        self.assertEqual(expected_status, actual_status)
 
         if not expect_agent:
-            self.assertEquals(agent, None)
+            self.assertEqual(agent, None)
             return
 
-        self.assert_(isinstance(agent, monitor_db.Agent))
-        self.assert_(agent.task)
+        self.assertTrue(isinstance(agent, monitor_db.Agent))
+        self.assertTrue(agent.task)
         return agent.task
 
     def test_run_if_ready_delays(self):
@@ -1014,29 +1014,29 @@ class JobSchedulingTest(BaseSchedulerTest):
         set_hqe_status(django_hqes[1], models.HostQueueEntry.Status.PENDING)
 
         # So that we don't depend on the config file value during the test.
-        self.assert_(scheduler_config.config
+        self.assertTrue(scheduler_config.config
                      .secs_to_wait_for_atomic_group_hosts is not None)
         self.god.stub_with(scheduler_config.config,
                            'secs_to_wait_for_atomic_group_hosts', 123456)
 
         # Get the pending one as a scheduler_models.HostQueueEntry object.
         hqe = scheduler_models.HostQueueEntry(django_hqes[1].id)
-        self.assert_(not job._delay_ready_task)
+        self.assertTrue(not job._delay_ready_task)
         self.assertTrue(job.is_ready())
 
         # Ready with one pending, one verifying and an atomic group should
         # result in a DelayCallTask to re-check if we're ready a while later.
         job.run_if_ready(hqe)
-        self.assertEquals('Waiting', hqe.status)
+        self.assertEqual('Waiting', hqe.status)
         self._dispatcher._schedule_delay_tasks()
-        self.assertEquals('Pending', hqe.status)
+        self.assertEqual('Pending', hqe.status)
         agent = self._dispatcher._agents[0]
-        self.assert_(job._delay_ready_task)
-        self.assert_(isinstance(agent, monitor_db.Agent))
-        self.assert_(agent.task)
+        self.assertTrue(job._delay_ready_task)
+        self.assertTrue(isinstance(agent, monitor_db.Agent))
+        self.assertTrue(agent.task)
         delay_task = agent.task
-        self.assert_(isinstance(delay_task, scheduler_models.DelayedCallTask))
-        self.assert_(not delay_task.is_done())
+        self.assertTrue(isinstance(delay_task, scheduler_models.DelayedCallTask))
+        self.assertTrue(not delay_task.is_done())
 
         self.god.stub_function(delay_task, 'abort')
 
@@ -1088,8 +1088,8 @@ class JobSchedulingTest(BaseSchedulerTest):
         # ...the over_max_threshold test should cause us to call run()
         delay_task.abort.expect_call()
         other_hqe.on_pending()
-        self.assertEquals('Starting', other_hqe.status)
-        self.assertEquals('Starting', hqe.status)
+        self.assertEqual('Starting', other_hqe.status)
+        self.assertEqual('Starting', hqe.status)
         self.god.stub_function(job, 'run')
         self.god.unstub(delay_task, 'abort')
 
@@ -1112,7 +1112,7 @@ class JobSchedulingTest(BaseSchedulerTest):
         self.assertEqual(other_hqe.job, hqe.job)
         # Be sure our delay was not lost during the other_hqe construction.
         self.assertEqual(job._delay_ready_task, delay_task)
-        self.assert_(job._delay_ready_task)
+        self.assertTrue(job._delay_ready_task)
         self.assertFalse(job._delay_ready_task.is_done())
         self.assertFalse(job._delay_ready_task.aborted)
 
@@ -1131,9 +1131,9 @@ class JobSchedulingTest(BaseSchedulerTest):
         # Check that job run() and _finish_run() were called by the above:
         self._dispatcher._schedule_running_host_queue_entries()
         agent = self._dispatcher._agents[0]
-        self.assert_(agent.task)
+        self.assertTrue(agent.task)
         task = agent.task
-        self.assert_(isinstance(task, monitor_db.QueueTask))
+        self.assertTrue(isinstance(task, monitor_db.QueueTask))
         # Requery these hqes in order to verify the status from the DB.
         django_hqes = list(models.HostQueueEntry.objects.filter(job=job.id))
         for entry in django_hqes:
@@ -1154,10 +1154,10 @@ class JobSchedulingTest(BaseSchedulerTest):
 
         queue_task = self._test_run_helper(expect_starting=True)
 
-        self.assert_(isinstance(queue_task, monitor_db.QueueTask))
+        self.assertTrue(isinstance(queue_task, monitor_db.QueueTask))
         # Atomic group jobs that do not depend on a specific label in the
         # atomic group will use the atomic group name as their group name.
-        self.assertEquals(queue_task.queue_entries[0].get_group_name(),
+        self.assertEqual(queue_task.queue_entries[0].get_group_name(),
                           'atomic1')
 
     def test_run_synchronous_atomic_group_with_label_ready(self):
@@ -1167,10 +1167,10 @@ class JobSchedulingTest(BaseSchedulerTest):
 
         queue_task = self._test_run_helper(expect_starting=True)
 
-        self.assert_(isinstance(queue_task, monitor_db.QueueTask))
+        self.assertTrue(isinstance(queue_task, monitor_db.QueueTask))
         # Atomic group jobs that also specify a label in the atomic group
         # will use the label name as their group name.
-        self.assertEquals(queue_task.queue_entries[0].get_group_name(),
+        self.assertEqual(queue_task.queue_entries[0].get_group_name(),
                           'label4')
 
     def test_run_synchronous_ready(self):
@@ -1179,10 +1179,10 @@ class JobSchedulingTest(BaseSchedulerTest):
 
         queue_task = self._test_run_helper(expect_starting=True)
 
-        self.assert_(isinstance(queue_task, monitor_db.QueueTask))
-        self.assertEquals(queue_task.job.id, 1)
+        self.assertTrue(isinstance(queue_task, monitor_db.QueueTask))
+        self.assertEqual(queue_task.job.id, 1)
         hqe_ids = [hqe.id for hqe in queue_task.queue_entries]
-        self.assertEquals(hqe_ids, [1, 2])
+        self.assertEqual(hqe_ids, [1, 2])
 
     def test_schedule_running_host_queue_entries_fail(self):
         self._create_job(hosts=[2])
@@ -1194,7 +1194,7 @@ class JobSchedulingTest(BaseSchedulerTest):
         job.run_if_ready(queue_entry)
         self.assertEqual(queue_entry.status,
                          models.HostQueueEntry.Status.STARTING)
-        self.assert_(queue_entry.execution_subdir)
+        self.assertTrue(queue_entry.execution_subdir)
         self.god.check_playback()
 
         class dummy_test_agent(object):
@@ -1300,7 +1300,7 @@ class AgentTaskTest(unittest.TestCase,
         models.DroneSet.drone_sets_enabled.expect_call().and_return(True)
 
         drones = []
-        for x in xrange(4):
+        for x in range(4):
             drones.append(models.Drone.objects.create(hostname=str(x)))
 
         drone_set_1 = models.DroneSet.objects.create(name='1')

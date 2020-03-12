@@ -49,7 +49,7 @@ def main(path):
         f_obj.close()
     else:
         meta = {}
-        print >> stderr, "ERROR: file <%s> not found, no metadata included in metrics" % file_name
+        print("ERROR: file <%s> not found, no metadata included in metrics" % file_name, file=stderr)
 
     # Save a processing timestamp
     meta['results_processed'] = datetime.utcnow().strftime("%A, %d. %B %Y %H:%M UTC")
@@ -75,26 +75,26 @@ def main(path):
 
     results['meta'] = meta
     results['metrics'] = metrics
-    print json.dumps(results, sort_keys=True, indent=4)
+    print(json.dumps(results, sort_keys=True, indent=4))
 
     return
 
 
 def usage():
-    print "                                                                                             \n",
-    print "    %s                                                                                       \n" % argv[0],
-    print "        reads result files from an autotest benchmark, and outputs the information as        \n",
-    print "        json data.                                                                           \n",
-    print "                                                                                             \n",
-    print "    Usage:                                                                                   \n",
-    print "        %s                                                                                   \n" % argv[0],
-    print "                                                                                             \n",
-    print "    Options:                                                                                 \n",
-    print "        --help           Prints this text.                                                   \n",
-    print "                                                                                             \n",
-    print "        --path=<results_path>            The path to the results files                       \n"
-    print "                                         (defaults to workspace/[jobname]/autotest/client).    \n",
-    print "                                                                                             \n",
+    print("                                                                                             \n", end=' ')
+    print("    %s                                                                                       \n" % argv[0], end=' ')
+    print("        reads result files from an autotest benchmark, and outputs the information as        \n", end=' ')
+    print("        json data.                                                                           \n", end=' ')
+    print("                                                                                             \n", end=' ')
+    print("    Usage:                                                                                   \n", end=' ')
+    print("        %s                                                                                   \n" % argv[0], end=' ')
+    print("                                                                                             \n", end=' ')
+    print("    Options:                                                                                 \n", end=' ')
+    print("        --help           Prints this text.                                                   \n", end=' ')
+    print("                                                                                             \n", end=' ')
+    print("        --path=<results_path>            The path to the results files                       \n")
+    print("                                         (defaults to workspace/[jobname]/autotest/client).    \n", end=' ')
+    print("                                                                                             \n", end=' ')
 
 
 if __name__ == "__main__":

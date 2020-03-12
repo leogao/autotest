@@ -11,7 +11,7 @@ import time
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.test_utils import mock, unittest
 from autotest.client.shared import error, base_syncdata, barrier
 from autotest.client.shared import utils
@@ -45,7 +45,7 @@ class SyncDataTest(unittest.TestCase):
 
         server = self._start_server(ls)
 
-        self.assertRaisesRegexp(error.NetCommunicationError,
+        self.assertRaisesRegex(error.NetCommunicationError,
                                 "Failed to receive python"
                                 " object over the network.",
                                 self._client, "127.0.0.1", 2)
@@ -57,7 +57,7 @@ class SyncDataTest(unittest.TestCase):
 
         server = self._start_server(ls, timewait=5)
 
-        self.assertRaisesRegexp(error.NetCommunicationError,
+        self.assertRaisesRegex(error.NetCommunicationError,
                                 "Failed to receive python"
                                 " object over the network.",
                                 self._client, "127.0.0.1", 2)
@@ -71,7 +71,7 @@ class SyncDataTest(unittest.TestCase):
         server = self._start_server(ls, send_data,
                                     timewait=5, connbreak=True)
 
-        self.assertRaisesRegexp(error.NetCommunicationError,
+        self.assertRaisesRegex(error.NetCommunicationError,
                                 "Failed to receive python"
                                 " object over the network.",
                                 self._client, "127.0.0.1", 2)

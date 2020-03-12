@@ -9,12 +9,12 @@ be used in the command line for debugging purposes.
 
 import logging
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 try:
     import autotest.common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client.shared import logging_manager, logging_config
 from autotest.client.shared.settings import settings
@@ -89,7 +89,7 @@ def find_repository_host(job_path):
                          http_path)
             utils.urlopen(http_path)
             return 'http', utils.normalize_hostname(drone), job_path
-        except urllib2.URLError:
+        except urllib.error.URLError:
             logging.error('Failed to access the selected results URL. '
                           'Reverting to usual results location')
             pass

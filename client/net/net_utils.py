@@ -65,7 +65,7 @@ class network_utils(object):
         mpstat_keys = ['time', 'CPU', 'user', 'nice', 'sys', 'iowait', 'irq',
                        'soft', 'steal', 'idle', 'intr/s']
         if loud:
-            print mpstat_out
+            print(mpstat_out)
 
         # Remove the optional AM/PM appearing in time format
         mpstat_out = mpstat_out.replace('AM', '')
@@ -78,7 +78,7 @@ class network_utils(object):
             # Skip the "Average" computed by mpstat. We are gonna compute the
             # average ourself.  Pick only the aggregate 'all' CPU results
             if match and match[0] != 'Average:' and match[1] == 'all':
-                stats.append(dict(zip(mpstat_keys, match)))
+                stats.append(dict(list(zip(mpstat_keys, match))))
 
         if sample_count >= 5:
             # Throw away first and last sample
@@ -91,7 +91,7 @@ class network_utils(object):
             if len(x):
                 count = len(x)
             else:
-                print 'net_utils.network_utils.process_mpstat: count is 0!!!\n'
+                print('net_utils.network_utils.process_mpstat: count is 0!!!\n')
                 count = 1
             cpu_stats[key] = sum(x) / count
 
@@ -163,7 +163,7 @@ class network_interface(object):
 
     def get_stats_diff(self, orig_stats):
         stats = self.get_stats()
-        for stat in stats.keys():
+        for stat in list(stats.keys()):
             if stat in orig_stats:
                 stats[stat] = stats[stat] - orig_stats[stat]
             else:

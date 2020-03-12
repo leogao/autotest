@@ -6,7 +6,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import enum, settings, host_protections, mail
 from autotest.database_legacy import database_connection
 from autotest.frontend import setup_django_environment  # pylint: disable=W0611
@@ -72,7 +72,7 @@ _PIDFILE_TO_PIDFILE_TYPE = {
 
 
 _PIDFILE_TYPE_TO_PIDFILE = dict((value, key) for key, value
-                                in _PIDFILE_TO_PIDFILE_TYPE.iteritems())
+                                in _PIDFILE_TO_PIDFILE_TYPE.items())
 
 
 class MockDroneManager(NullMethodObject):
@@ -151,7 +151,7 @@ class MockDroneManager(NullMethodObject):
 
     def nonfinished_pidfile_ids(self):
         return [pidfile_id for pidfile_id, pidfile_contents
-                in self._pidfiles.iteritems()
+                in self._pidfiles.items()
                 if pidfile_contents.exit_status is None]
 
     def running_pidfile_ids(self):
@@ -328,7 +328,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
         self.dispatcher.initialize()
 
     def _run_dispatcher(self):
-        for _ in xrange(self._A_LOT_OF_TICKS):
+        for _ in range(self._A_LOT_OF_TICKS):
             self.dispatcher.tick()
 
     def test_idle(self):
@@ -338,7 +338,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
     def _assert_process_executed(self, working_directory, pidfile_name):
         process_was_executed = self.mock_drone_manager.was_process_executed(
             'hosts/host1/1-verify', drone_manager.AUTOSERV_PID_FILE)
-        self.assert_(process_was_executed,
+        self.assertTrue(process_was_executed,
                      '%s/%s not executed' % (working_directory, pidfile_name))
 
     def _update_instance(self, model_instance):
@@ -353,12 +353,12 @@ class SchedulerFunctionalTest(unittest.TestCase,
     def _check_entry_status(self, queue_entry, status):
         # update from DB
         queue_entry = self._update_instance(queue_entry)
-        self.assertEquals(queue_entry.status, status)
+        self.assertEqual(queue_entry.status, status)
 
     def _check_host_status(self, host, status):
         # update from DB
         host = self._update_instance(host)
-        self.assertEquals(host.status, status)
+        self.assertEqual(host.status, status)
 
     def _run_pre_job_verify(self, queue_entry):
         self._run_dispatcher()  # launches verify
@@ -432,7 +432,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
         self._assert_nothing_is_running()
 
     def _assert_nothing_is_running(self):
-        self.assertEquals(self.mock_drone_manager.running_pidfile_ids(), [])
+        self.assertEqual(self.mock_drone_manager.running_pidfile_ids(), [])
 
     def _setup_for_post_job_cleanup(self):
         self._initialize_test()
@@ -479,7 +479,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
         queue_entry = self._update_instance(queue_entry)
         pidfile_id = self.mock_drone_manager.pidfile_from_path(
             queue_entry.execution_path(), pidfile_name)
-        self.assert_(pidfile_id._paired_with_pidfile)
+        self.assertTrue(pidfile_id._paired_with_pidfile)
 
     def _finish_job(self, queue_entry):
         self.mock_drone_manager.finish_process(_PidfileType.JOB)
@@ -584,7 +584,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
         self._run_dispatcher()  # launches verify
         job.hostqueueentry_set.update(aborted=True)
         self._run_dispatcher()  # kills verify, launches cleanup
-        self.assert_(self.mock_drone_manager.was_last_process_killed(
+        self.assertTrue(self.mock_drone_manager.was_last_process_killed(
             _PidfileType.VERIFY))
         self.mock_drone_manager.finish_process(_PidfileType.CLEANUP)
         self._run_dispatcher()
@@ -598,7 +598,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
         self._run_dispatcher()  # launches job
         job.hostqueueentry_set.update(aborted=True)
         self._run_dispatcher()  # kills job, launches gathering
-        self.assert_(self.mock_drone_manager.was_last_process_killed(
+        self.assertTrue(self.mock_drone_manager.was_last_process_killed(
             _PidfileType.JOB))
         self.mock_drone_manager.finish_process(_PidfileType.GATHER)
         self._run_dispatcher()  # launches parsing + cleanup
@@ -620,13 +620,13 @@ class SchedulerFunctionalTest(unittest.TestCase,
     def test_no_pidfile_leaking(self):
         self._initialize_test()
         self.test_simple_job()
-        self.assertEquals(self.mock_drone_manager._pidfiles, {})
+        self.assertEqual(self.mock_drone_manager._pidfiles, {})
 
         self.test_job_abort_in_verify()
-        self.assertEquals(self.mock_drone_manager._pidfiles, {})
+        self.assertEqual(self.mock_drone_manager._pidfiles, {})
 
         self.test_job_abort()
-        self.assertEquals(self.mock_drone_manager._pidfiles, {})
+        self.assertEqual(self.mock_drone_manager._pidfiles, {})
 
     def _make_job_and_queue_entry(self):
         job = self._create_job(hosts=[1])
@@ -702,7 +702,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
 
         self._initialize_test()
         for queue_entry in job.hostqueueentry_set.all():
-            self.assertEquals(queue_entry.status, HqeStatus.STARTING)
+            self.assertEqual(queue_entry.status, HqeStatus.STARTING)
 
     def test_recover_parsing(self):
         self._initialize_test()
@@ -847,7 +847,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
         self._run_dispatcher()  # verify runs on 1 and 2
         _check_hqe_statuses(HqeStatus.VERIFYING, HqeStatus.VERIFYING,
                             HqeStatus.VERIFYING)
-        self.assertEquals(len(self.mock_drone_manager.running_pidfile_ids()), 2)
+        self.assertEqual(len(self.mock_drone_manager.running_pidfile_ids()), 2)
 
         self.mock_drone_manager.finish_specific_process(
             'hosts/host1/1-verify', drone_manager.AUTOSERV_PID_FILE)
@@ -911,9 +911,9 @@ class SchedulerFunctionalTest(unittest.TestCase,
         job = self._create_job(atomic_group=1)
         self._run_dispatcher()  # expand + verify
         queue_entries = job.hostqueueentry_set.all()
-        self.assertEquals(len(queue_entries), 2)
-        self.assertEquals(queue_entries[0].host.hostname, 'host5')
-        self.assertEquals(queue_entries[1].host.hostname, 'host6')
+        self.assertEqual(len(queue_entries), 2)
+        self.assertEqual(queue_entries[0].host.hostname, 'host5')
+        self.assertEqual(queue_entries[1].host.hostname, 'host6')
 
         self.mock_drone_manager.finish_process(_PidfileType.VERIFY)
         self._run_dispatcher()  # delay task started waiting
@@ -930,7 +930,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
         job = self._create_job(metahosts=[1])
         self._run_dispatcher()
         entry = job.hostqueueentry_set.all()[0]
-        self.assertEquals(entry.host.hostname, 'host1')
+        self.assertEqual(entry.host.hostname, 'host1')
         self._check_statuses(entry, HqeStatus.VERIFYING, HostStatus.VERIFYING)
         self.mock_drone_manager.finish_process(_PidfileType.VERIFY)
         self._run_dispatcher()
@@ -945,7 +945,7 @@ class SchedulerFunctionalTest(unittest.TestCase,
                                                exit_status=256)
         self._run_dispatcher()  # host1 failed, gets reassigned to host2
         entry = job.hostqueueentry_set.all()[0]
-        self.assertEquals(entry.host.hostname, 'host2')
+        self.assertEqual(entry.host.hostname, 'host2')
         self._check_statuses(entry, HqeStatus.VERIFYING, HostStatus.VERIFYING)
         self._check_host_status(self.hosts[0], HostStatus.REPAIRING)
 
@@ -983,12 +983,12 @@ class SchedulerFunctionalTest(unittest.TestCase,
         attached_files = self.mock_drone_manager.attached_files(
             '1-autotest_system/host1')
         job_keyval_path = '1-autotest_system/host1/keyval'
-        self.assert_(job_keyval_path in attached_files, attached_files)
+        self.assertTrue(job_keyval_path in attached_files, attached_files)
         keyval_contents = attached_files[job_keyval_path]
         keyval_dict = dict(line.strip().split('=', 1)
                            for line in keyval_contents.splitlines())
-        self.assert_('job_queued' in keyval_dict, keyval_dict)
-        self.assertEquals(keyval_dict['mykey'], 'myvalue')
+        self.assertTrue('job_queued' in keyval_dict, keyval_dict)
+        self.assertEqual(keyval_dict['mykey'], 'myvalue')
 
 
 if __name__ == '__main__':

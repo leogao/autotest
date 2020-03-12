@@ -5,7 +5,7 @@
 import optparse
 import sys
 
-import monitors_util
+from . import monitors_util
 
 usage = 'usage: %prog [options] follow_path ...'
 parser = optparse.OptionParser(usage=usage)

@@ -13,7 +13,7 @@ from django.db import models as dbmodels
 # IMPORTANT: please update INTERFACE_VERSION with the current date whenever
 # the interface changes, so that RPC clients can handle the changes
 #
-INTERFACE_VERSION = (2013, 05, 23)
+INTERFACE_VERSION = (2013, 0o5, 23)
 
 
 # table/spreadsheet view support
@@ -175,13 +175,13 @@ def _format_iteration_keyvals(test):
     iteration_attr = _iteration_attributes_to_dict(test.iteration_attributes)
     iteration_perf = _iteration_attributes_to_dict(test.iteration_results)
 
-    all_iterations = iteration_attr.keys() + iteration_perf.keys()
+    all_iterations = list(iteration_attr.keys()) + list(iteration_perf.keys())
     max_iterations = max(all_iterations + [0])
 
     # merge the iterations into a single list of attr & perf dicts
     return [{'attr': iteration_attr.get(index, {}),
              'perf': iteration_perf.get(index, {})}
-            for index in xrange(1, max_iterations + 1)]
+            for index in range(1, max_iterations + 1)]
 
 
 def _job_keyvals_to_dict(keyvals):
@@ -193,7 +193,7 @@ def get_detailed_test_views(**filter_data):
 
     tests_by_id = models.Test.objects.in_bulk([test_view['test_idx']
                                                for test_view in test_views])
-    tests = tests_by_id.values()
+    tests = list(tests_by_id.values())
     models.Test.objects.populate_relationships(tests, models.TestAttribute,
                                                'attributes')
     models.Test.objects.populate_relationships(tests, models.IterationAttribute,
@@ -205,7 +205,7 @@ def get_detailed_test_views(**filter_data):
 
     jobs_by_id = models.Job.objects.in_bulk([test_view['job_idx']
                                              for test_view in test_views])
-    jobs = jobs_by_id.values()
+    jobs = list(jobs_by_id.values())
     models.Job.objects.populate_relationships(jobs, models.JobKeyval,
                                               'keyvals')
 
@@ -352,7 +352,7 @@ def set_test_attribute(attribute, value, **test_filter_data):
     test_ids = models.TestView.objects.query_test_ids(test_filter_data)
     tests = models.Test.objects.in_bulk(test_ids)
 
-    for test in tests.itervalues():
+    for test in tests.values():
         test.set_or_delete_attribute(attribute, value)
 
 
@@ -404,7 +404,7 @@ def get_static_data():
                     for field in models.TestView._meta.fields]
     extra_fields = [(field_name.capitalize(), field_sql)
                     for field_sql, field_name
-                    in models.TestView.extra_fields.iteritems()]
+                    in models.TestView.extra_fields.items()]
 
     benchmark_key = {
         'kernbench': 'elapsed',

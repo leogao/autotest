@@ -136,8 +136,8 @@ def TextTestRunner_run(self, test):
     self.stream.writeln()
     if not result.wasSuccessful():
         self.stream.write("FAILED (")
-        failed, errored, skipped = map(
-            len, (result.failures, result.errors, result.skipped))
+        failed, errored, skipped = list(map(
+            len, (result.failures, result.errors, result.skipped)))
         if failed:
             self.stream.write("failures=%d" % failed)
         if errored:

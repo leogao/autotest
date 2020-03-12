@@ -1,11 +1,11 @@
-import cPickle
+import pickle
 import logging
 import os
 
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.scheduler import drone_utility
 from autotest.client.shared.settings import settings
 from autotest.client.shared import mail
@@ -138,10 +138,10 @@ class _RemoteDrone(_AbstractDrone):
     def _execute_calls_impl(self, calls):
         logging.info("Running drone_utility on %s", self.hostname)
         result = self._host.run('python %s' % self._drone_utility_path,
-                                stdin=cPickle.dumps(calls), stdout_tee=None,
+                                stdin=pickle.dumps(calls), stdout_tee=None,
                                 connect_timeout=300)
         try:
-            return cPickle.loads(result.stdout)
+            return pickle.loads(result.stdout)
         except Exception:  # cPickle.loads can throw all kinds of exceptions
             logging.critical('Invalid response:\n---\n%s\n---', result.stdout)
             raise

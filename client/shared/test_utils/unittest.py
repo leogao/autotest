@@ -55,7 +55,7 @@ try:
 except ImportError:
     # we put a local copy of this in our repository
     #  http://pypi.python.org/simple/functools/
-    import functools_24
+    from . import functools_24
     functools = functools_24
 
 import os
@@ -100,7 +100,7 @@ def _EmulateWith(context, func):
     try:
         func()
     except Exception:
-        if not context.__exit__(sys.exc_type, sys.exc_value, sys.exc_traceback):
+        if not context.__exit__(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]):
             raise
     else:
         context.__exit__(None, None, None)
@@ -320,7 +320,7 @@ class _AssertRaisesContext(object):
             return True
 
         expected_regexp = self.expected_regex
-        if isinstance(expected_regexp, basestring):
+        if isinstance(expected_regexp, str):
             expected_regexp = re.compile(expected_regexp)
         if not expected_regexp.search(str(exc_value)):
             raise self.failureException('"%s" does not match "%s"' %
@@ -721,7 +721,7 @@ class TestCase(object):
             if seq1 == seq2:
                 return
 
-            for i in xrange(min(len1, len2)):
+            for i in range(min(len1, len2)):
                 try:
                     item1 = seq1[i]
                 except (TypeError, IndexError, NotImplementedError):
@@ -863,8 +863,8 @@ class TestCase(object):
             self.fail(self._formatMessage(msg, standardMsg))
 
     def assertDictEqual(self, d1, d2, msg=None):
-        self.assert_(isinstance(d1, dict), 'First argument is not a dictionary')
-        self.assert_(isinstance(d2, dict), 'Second argument is not a dictionary')
+        self.assertTrue(isinstance(d1, dict), 'First argument is not a dictionary')
+        self.assertTrue(isinstance(d2, dict), 'Second argument is not a dictionary')
 
         if d1 != d2:
             standardMsg = ('\n' + '\n'.join(difflib.ndiff(
@@ -876,7 +876,7 @@ class TestCase(object):
         """Checks whether actual is a superset of expected."""
         missing = []
         mismatched = []
-        for key, value in expected.iteritems():
+        for key, value in expected.items():
             if key not in actual:
                 missing.append(key)
             elif value != actual[key]:
@@ -927,9 +927,9 @@ class TestCase(object):
 
     def assertMultiLineEqual(self, first, second, msg=None):
         """Assert that two multi-line strings are equal."""
-        self.assert_(isinstance(first, basestring), (
+        self.assertTrue(isinstance(first, str), (
             'First argument is not a string'))
-        self.assert_(isinstance(second, basestring), (
+        self.assertTrue(isinstance(second, str), (
             'Second argument is not a string'))
 
         if first != second:
@@ -991,7 +991,7 @@ class TestCase(object):
         _EmulateWith(context, lambda: callable_obj(*args, **kwargs))
 
     def assertRegexpMatches(self, text, expected_regex, msg=None):
-        if isinstance(expected_regex, basestring):
+        if isinstance(expected_regex, str):
             expected_regex = re.compile(expected_regex)
         if not expected_regex.search(text):
             msg = msg or "Regexp didn't match"
@@ -1088,7 +1088,7 @@ class TestSuite(object):
         self._tests.append(test)
 
     def addTests(self, tests):
-        if isinstance(tests, basestring):
+        if isinstance(tests, str):
             raise TypeError("tests must be an iterable of tests, not a string")
         for test in tests:
             self.addTest(test)
@@ -1223,7 +1223,7 @@ class TestLoader(object):
         testCaseNames = self.getTestCaseNames(testCaseClass)
         if not testCaseNames and hasattr(testCaseClass, 'runTest'):
             testCaseNames = ['runTest']
-        suite = self.classSuiteClass(map(testCaseClass, testCaseNames),
+        suite = self.classSuiteClass(list(map(testCaseClass, testCaseNames)),
                                      testCaseClass)
         return suite
 
@@ -1297,7 +1297,7 @@ class TestLoader(object):
                          prefix=self.testMethodPrefix):
             return attrname.startswith(prefix) and \
                 hasattr(getattr(testCaseClass, attrname), '__call__')
-        testFnNames = filter(isTestMethod, dir(testCaseClass))
+        testFnNames = list(filter(isTestMethod, dir(testCaseClass)))
         if self.sortTestMethodsUsing:
             testFnNames.sort(key=_CmpToKey(self.sortTestMethodsUsing))
         return testFnNames
@@ -1471,14 +1471,14 @@ class TextTestRunner(object):
         self.stream.writeln("Ran %d test%s in %.3fs" %
                             (run, run != 1 and "s" or "", timeTaken))
         self.stream.writeln()
-        results = map(len, (result.expectedFailures,
+        results = list(map(len, (result.expectedFailures,
                             result.unexpectedSuccesses,
-                            result.skipped))
+                            result.skipped)))
         expectedFails, unexpectedSuccesses, skipped = results
         infos = []
         if not result.wasSuccessful():
             self.stream.write("FAILED")
-            failed, errored = map(len, (result.failures, result.errors))
+            failed, errored = list(map(len, (result.failures, result.errors)))
             if failed:
                 infos.append("failures=%d" % failed)
             if errored:
@@ -1525,7 +1525,7 @@ Examples:
     def __init__(self, module='__main__', defaultTest=None,
                  argv=None, testRunner=TextTestRunner,
                  testLoader=defaultTestLoader):
-        if isinstance(module, basestring):
+        if isinstance(module, str):
             self.module = __import__(module)
             for part in module.split('.')[1:]:
                 self.module = getattr(self.module, part)
@@ -1543,8 +1543,8 @@ Examples:
 
     def usageExit(self, msg=None):
         if msg:
-            print msg
-        print self.USAGE % self.__dict__
+            print(msg)
+        print(self.USAGE % self.__dict__)
         sys.exit(2)
 
     def parseArgs(self, argv):
@@ -1575,7 +1575,7 @@ Examples:
                                                        self.module)
 
     def runTests(self):
-        if isinstance(self.testRunner, (type, types.ClassType)):
+        if isinstance(self.testRunner, type):
             try:
                 testRunner = self.testRunner(verbosity=self.verbosity)
             except TypeError:

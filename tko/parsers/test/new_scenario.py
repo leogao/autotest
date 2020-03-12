@@ -26,7 +26,7 @@ from os import path
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.tko.parsers.test import scenario_base
 from autotest.client.shared import autotemp
 
@@ -53,13 +53,13 @@ def main():
 
     results_dirpath = path.normpath(args[0])
     if not path.exists(results_dirpath) or not path.isdir(results_dirpath):
-        print 'Invalid results_dirpath:', results_dirpath
+        print('Invalid results_dirpath:', results_dirpath)
         parser.print_help()
         sys.exit(1)
 
     scenarios_dirpath = path.normpath(args[1])
     if not path.exists(scenarios_dirpath) or not path.isdir(scenarios_dirpath):
-        print 'Invalid scenarios_dirpath:', scenarios_dirpath
+        print('Invalid scenarios_dirpath:', scenarios_dirpath)
         parser.print_help()
         sys.exit(1)
 
@@ -71,7 +71,7 @@ def main():
     scenario_package_dirpath = path.join(
         scenarios_dirpath, package_dirname)
     if path.exists(scenario_package_dirpath):
-        print (
+        print(
             'Scenario package already exists at path: %s' %
             scenario_package_dirpath)
         parser.print_help()

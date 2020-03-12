@@ -17,7 +17,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 #
 # Get rid of DeprecationWarning messages on newer Python version while still
@@ -410,7 +410,7 @@ class EliloConf(object):
         '''
         output = ''
 
-        for key, val in self.global_options_to_add.items():
+        for key, val in list(self.global_options_to_add.items()):
             output += self.keyval_to_line((key, val))
 
         eliloconf = open(self.path, 'r')
@@ -729,7 +729,7 @@ class Grubby(object):
         self.opts = opts
         self.log = logging.getLogger(self.__class__.__name__)
 
-        if os.environ.has_key('BOOTTOOL_DEBUG_RUN'):
+        if 'BOOTTOOL_DEBUG_RUN' in os.environ:
             self.debug_run = True
         else:
             self.debug_run = False
@@ -1244,7 +1244,7 @@ class Grubby(object):
                 with the title for the found entry, otherwise returns None
         """
         entries = self.get_entries()
-        for entry in entries.itervalues():
+        for entry in entries.values():
             if entry.get('kernel') == path:
                 return entry['title']
         return None
@@ -1441,7 +1441,7 @@ class Grubby(object):
                 # then try to grab it from github
                 try:
                     tarball = os.path.join(topdir, tarball_name)
-                    urllib.urlretrieve(GRUBBY_TARBALL_URI, tarball)
+                    urllib.request.urlretrieve(GRUBBY_TARBALL_URI, tarball)
                     f = open(tarball)
                 except Exception:
                     return None
@@ -1940,7 +1940,7 @@ class OptionParser(optparse.OptionParser):
         action = self.opts_get_action(opts)
         if action in ACTIONS_REQUIRE_TITLE:
             if opts.title is None:
-                print 'Action %s requires a --title parameter' % action
+                print('Action %s requires a --title parameter' % action)
                 raise SystemExit
 
         return (opts, args)
@@ -1985,7 +1985,7 @@ class BoottoolApp(object):
         if level > max_level:
             level = max_level
 
-        if os.environ.has_key('BOOTTOOL_DEBUG_RUN'):
+        if 'BOOTTOOL_DEBUG_RUN' in os.environ:
             logging_level = logging.DEBUG
         else:
             logging_level = log_map.get(level)
@@ -2029,7 +2029,7 @@ class BoottoolApp(object):
             if result is None:
                 result = 0
             elif isinstance(result, str):
-                print result
+                print(result)
                 result = 0
             sys.exit(result)
 
@@ -2045,12 +2045,12 @@ class BoottoolApp(object):
         '''
         version = self.grubby.get_grubby_version()
         if version is not None:
-            print "%s.%s" % version
+            print("%s.%s" % version)
             return
 
         version = self.grubby.get_grubby_version_raw()
         if version is not None:
-            print version
+            print(version)
 
     def action_grubby_version_check(self):
         '''
@@ -2106,15 +2106,15 @@ class BoottoolApp(object):
         else:
             entries = {info_index: self.grubby.get_entry(info_index)}
 
-        for index, entry in entries.items():
-            print
-            for key, val in entry.items():
+        for index, entry in list(entries.items()):
+            print()
+            for key, val in list(entry.items()):
                 # remove quotes
                 if isinstance(val, str):
                     if val.startswith('"') and val.endswith('"'):
                         val = val[1:-1]
 
-                print '%-8s: %s' % (key, val)
+                print('%-8s: %s' % (key, val))
 
     def action_add_kernel(self):
         '''
@@ -2191,7 +2191,7 @@ class BoottoolApp(object):
         """
         Get the default entry index
         """
-        print self.grubby.get_default_index()
+        print(self.grubby.get_default_index())
 
     def action_set_default(self):
         """

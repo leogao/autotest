@@ -14,7 +14,7 @@ import traceback
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client.shared.settings import settings
 require_atfork = settings.get_value('AUTOSERV', 'require_atfork_module',
@@ -36,8 +36,8 @@ except ImportError as e:
     from autotest.client.shared.settings import settings
     if settings.get_value('AUTOSERV', 'require_atfork_module', type=bool,
                           default=False):
-        print >>sys.stderr, 'Please run utils/build_externals.py'
-        print e
+        print('Please run utils/build_externals.py', file=sys.stderr)
+        print(e)
         sys.exit(1)
 
 from autotest.server import server_logging_config
@@ -119,8 +119,8 @@ def run_autoserv(pid_file_manager, results, parser):
             m = re.sub('#.*', '', m).strip()
             if m:
                 machines.append(m)
-        print "Read list of machines from file: %s" % machines_file
-        print ','.join(machines)
+        print("Read list of machines from file: %s" % machines_file)
+        print(','.join(machines))
 
     if machines:
         for machine in machines:

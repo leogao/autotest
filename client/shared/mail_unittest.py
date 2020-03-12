@@ -2,7 +2,7 @@
 
 import unittest
 
-import mail
+from . import mail
 # the email module has some weird behavior change among py 2.4/2.6
 # pylint: disable=E0611
 from email import Message
@@ -71,9 +71,9 @@ class mail_test(unittest.TestCase):
         mail.send(from_address="me", to_addresses="you", cc_addresses="them",
                   subject="hello", body="Hello everybody!", smtp_info=smtp_info)
 
-        self.assertEquals("me", test_data.mail_from_address)
-        self.assertEquals(["you", "them"], test_data.mail_to_address)
-        self.assertEquals(message.as_string(), test_data.mail_message)
+        self.assertEqual("me", test_data.mail_from_address)
+        self.assertEqual(["you", "them"], test_data.mail_to_address)
+        self.assertEqual(message.as_string(), test_data.mail_message)
 
 
 # this is so the test can be run in standalone mode

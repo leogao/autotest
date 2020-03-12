@@ -13,7 +13,7 @@ from optparse import OptionParser
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.scheduler import watcher_logging_config
 from autotest.client import os_dep
 from autotest.client.shared import error, utils

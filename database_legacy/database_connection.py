@@ -7,7 +7,7 @@ import traceback
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.settings import settings
 
 RECONNECT_FOREVER = object()
@@ -209,7 +209,7 @@ class DatabaseConnection(object):
     def _get_backend(self, db_type):
         if db_type not in _BACKEND_MAP:
             raise ValueError('Invalid database type: %s, should be one of %s' %
-                             (db_type, ', '.join(_BACKEND_MAP.keys())))
+                             (db_type, ', '.join(list(_BACKEND_MAP.keys()))))
         backend_class = _BACKEND_MAP[db_type]
         return backend_class()
 

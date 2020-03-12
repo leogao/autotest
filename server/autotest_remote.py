@@ -464,11 +464,11 @@ class BaseAutotest(installable_object.InstallableObject):
 
         # on full-size installs, turn on any profilers the server is using
         if not atrun.background:
-            running_profilers = host.job.profilers.add_log.iteritems()
+            running_profilers = iter(host.job.profilers.add_log.items())
             for profiler, (args, dargs) in running_profilers:
                 call_args = [repr(profiler)]
                 call_args += [repr(arg) for arg in args]
-                call_args += ["%s=%r" % item for item in dargs.iteritems()]
+                call_args += ["%s=%r" % item for item in dargs.items()]
                 prologue_lines.append("job.profilers.add(%s)\n"
                                       % ", ".join(call_args))
         cfile = "".join(prologue_lines)
@@ -500,8 +500,8 @@ class BaseAutotest(installable_object.InstallableObject):
             host = self.host
         if not self.installed:
             self.install(host)
-        opts = ["%s=%s" % (o[0], repr(o[1])) for o in dargs.items()]
-        cmd = ", ".join([repr(test_name)] + map(repr, args) + opts)
+        opts = ["%s=%s" % (o[0], repr(o[1])) for o in list(dargs.items())]
+        cmd = ", ".join([repr(test_name)] + list(map(repr, args)) + opts)
         control = "job.run_test(%s)\n" % cmd
         self.run(control, results_dir, host, timeout=timeout)
 
@@ -996,7 +996,7 @@ class client_logger(object):
 
     def _process_log_dict(self, log_dict):
         log_list = log_dict.pop("logs", [])
-        for key in sorted(log_dict.iterkeys()):
+        for key in sorted(log_dict.keys()):
             log_list += self._process_log_dict(log_dict.pop(key))
         return log_list
 
@@ -1219,7 +1219,7 @@ class AutotestHostMixin(object):
         control_file = ('result = job.run_test(%s)\n'
                         'job.set_state("test_result", result)\n')
         test_args = [repr(test_name)]
-        test_args += ['%s=%r' % (k, v) for k, v in dargs.iteritems()]
+        test_args += ['%s=%r' % (k, v) for k, v in dargs.items()]
         control_file %= ', '.join(test_args)
         at.run(control_file, host=self)
         return at.job.get_state('test_result', default=False)

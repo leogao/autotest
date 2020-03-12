@@ -17,7 +17,7 @@ import traceback
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import utils, error
 from autotest.client.shared.settings import settings
 from autotest.client.shared import mail
@@ -53,7 +53,7 @@ class _MethodCall(object):
     def __str__(self):
         args = ', '.join(repr(arg) for arg in self._args)
         kwargs = ', '.join('%s=%r' % (key, value) for key, value in
-                           self._kwargs.iteritems())
+                           self._kwargs.items())
         full_args = ', '.join(item for item in (args, kwargs) if item)
         return '%s(%s)' % (self._method, full_args)
 
@@ -128,7 +128,7 @@ class DroneUtility(object):
 
         # split each line into the columns output by ps
         split_lines = [line.split(None, 4) for line in ps_output.splitlines()]
-        return (dict(itertools.izip(cls._PS_ARGS, line_components))
+        return (dict(zip(cls._PS_ARGS, line_components))
                 for line_components in split_lines)
 
     def _refresh_processes(self, command_name, open=open,
@@ -383,7 +383,7 @@ class DroneUtility(object):
             call_count.setdefault(call._method, 0)
             call_count[call._method] += 1
         call_summary = '\n'.join('%d %s' % (count, method)
-                                 for method, count in call_count.iteritems())
+                                 for method, count in call_count.items())
         self._warn('Execution took %f sec\n%s' % (duration, call_summary))
 
     def execute_calls(self, calls):
@@ -432,7 +432,7 @@ def parse_input():
 
 
 def return_data(data):
-    print pickle.dumps(data)
+    print(pickle.dumps(data))
 
 
 def main():

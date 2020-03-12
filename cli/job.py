@@ -36,7 +36,7 @@ class job(topic_common.atest):
         for result in results:
             total = sum(result['status_counts'].values())
             status = ['%s=%s(%.1f%%)' % (key, val, 100.0 * float(val) / total)
-                      for key, val in result['status_counts'].iteritems()]
+                      for key, val in result['status_counts'].items()]
             status.sort()
             result['status_counts'] = ', '.join(status)
 
@@ -196,9 +196,9 @@ class job_stat(job_list_stat):
             if job_id in hosts_status:
                 this_job = hosts_status[job_id]
                 job['hosts'] = ' '.join(' '.join(host) for host in
-                                        this_job.itervalues())
+                                        this_job.values())
                 host_per_status = ['%s="%s"' % (status, ' '.join(host))
-                                   for status, host in this_job.iteritems()]
+                                   for status, host in this_job.items()]
                 job['hosts_status'] = ', '.join(host_per_status)
                 if self.status_list:
                     statuses = set(s.lower() for s in self.status_list)
@@ -596,7 +596,7 @@ class job_create(job_create_or_clone):
             if uploading_kernel:
                 default_timeout = socket.getdefaulttimeout()
                 socket.setdefaulttimeout(topic_common.UPLOAD_SOCKET_TIMEOUT)
-                print 'Uploading Kernel: this may take a while...',
+                print('Uploading Kernel: this may take a while...', end=' ')
                 sys.stdout.flush()
             try:
                 cf_info = self.execute_rpc(op='generate_control_file',
@@ -607,7 +607,7 @@ class job_create(job_create_or_clone):
                     socket.setdefaulttimeout(default_timeout)
 
             if uploading_kernel:
-                print 'Done'
+                print('Done')
             self.data['control_file'] = cf_info['control_file']
             if 'synch_count' not in self.data:
                 self.data['synch_count'] = cf_info['synch_count']
@@ -681,16 +681,16 @@ class job_clone(job_create_or_clone):
         # Also remove parameterized_job field, as the feature still is
         # incomplete, this tool does not attempt to support it for now,
         # it uses a different API function and it breaks create_job()
-        if clone_info['job'].has_key('parameterized_job'):
+        if 'parameterized_job' in clone_info['job']:
             del clone_info['job']['parameterized_job']
 
         # Keyword args cannot be unicode strings
         self.data.update((str(key), val)
-                         for key, val in clone_info['job'].iteritems())
+                         for key, val in clone_info['job'].items())
 
         if self.reuse_hosts:
             # Convert host list from clone info that can be used for job_create
-            for label, qty in clone_info['meta_host_counts'].iteritems():
+            for label, qty in clone_info['meta_host_counts'].items():
                 self.data['meta_hosts'].extend([label] * qty)
 
             self.data['hosts'].extend(host['hostname']
@@ -714,7 +714,7 @@ class job_abort(job, action_common.atest_delete):
     def execute(self):
         data = {'job__id__in': self.jobids}
         self.execute_rpc(op='abort_host_queue_entries', **data)
-        print 'Aborting jobs: %s' % ', '.join(self.jobids)
+        print('Aborting jobs: %s' % ', '.join(self.jobids))
 
     # The unittests will hide this method, well, for unittesting
     # pylint: disable=E0202

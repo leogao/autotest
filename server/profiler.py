@@ -2,7 +2,7 @@ import itertools
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 
 def _get_unpassable_types(arg):
@@ -10,12 +10,12 @@ def _get_unpassable_types(arg):
     unpassable. If arg is an atomic type (e.g. int) it either returns an
     empty set (if the type is passable) or a singleton of the type (if the
     type is not passable). """
-    if isinstance(arg, (basestring, int, long)):
+    if isinstance(arg, (str, int)):
         return set()
     elif isinstance(arg, (list, tuple, set, frozenset, dict)):
         if isinstance(arg, dict):
             # keys and values must both be passable
-            parts = itertools.chain(arg.iterkeys(), arg.itervalues())
+            parts = itertools.chain(iter(arg.keys()), iter(arg.values()))
         else:
             # for all other containers we just iterate
             parts = iter(arg)

@@ -56,7 +56,7 @@ class TempManager(model_logic.ExtendedManager):
         cursor = readonly_connection.connection().cursor()
         cursor.execute(sql, params)
         field_names = self._get_column_names(cursor)
-        row_dicts = [dict(zip(field_names, row)) for row in cursor.fetchall()]
+        row_dicts = [dict(list(zip(field_names, row))) for row in cursor.fetchall()]
         return row_dicts
 
     def get_count_sql(self, query):
@@ -334,7 +334,7 @@ class TestViewManager(TempManager):
 
         # add extra fields to selects, using the SQL itself as the "alias"
         extra_select = dict((sql, sql)
-                            for sql in self.model.extra_fields.iterkeys())
+                            for sql in self.model.extra_fields.keys())
         return query.extra(select=extra_select)
 
     def _get_include_exclude_suffix(self, exclude):
@@ -385,7 +385,7 @@ class TestViewManager(TempManager):
         return dict(name_and_id for name_and_id in label_ids)
 
     def _include_or_exclude_labels(self, query_set, label_names, exclude=False):
-        label_ids = self._get_label_ids_from_names(label_names).itervalues()
+        label_ids = iter(self._get_label_ids_from_names(label_names).values())
         suffix = self._get_include_exclude_suffix(exclude)
         condition = ('tko_test_labels_tests%s.testlabel_id IN (%s)' %
                      (suffix,

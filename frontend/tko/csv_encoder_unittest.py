@@ -4,7 +4,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.frontend import setup_django_environment  # pylint: disable=W0611
 from autotest.frontend import setup_test_environment  # pylint: disable=W0611
 from autotest.frontend.tko import csv_encoder
@@ -29,7 +29,7 @@ class CsvEncodingTest(unittest.TestCase):
         response = encoder.encode()
         csv_result = response.content
         expected_csv = '\r\n'.join(expected_csv_rows) + '\r\n'
-        self.assertEquals(csv_result, expected_csv)
+        self.assertEqual(csv_result, expected_csv)
 
     def test_spreadsheet_encoder(self):
         request = self._make_request('get_status_counts')

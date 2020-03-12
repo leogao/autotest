@@ -79,7 +79,7 @@ def make_alert(warnfile, msg_type, msg_template, timestamp_format=None):
     def alert(*params):
         formatted_msg = msg_type + "\t" + msg_template % params
         timestamped_msg = prepend_timestamp(formatted_msg, timestamp_format)
-        print >> warnfile, timestamped_msg
+        print(timestamped_msg, file=warnfile)
     return alert
 
 
@@ -104,7 +104,7 @@ def _read_overrides(overrides_file):
         return {}
     overrides_lines = [line for line in overrides_file.readlines()
                        if not line.startswith('#')]
-    overrides_pairs = zip(overrides_lines[0::3], overrides_lines[1::3])
+    overrides_pairs = list(zip(overrides_lines[0::3], overrides_lines[1::3]))
     _assert_is_all_blank_lines(overrides_lines[2::3], overrides_file)
     return dict(overrides_pairs)
 
@@ -129,8 +129,8 @@ def build_alert_hooks(patterns_file, warnfile, overrides_file=None):
     #   alert   = a string describing the alert message
     #             if the regex matches the line, this displayed warning will
     #             be the result of (alert % match.groups())
-    patterns = zip(pattern_lines[0::4], pattern_lines[1::4],
-                   pattern_lines[2::4])
+    patterns = list(zip(pattern_lines[0::4], pattern_lines[1::4],
+                   pattern_lines[2::4]))
     _assert_is_all_blank_lines(pattern_lines[3::4], patterns_file)
 
     overrides_map = _read_overrides(overrides_file)
@@ -331,7 +331,7 @@ def poll_tail_pipes(pipes, lastlines_dirpath=None, waitsecs=5):
     lines = []
     bad_pipes = []
     # Block until at least one is ready to read or waitsecs elapses
-    ready, _, _ = select.select(pipes.keys(), (), (), waitsecs)
+    ready, _, _ = select.select(list(pipes.keys()), (), (), waitsecs)
     for fi in ready:
         path = pipes[fi]
         data = fi.read()
@@ -385,4 +385,4 @@ def follow_files(follow_paths, outstream, lastlines_dirpath=None, waitsecs=5):
             # Something is wrong. Stop looping.
             break
 
-    snuff(procs.values())
+    snuff(list(procs.values()))

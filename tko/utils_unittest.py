@@ -9,7 +9,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.test_utils import mock
 from autotest.tko import utils
 
@@ -21,17 +21,17 @@ class get_timestamp_test(unittest.TestCase):
         timezone = datetime.timedelta(seconds=time.timezone)
         utc_date = date + timezone
         # should be equal to epoch, i.e. Jan 1, 1970
-        self.assertEquals(utc_date.year, 1970)
-        self.assertEquals(utc_date.month, 1)
-        self.assertEquals(utc_date.day, 1)
-        self.assertEquals(utc_date.hour, 0)
-        self.assertEquals(utc_date.minute, 0)
-        self.assertEquals(utc_date.second, 0)
-        self.assertEquals(utc_date.microsecond, 0)
+        self.assertEqual(utc_date.year, 1970)
+        self.assertEqual(utc_date.month, 1)
+        self.assertEqual(utc_date.day, 1)
+        self.assertEqual(utc_date.hour, 0)
+        self.assertEqual(utc_date.minute, 0)
+        self.assertEqual(utc_date.second, 0)
+        self.assertEqual(utc_date.microsecond, 0)
 
     def test_returns_none_on_missing_value(self):
         date = utils.get_timestamp({}, "missing_key")
-        self.assertEquals(date, None)
+        self.assertEqual(date, None)
 
     def test_fails_on_non_integer_values(self):
         self.assertRaises(ValueError, utils.get_timestamp,
@@ -40,10 +40,10 @@ class get_timestamp_test(unittest.TestCase):
     def test_date_can_be_string_or_integer(self):
         int_times = [1, 12, 123, 1234, 12345, 123456]
         str_times = [str(t) for t in int_times]
-        for int_t, str_t in itertools.izip(int_times, str_times):
+        for int_t, str_t in zip(int_times, str_times):
             date_int = utils.get_timestamp({"key": int_t}, "key")
             date_str = utils.get_timestamp({"key": str_t}, "key")
-            self.assertEquals(date_int, date_str)
+            self.assertEqual(date_int, date_str)
 
 
 class find_toplevel_job_dir_test(unittest.TestCase):

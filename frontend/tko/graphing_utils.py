@@ -26,7 +26,7 @@ matplotlib.use('Agg')
 
 import matplotlib.figure
 import matplotlib.backends.backend_agg
-import StringIO
+import io
 import colorsys
 import PIL.Image
 import PIL.ImageChops
@@ -71,7 +71,7 @@ def _colors(n):
     Generator function for creating n colors. The return value is a tuple
     representing the RGB of the color.
     """
-    for i in xrange(n):
+    for i in range(n):
         yield colorsys.hsv_to_rgb(float(i) / n, 1.0, 1.0)
 
 
@@ -228,7 +228,7 @@ def _create_line(plots, labels, plot_info):
             plot['y'] = [-y for y in plot['y']]
 
         # Plot the series
-        subplot.set_xticks(range(0, len(labels)))
+        subplot.set_xticks(list(range(0, len(labels))))
         subplot.set_xlim(-1, len(labels))
         if single:
             lines += subplot.plot(plot['x'], plot['y'], label=plot['label'],
@@ -254,7 +254,7 @@ def _create_line(plots, labels, plot_info):
         x = line.get_xdata()
         y = line.get_ydata()
         label = line.get_label()
-        icoords = line.get_transform().transform(zip(x, y))
+        icoords = line.get_transform().transform(list(zip(x, y)))
 
         # Get the appropriate drilldown query
         drill = plot_info.query_dict['__' + label + '__']
@@ -333,7 +333,7 @@ def _create_bar(plots, labels, plot_info):
 
     # Set up the plot
     subplot = figure.add_subplot(1, 1, 1)
-    subplot.set_xticks(range(0, len(labels)))
+    subplot.set_xticks(list(range(0, len(labels))))
     subplot.set_xlim(-1, len(labels))
     subplot.set_xticklabels(labels, rotation=90, size=_BAR_XTICK_LABELS_SIZE)
     # draw a bold line at y=0, making it easier to tell if bars are dipping
@@ -368,8 +368,8 @@ def _create_bar(plots, labels, plot_info):
         # coordinate transforms
         line = subplot.plot(adjusted_x, plot['y'], linestyle='None')[0]
         label = plot['label']
-        upper_left_coords = line.get_transform().transform(zip(adjusted_x,
-                                                               plot['y']))
+        upper_left_coords = line.get_transform().transform(list(zip(adjusted_x,
+                                                               plot['y'])))
         bottom_right_coords = line.get_transform().transform(
             [(x + width, 0) for x in adjusted_x])
 
@@ -457,7 +457,7 @@ def _create_png(figure):
     bounding_box = non_whitespace.getbbox()
     image = image.crop(bounding_box)
 
-    image_data = StringIO.StringIO()
+    image_data = io.StringIO()
     image.save(image_data, format='PNG')
 
     return image_data.getvalue(), bounding_box
@@ -554,7 +554,7 @@ def _create_metrics_plot_helper(plot_info, extra_text=None):
     rows = cursor.fetchall()
     # "transpose" rows, so columns[0] is all the values from the first column,
     # etc.
-    columns = zip(*rows)
+    columns = list(zip(*rows))
 
     plots = []
     labels = [str(label) for label in columns[0]]
@@ -703,7 +703,7 @@ def _create_qual_histogram_helper(plot_info, extra_text=None):
             hist_data.append((hostname, percentage))
 
     interval = plot_info.interval
-    bins = range(0, 100, interval)
+    bins = list(range(0, 100, interval))
     if bins[-1] != 100:
         bins.append(bins[-1] + interval)
 
@@ -736,7 +736,7 @@ def _create_qual_histogram_helper(plot_info, extra_text=None):
         x.append(bar.get_x())
         y.append(bar.get_height())
     f = subplot.plot(x, y, linestyle='None')[0]
-    upper_left_coords = f.get_transform().transform(zip(x, y))
+    upper_left_coords = f.get_transform().transform(list(zip(x, y)))
     bottom_right_coords = f.get_transform().transform(
         [(x_val + interval, 0) for x_val in x])
 

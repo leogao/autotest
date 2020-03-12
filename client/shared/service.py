@@ -23,7 +23,7 @@ from tempfile import mktemp
 
 from autotest.client import utils
 
-import error
+from . import error
 
 _COMMAND_TABLE_DOC = """
 

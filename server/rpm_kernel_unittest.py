@@ -6,7 +6,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import utils as common_utils
 from autotest.client.shared.test_utils import mock
 from autotest.server import rpm_kernel, utils, hosts
@@ -69,7 +69,7 @@ class TestRpmKernel(unittest.TestCase):
         utils.run.expect_call(cmd).and_return(result)
 
         # run and test
-        self.assertEquals(self.kernel.get_version(), result.stdout)
+        self.assertEqual(self.kernel.get_version(), result.stdout)
         self.god.check_playback()
 
     def test_get_image_name(self):
@@ -81,7 +81,7 @@ class TestRpmKernel(unittest.TestCase):
                               ).and_return(result)
 
         # run and test
-        self.assertEquals(self.kernel.get_image_name(), result.stdout)
+        self.assertEqual(self.kernel.get_image_name(), result.stdout)
         self.god.check_playback()
 
     def test_get_vmlinux_name(self):
@@ -93,7 +93,7 @@ class TestRpmKernel(unittest.TestCase):
                               ).and_return(result)
 
         # run and test
-        self.assertEquals(self.kernel.get_vmlinux_name(), result.stdout)
+        self.assertEqual(self.kernel.get_vmlinux_name(), result.stdout)
         self.god.check_playback()
 
     def test_get_initrd_name(self):

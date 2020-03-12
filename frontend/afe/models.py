@@ -8,7 +8,7 @@ from django.db import models as dbmodels, connection
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.frontend.afe import model_logic, model_attributes
 from autotest.frontend import thread_local
 from autotest.frontend import settings as frontend_settings
@@ -96,7 +96,7 @@ class AtomicGroup(model_logic.ModelWithInvalid, dbmodels.Model):
         db_table = 'afe_atomic_groups'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class Label(model_logic.ModelWithInvalid, dbmodels.Model):
@@ -173,7 +173,7 @@ class Label(model_logic.ModelWithInvalid, dbmodels.Model):
         db_table = 'afe_labels'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class Drone(dbmodels.Model, model_logic.ModelExtensions):
@@ -203,7 +203,7 @@ class Drone(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_drones'
 
     def __unicode__(self):
-        return unicode(self.hostname)
+        return str(self.hostname)
 
 
 class DroneSet(dbmodels.Model, model_logic.ModelExtensions):
@@ -296,7 +296,7 @@ class DroneSet(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_drone_sets'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class User(dbmodels.Model, model_logic.ModelExtensions):
@@ -374,7 +374,7 @@ class User(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_users'
 
     def __unicode__(self):
-        return unicode(self.login)
+        return str(self.login)
 
 
 class Host(model_logic.ModelWithInvalid, dbmodels.Model,
@@ -584,7 +584,7 @@ class Host(model_logic.ModelWithInvalid, dbmodels.Model,
         db_table = 'afe_hosts'
 
     def __unicode__(self):
-        return unicode(self.hostname)
+        return str(self.hostname)
 
 
 class HostAttribute(dbmodels.Model):
@@ -683,7 +683,7 @@ class Test(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_autotests'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class TestParameter(dbmodels.Model):
@@ -701,7 +701,7 @@ class TestParameter(dbmodels.Model):
         unique_together = ('test', 'name')
 
     def __unicode__(self):
-        return u'%s (%s)' % (self.name, self.test.name)
+        return '%s (%s)' % (self.name, self.test.name)
 
 
 class Profiler(dbmodels.Model, model_logic.ModelExtensions):
@@ -724,7 +724,7 @@ class Profiler(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_profilers'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class AclGroup(dbmodels.Model, model_logic.ModelExtensions):
@@ -876,7 +876,7 @@ class AclGroup(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_acl_groups'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class Kernel(dbmodels.Model):
@@ -919,7 +919,7 @@ class Kernel(dbmodels.Model):
         unique_together = ('version', 'cmdline')
 
     def __unicode__(self):
-        return u'%s %s' % (self.version, self.cmdline)
+        return '%s %s' % (self.version, self.cmdline)
 
 
 class ParameterizedJob(dbmodels.Model):
@@ -952,7 +952,7 @@ class ParameterizedJob(dbmodels.Model):
         db_table = 'afe_parameterized_jobs'
 
     def __unicode__(self):
-        return u'%s (parameterized) - %s' % (self.test.name, self.job())
+        return '%s (parameterized) - %s' % (self.test.name, self.job())
 
 
 class ParameterizedJobProfiler(dbmodels.Model):
@@ -984,7 +984,7 @@ class ParameterizedJobProfilerParameter(dbmodels.Model):
         unique_together = ('parameterized_job_profiler', 'parameter_name')
 
     def __unicode__(self):
-        return u'%s - %s' % (self.parameterized_job_profiler.profiler.name,
+        return '%s - %s' % (self.parameterized_job_profiler.profiler.name,
                              self.parameter_name)
 
 
@@ -1004,7 +1004,7 @@ class ParameterizedJobParameter(dbmodels.Model):
         unique_together = ('parameterized_job', 'test_parameter')
 
     def __unicode__(self):
-        return u'%s - %s' % (self.parameterized_job.job().name,
+        return '%s - %s' % (self.parameterized_job.job().name,
                              self.test_parameter.name)
 
 
@@ -1216,7 +1216,7 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
         job.dependency_labels = options['dependencies']
 
         if options.get('keyvals'):
-            for key, value in options['keyvals'].iteritems():
+            for key, value in options['keyvals'].items():
                 JobKeyval.objects.create(job=job, key=key, value=value)
 
         return job
@@ -1276,7 +1276,7 @@ class Job(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_jobs'
 
     def __unicode__(self):
-        return u'%s (%s-%s)' % (self.name, self.id, self.owner)
+        return '%s (%s-%s)' % (self.name, self.id, self.owner)
 
 
 class JobKeyval(dbmodels.Model, model_logic.ModelExtensions):
@@ -1412,7 +1412,7 @@ class HostQueueEntry(dbmodels.Model, model_logic.ModelExtensions):
         hostname = None
         if self.host:
             hostname = self.host.hostname
-        return u"%s/%d (%d)" % (hostname, self.job.id, self.id)
+        return "%s/%d (%d)" % (hostname, self.job.id, self.id)
 
 
 class AbortedHostQueueEntry(dbmodels.Model, model_logic.ModelExtensions):
@@ -1453,7 +1453,7 @@ class RecurringRun(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_recurring_run'
 
     def __unicode__(self):
-        return u'RecurringRun(job %s, start %s, period %s, count %s)' % (
+        return 'RecurringRun(job %s, start %s, period %s, count %s)' % (
             self.job.id, self.start_date, self.loop_period, self.loop_count)
 
 
@@ -1560,12 +1560,12 @@ class SpecialTask(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'afe_special_tasks'
 
     def __unicode__(self):
-        result = u'Special Task %s (host %s, task %s, time %s)' % (
+        result = 'Special Task %s (host %s, task %s, time %s)' % (
             self.id, self.host, self.task, self.time_requested)
         if self.is_complete:
-            result += u' (completed)'
+            result += ' (completed)'
         elif self.is_active:
-            result += u' (active)'
+            result += ' (active)'
 
         return result
 
@@ -1601,7 +1601,7 @@ class SoftwareComponentKind(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'software_component_kind'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class SoftwareComponentArch(dbmodels.Model, model_logic.ModelExtensions):
@@ -1618,7 +1618,7 @@ class SoftwareComponentArch(dbmodels.Model, model_logic.ModelExtensions):
         db_table = 'software_component_arch'
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class SoftwareComponent(dbmodels.Model, model_logic.ModelExtensions):
@@ -1679,7 +1679,7 @@ class SoftwareComponent(dbmodels.Model, model_logic.ModelExtensions):
                             "arch"))
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class LinuxDistro(dbmodels.Model, model_logic.ModelExtensions):
@@ -1730,7 +1730,7 @@ class LinuxDistro(dbmodels.Model, model_logic.ModelExtensions):
         unique_together = (("name", "version", "release", "arch"))
 
     def __unicode__(self):
-        return unicode(self.name)
+        return str(self.name)
 
 
 class TestEnvironment(dbmodels.Model, model_logic.ModelExtensions):

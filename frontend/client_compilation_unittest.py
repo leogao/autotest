@@ -5,7 +5,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client import utils
 
 _AUTOTEST_DIR = common.autotest_dir
@@ -19,7 +19,7 @@ class ClientCompilationTest(unittest.TestCase):
         cmd = '%s -d -c %s -e "-validateOnly"' % (compile_script, module_name)
         result = utils.run(cmd, verbose=False, ignore_status=True)
         result = result.exit_status
-        self.assertEquals(result, 0)
+        self.assertEqual(result, 0)
 
     def test_afe_compilation(self):
         self._compile_module('autotest.AfeClient')

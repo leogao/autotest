@@ -7,7 +7,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import settings
 from autotest.client.shared import autotemp
 
@@ -68,26 +68,26 @@ class settings_test(unittest.TestCase):
 
     def test_float(self):
         val = self.conf.get_value("SECTION_A", "value_1", float)
-        self.assertEquals(type(val), types.FloatType)
-        self.assertEquals(val, 6.0)
+        self.assertEqual(type(val), float)
+        self.assertEqual(val, 6.0)
 
     def test_int(self):
         val = self.conf.get_value("SECTION_B", "value_1", int)
-        self.assertEquals(type(val), types.IntType)
+        self.assertEqual(type(val), int)
         self.assertTrue(val < 0)
         val = self.conf.get_value("SECTION_B", "value_3", int)
-        self.assertEquals(val, 0)
+        self.assertEqual(val, 0)
         val = self.conf.get_value("SECTION_B", "value_4", int)
         self.assertTrue(val > 0)
 
     def test_string(self):
         val = self.conf.get_value("SECTION_A", "value_2")
-        self.assertEquals(type(val), types.StringType)
-        self.assertEquals(val, "hello")
+        self.assertEqual(type(val), bytes)
+        self.assertEqual(val, "hello")
 
     def test_override(self):
         val = self.conf.get_value("SECTION_C", "value_1")
-        self.assertEquals(val, "somebody@remotehost")
+        self.assertEqual(val, "somebody@remotehost")
 
     def test_exception(self):
         error = 0
@@ -96,24 +96,24 @@ class settings_test(unittest.TestCase):
                                       "value_2", int)
         except Exception:
             error = 1
-        self.assertEquals(error, 1)
+        self.assertEqual(error, 1)
 
     def test_boolean(self):
         val = self.conf.get_value("SECTION_A", "value_3", bool)
-        self.assertEquals(val, True)
+        self.assertEqual(val, True)
         val = self.conf.get_value("SECTION_A", "value_4", bool)
-        self.assertEquals(val, False)
+        self.assertEqual(val, False)
         val = self.conf.get_value("SECTION_A", "value_5", bool)
-        self.assertEquals(val, True)
+        self.assertEqual(val, True)
         val = self.conf.get_value("SECTION_A", "value_6", bool)
-        self.assertEquals(val, False)
+        self.assertEqual(val, False)
 
     def test_defaults(self):
         val = self.conf.get_value("MISSING", "foo", float, 3.6)
-        self.assertEquals(val, 3.6)
+        self.assertEqual(val, 3.6)
         val = self.conf.get_value("SECTION_A", "novalue", str,
                                   "default")
-        self.assertEquals(val, "default")
+        self.assertEqual(val, "default")
 
 
 # this is so the test can be run in standalone mode

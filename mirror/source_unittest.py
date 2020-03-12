@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # Copyright 2009 Google Inc. Released under the GPL v2
 
-import cStringIO
-import httplib
+import io
+import http.client
 import os
 import time
 import unittest
@@ -10,7 +10,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.mirror import source
 from autotest.client.shared.test_utils import mock
 
@@ -108,7 +108,7 @@ class rsync_source_unittest(common_source):
         s = source.rsync_source(self.db_mock, self._prefix)
         s.add_path('v2.6/patch-2.6.*.bz2', 'v2.6')
         s.add_path('v2.6/testing/patch*.bz2', 'v2.6/testing')
-        self.assertEquals(s.get_new_files(), self._result)
+        self.assertEqual(s.get_new_files(), self._result)
         self.god.check_playback()
 
     def test_exclusions(self):
@@ -131,7 +131,7 @@ class rsync_source_unittest(common_source):
                                 excludes=('2.6.30-rc2',))
         s.add_path('v2.6/patch-2.6.*.bz2', 'v2.6')
         s.add_path('v2.6/testing/patch*.bz2', 'v2.6/testing')
-        self.assertEquals(s.get_new_files(), excluded_result)
+        self.assertEqual(s.get_new_files(), excluded_result)
         self.god.check_playback()
 
 
@@ -244,12 +244,12 @@ class url_source_unittest(common_source):
         self.addinfourl_mock = self.god.create_mock_class(
             source.urllib2.addinfourl, 'addinfourl')
         self.mime_mock = self.god.create_mock_class(
-            httplib.HTTPMessage, 'HTTPMessage')
+            http.client.HTTPMessage, 'HTTPMessage')
 
     def test_get_new_files(self):
         # record
         (source.urllib2.urlopen.expect_call(self._full_path1)
-            .and_return(cStringIO.StringIO(self._output1)))
+            .and_return(io.StringIO(self._output1)))
         for link, size, time in self._extracted_links1:
             (source.urllib2.urlopen.expect_call(link)
                 .and_return(self.addinfourl_mock))
@@ -258,7 +258,7 @@ class url_source_unittest(common_source):
             self.mime_mock.getdate.expect_call('date').and_return(time)
 
         (source.urllib2.urlopen.expect_call(self._full_path2)
-            .and_return(cStringIO.StringIO(self._output2)))
+            .and_return(io.StringIO(self._output2)))
         for link, size, time in self._extracted_links2:
             (source.urllib2.urlopen.expect_call(link)
                 .and_return(self.addinfourl_mock))
@@ -272,7 +272,7 @@ class url_source_unittest(common_source):
         s = source.url_source(self.db_mock, self._prefix)
         s.add_url(self._path1, r'.*\.(gz|bz2)$')
         s.add_url(self._path2, r'.*patch-[0-9.]+(-rc[0-9]+)?\.bz2$')
-        self.assertEquals(s.get_new_files(), self._result)
+        self.assertEqual(s.get_new_files(), self._result)
         self.god.check_playback()
 
 
@@ -289,7 +289,7 @@ class directory_source_unittest(common_source):
         self._stat_mock = self.god.create_mock_function('stat')
 
     @staticmethod
-    def _get_stat_result(mode=0644, ino=12345, dev=12345, nlink=1, uid=1000,
+    def _get_stat_result(mode=0o644, ino=12345, dev=12345, nlink=1, uid=1000,
                          gid=1000, size=10, atime=123, mtime=123, ctime=123):
         """
         Build an os.stat_result() instance with many default values.
@@ -327,7 +327,7 @@ class directory_source_unittest(common_source):
 
         s = source.directory_source(self.db_mock, path)
         expected = {'file2': source.database.item(file2_full_path, 1010, 123)}
-        self.assertEquals(expected, s.get_new_files(_stat_func=self._stat_mock))
+        self.assertEqual(expected, s.get_new_files(_stat_func=self._stat_mock))
         self.god.check_playback()
 
     def test_get_new_files_success(self):
@@ -360,7 +360,7 @@ class directory_source_unittest(common_source):
             'file1': source.database.item(file1_full_path, 1010, 123),
             'file3': source.database.item(file3_full_path, 1030, 12345),
         }
-        self.assertEquals(expected, s.get_new_files(_stat_func=self._stat_mock))
+        self.assertEqual(expected, s.get_new_files(_stat_func=self._stat_mock))
         self.god.check_playback()
 
 

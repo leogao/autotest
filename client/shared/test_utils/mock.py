@@ -1,6 +1,6 @@
 __author__ = "raphtee@google.com (Travis Miller)"
 
-import StringIO
+import io
 import collections
 import re
 import sys
@@ -18,7 +18,7 @@ class CheckPlaybackError(Exception):
     pass
 
 
-class SaveDataAfterCloseStringIO(StringIO.StringIO):
+class SaveDataAfterCloseStringIO(io.StringIO):
 
     """Saves the contents in a final_data property when close() is called.
 
@@ -33,7 +33,7 @@ class SaveDataAfterCloseStringIO(StringIO.StringIO):
 
     def close(self):
         self.final_data = self.getvalue()
-        StringIO.StringIO.close(self)
+        io.StringIO.close(self)
 
 
 class argument_comparator(object):
@@ -49,7 +49,7 @@ class equality_comparator(argument_comparator):
 
     @staticmethod
     def _types_match(arg1, arg2):
-        if isinstance(arg1, basestring) and isinstance(arg2, basestring):
+        if isinstance(arg1, str) and isinstance(arg2, str):
             return True
         return type(arg1) == type(arg2)
 
@@ -72,7 +72,7 @@ class equality_comparator(argument_comparator):
             if not cls._compare(sorted(actual_arg.keys()),
                                 sorted(expected_arg.keys())):
                 return False
-            for key, value in actual_arg.iteritems():
+            for key, value in actual_arg.items():
                 if not cls._compare(value, expected_arg[key]):
                     return False
         elif actual_arg != expected_arg:
@@ -104,7 +104,7 @@ class regex_comparator(argument_comparator):
 class is_string_comparator(argument_comparator):
 
     def is_satisfied_by(self, parameter):
-        return isinstance(parameter, basestring)
+        return isinstance(parameter, str)
 
     def __str__(self):
         return "a string"
@@ -138,7 +138,7 @@ class base_mapping(object):
         self.symbol = symbol
         self.args = [equality_comparator(arg) for arg in args]
         self.dargs = dict((key, equality_comparator(value))
-                          for key, value in dargs.iteritems())
+                          for key, value in dargs.items())
         self.error = None
 
     def match(self, *args, **dargs):
@@ -150,14 +150,14 @@ class base_mapping(object):
                 return False
 
         # check for incorrect dargs
-        for key, value in dargs.iteritems():
+        for key, value in dargs.items():
             if key not in self.dargs:
                 return False
             if not self.dargs[key].is_satisfied_by(value):
                 return False
 
         # check for missing dargs
-        for key in self.dargs.iterkeys():
+        for key in self.dargs.keys():
             if key not in dargs:
                 return False
 
@@ -447,8 +447,8 @@ class mock_god(object):
 
     def __method_playback(self, symbol, *args, **dargs):
         if self._debug:
-            print >> sys.__stdout__, (' * Mock call: ' +
-                                      _dump_function_call(symbol, args, dargs))
+            print((' * Mock call: ' +
+                                      _dump_function_call(symbol, args, dargs)), file=sys.__stdout__)
 
         if len(self.recording) != 0:
             # self.recording is subscriptable (deque), ignore E1136
@@ -484,7 +484,7 @@ class mock_god(object):
 
     def _append_error(self, error):
         if self._debug:
-            print >> sys.__stdout__, ' *** ' + error
+            print(' *** ' + error, file=sys.__stdout__)
         if self._fail_fast:
             raise CheckPlaybackError(error)
         self.errors.append(error)
@@ -496,9 +496,9 @@ class mock_god(object):
         """
         if len(self.errors) > 0:
             if self._debug:
-                print '\nPlayback errors:'
+                print('\nPlayback errors:')
             for error in self.errors:
-                print >> sys.__stdout__, error
+                print(error, file=sys.__stdout__)
 
             if self._ut:
                 self._ut.fail('\n'.join(self.errors))
@@ -509,7 +509,7 @@ class mock_god(object):
             for func_call in self.recording:
                 error = "%s not called" % (func_call,)
                 errors.append(error)
-                print >> sys.__stdout__, error
+                print(error, file=sys.__stdout__)
 
             if self._ut:
                 self._ut.fail('\n'.join(errors))
@@ -522,8 +522,8 @@ class mock_god(object):
         self.orig_stdout = sys.stdout
         self.orig_stderr = sys.stderr
 
-        self.mock_streams_stdout = StringIO.StringIO('')
-        self.mock_streams_stderr = StringIO.StringIO('')
+        self.mock_streams_stdout = io.StringIO('')
+        self.mock_streams_stderr = io.StringIO('')
 
         sys.stdout = self.mock_streams_stdout
         sys.stderr = self.mock_streams_stderr
@@ -551,6 +551,6 @@ def _dump_function_call(symbol, args, dargs):
     arg_vec = []
     for arg in args:
         arg_vec.append(_arg_to_str(arg))
-    for key, val in dargs.iteritems():
+    for key, val in dargs.items():
         arg_vec.append("%s=%s" % (key, _arg_to_str(val)))
     return "%s(%s)" % (symbol, ', '.join(arg_vec))

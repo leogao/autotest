@@ -8,7 +8,7 @@ __author__ = 'showard@google.com (Steve Howard)'
 import inspect
 import pydoc
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from autotest.frontend.afe import models, rpc_utils
 from autotest.frontend.afe import rpcserver_logging
@@ -54,7 +54,7 @@ class RpcHandler(object):
     def raw_request_data(self, request):
         if request.method == 'POST':
             return request.raw_post_data
-        return urllib.unquote(request.META['QUERY_STRING'])
+        return urllib.parse.unquote(request.META['QUERY_STRING'])
 
     def execute_request(self, json_request):
         return self._dispatcher.handleRequest(json_request)
@@ -113,7 +113,7 @@ class RpcHandler(object):
             keyword_args = args[-1]
             args = args[:-1]
             return f(*args, **keyword_args)
-        new_fn.func_name = f.func_name
+        new_fn.__name__ = f.__name__
         return new_fn
 
     def _grab_methods_from(self, module):

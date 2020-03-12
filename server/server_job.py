@@ -457,7 +457,7 @@ class base_server_job(base_job.base_job):
         results = self.parallel_simple(function, machines, timeout=timeout,
                                        return_results=True)
         success_machines = []
-        for result, machine in itertools.izip(results, machines):
+        for result, machine in zip(results, machines):
             if not isinstance(result, Exception):
                 success_machines.append(machine)
         return success_machines
@@ -1001,7 +1001,7 @@ class base_server_job(base_job.base_job):
                 existing_machines_text = None
             if machines_text != existing_machines_text:
                 utils.open_write_close(MACHINES_FILENAME, machines_text)
-        execfile(code_file, namespace, namespace)
+        exec(compile(open(code_file, "rb").read(), code_file, 'exec'), namespace, namespace)
 
     def _parse_status(self, new_line):
         if not self._using_parser:
@@ -1025,7 +1025,7 @@ class base_server_job(base_job.base_job):
             msg = ("WARNING: An unexpected error occurred while "
                    "inserting test results into the database. "
                    "Ignoring error.\n" + traceback.format_exc())
-            print >> sys.stderr, msg
+            print(msg, file=sys.stderr)
 
     def preprocess_client_state(self):
         """

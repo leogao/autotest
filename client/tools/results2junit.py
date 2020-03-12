@@ -22,7 +22,7 @@ from sys import argv, stdout, stderr, exit
 #from string                          import maketrans
 #import uuid
 
-import JUnit_api as api
+from . import JUnit_api as api
 
 import json
 

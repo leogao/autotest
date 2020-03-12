@@ -4,7 +4,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.frontend import setup_django_environment  # pylint: disable=W0611
 from autotest.frontend import test_utils
 from autotest.frontend.afe import models, model_attributes
@@ -25,7 +25,7 @@ class AclGroupTest(unittest.TestCase,
     def _check_acls(self, host, acl_name_list):
         actual_acl_names = [acl_group.name for acl_group
                             in host.aclgroup_set.all()]
-        self.assertEquals(set(actual_acl_names), set(acl_name_list))
+        self.assertEqual(set(actual_acl_names), set(acl_name_list))
 
     def test_on_host_membership_change(self):
         host1, host2 = self.hosts[1:3]
@@ -56,15 +56,15 @@ class HostTest(unittest.TestCase,
         # host, the status isn't reset, since this can interfere with the
         # scheduler.
         host = models.Host.create_one_time_host('othost')
-        self.assertEquals(host.invalid, True)
-        self.assertEquals(host.status, models.Host.Status.READY)
+        self.assertEqual(host.invalid, True)
+        self.assertEqual(host.status, models.Host.Status.READY)
 
         host.status = models.Host.Status.RUNNING
         host.save()
 
         host2 = models.Host.add_object(hostname='othost')
-        self.assertEquals(host2.id, host.id)
-        self.assertEquals(host2.status, models.Host.Status.RUNNING)
+        self.assertEqual(host2.id, host.id)
+        self.assertEqual(host2.status, models.Host.Status.RUNNING)
 
 
 class SpecialTaskUnittest(unittest.TestCase,
@@ -83,20 +83,20 @@ class SpecialTaskUnittest(unittest.TestCase,
 
     def test_execution_path(self):
         task = self._create_task()
-        self.assertEquals(task.execution_path(), 'hosts/host1/1-verify')
+        self.assertEqual(task.execution_path(), 'hosts/host1/1-verify')
 
     def test_status(self):
         task = self._create_task()
-        self.assertEquals(task.status, 'Queued')
+        self.assertEqual(task.status, 'Queued')
 
         task.update_object(is_active=True)
-        self.assertEquals(task.status, 'Running')
+        self.assertEqual(task.status, 'Running')
 
         task.update_object(is_active=False, is_complete=True, success=True)
-        self.assertEquals(task.status, 'Completed')
+        self.assertEqual(task.status, 'Completed')
 
         task.update_object(success=False)
-        self.assertEquals(task.status, 'Failed')
+        self.assertEqual(task.status, 'Failed')
 
     def test_activate(self):
         task = self._create_task()
@@ -117,7 +117,7 @@ class SpecialTaskUnittest(unittest.TestCase,
         task = models.SpecialTask.objects.create(
             host=self.hosts[0], task=models.SpecialTask.Task.VERIFY,
             queue_entry=job.hostqueueentry_set.all()[0])
-        self.assertEquals(task.requested_by.login, 'autotest_system')
+        self.assertEqual(task.requested_by.login, 'autotest_system')
 
 
 class HostQueueEntryUnittest(unittest.TestCase,
@@ -134,7 +134,7 @@ class HostQueueEntryUnittest(unittest.TestCase,
         entry.execution_subdir = 'subdir'
         entry.save()
 
-        self.assertEquals(entry.execution_path(), '1-autotest_system/subdir')
+        self.assertEqual(entry.execution_path(), '1-autotest_system/subdir')
 
 
 class ModelWithInvalidTest(unittest.TestCase,

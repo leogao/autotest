@@ -5,7 +5,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.settings import settings
 from autotest.client.shared.test_utils import mock
 from autotest.scheduler import drone_manager, drones
@@ -43,8 +43,8 @@ class MockDrone(drones._AbstractDrone):
         recorded_arg_list = self._recorded_calls[method_name]
         was_called = arguments in recorded_arg_list
         if not was_called:
-            print 'Recorded args:', recorded_arg_list
-            print 'Expected:', arguments
+            print('Recorded args:', recorded_arg_list)
+            print('Expected:', arguments)
         return was_called
 
     def was_call_queued(self, method, *args, **kwargs):
@@ -105,22 +105,22 @@ class DroneManager(unittest.TestCase):
     def test_choose_drone_for_execution(self):
         drone = self._test_choose_drone_for_execution_helper([(1, 2), (0, 2)],
                                                              1)
-        self.assertEquals(drone.name, 1)
+        self.assertEqual(drone.name, 1)
 
     def test_choose_drone_for_execution_some_full(self):
         drone = self._test_choose_drone_for_execution_helper([(0, 1), (1, 3)],
                                                              2)
-        self.assertEquals(drone.name, 1)
+        self.assertEqual(drone.name, 1)
 
     def test_choose_drone_for_execution_all_full(self):
         drone = self._test_choose_drone_for_execution_helper([(2, 1), (3, 2)],
                                                              1)
-        self.assertEquals(drone.name, 1)
+        self.assertEqual(drone.name, 1)
 
     def test_choose_drone_for_execution_all_full_same_percentage_capacity(self):
         drone = self._test_choose_drone_for_execution_helper([(5, 3), (10, 6)],
                                                              1)
-        self.assertEquals(drone.name, 1)
+        self.assertEqual(drone.name, 1)
 
     def test_user_restrictions(self):
         # this drone is restricted to a different user
@@ -130,12 +130,12 @@ class DroneManager(unittest.TestCase):
         self.manager._enqueue_drone(MockDrone(2, max_processes=2,
                                               allowed_users=[self._USERNAME]))
 
-        self.assertEquals(2,
+        self.assertEqual(2,
                           self.manager.max_runnable_processes(self._USERNAME,
                                                               None))
         drone = self.manager._choose_drone_for_execution(
             1, username=self._USERNAME, drone_hostnames_allowed=None)
-        self.assertEquals(drone.name, 2)
+        self.assertEqual(drone.name, 2)
 
     def test_user_restrictions_with_full_drone(self):
         # this drone is restricted to a different user
@@ -146,12 +146,12 @@ class DroneManager(unittest.TestCase):
                                               max_processes=2,
                                               allowed_users=[self._USERNAME]))
 
-        self.assertEquals(0,
+        self.assertEqual(0,
                           self.manager.max_runnable_processes(self._USERNAME,
                                                               None))
         drone = self.manager._choose_drone_for_execution(
             1, username=self._USERNAME, drone_hostnames_allowed=None)
-        self.assertEquals(drone.name, 2)
+        self.assertEqual(drone.name, 2)
 
     def _setup_test_drone_restrictions(self, active_processes=0):
         self.manager._enqueue_drone(MockDrone(
@@ -163,7 +163,7 @@ class DroneManager(unittest.TestCase):
 
     def test_drone_restrictions_allow_any(self):
         self._setup_test_drone_restrictions()
-        self.assertEquals(10,
+        self.assertEqual(10,
                           self.manager.max_runnable_processes(self._USERNAME,
                                                               None))
         drone = self.manager._choose_drone_for_execution(
@@ -173,7 +173,7 @@ class DroneManager(unittest.TestCase):
     def test_drone_restrictions_under_capacity(self):
         self._setup_test_drone_restrictions()
         drone_hostnames_allowed = (2, 3)
-        self.assertEquals(
+        self.assertEqual(
             5, self.manager.max_runnable_processes(self._USERNAME,
                                                    drone_hostnames_allowed))
         drone = self.manager._choose_drone_for_execution(
@@ -185,7 +185,7 @@ class DroneManager(unittest.TestCase):
     def test_drone_restrictions_over_capacity(self):
         self._setup_test_drone_restrictions(active_processes=6)
         drone_hostnames_allowed = (2, 3)
-        self.assertEquals(
+        self.assertEqual(
             0, self.manager.max_runnable_processes(self._USERNAME,
                                                    drone_hostnames_allowed))
         drone = self.manager._choose_drone_for_execution(
@@ -196,7 +196,7 @@ class DroneManager(unittest.TestCase):
     def test_drone_restrictions_allow_none(self):
         self._setup_test_drone_restrictions()
         drone_hostnames_allowed = ()
-        self.assertEquals(
+        self.assertEqual(
             0, self.manager.max_runnable_processes(self._USERNAME,
                                                    drone_hostnames_allowed))
         drone = self.manager._choose_drone_for_execution(
@@ -223,7 +223,7 @@ class DroneManager(unittest.TestCase):
                                 drone_hostnames=[self.mock_drone.name],
                                 results_repository_hostname=results_hostname)
 
-        self.assert_(self.mock_drone.was_call_queued(
+        self.assertTrue(self.mock_drone.was_call_queued(
             'initialize', self._DRONE_RESULTS_DIR + '/'))
         self.god.check_playback()
 
@@ -242,9 +242,9 @@ class DroneManager(unittest.TestCase):
 
         full_working_directory = os.path.join(self._DRONE_RESULTS_DIR,
                                               self._WORKING_DIRECTORY)
-        self.assertEquals(pidfile_id.path,
+        self.assertEqual(pidfile_id.path,
                           os.path.join(full_working_directory, pidfile_name))
-        self.assert_(self.mock_drone.was_call_queued(
+        self.assertTrue(self.mock_drone.was_call_queued(
             'execute_command', ['test', full_working_directory],
             full_working_directory,
             os.path.join(self._DRONE_RESULTS_DIR, log_file), pidfile_name))
@@ -261,7 +261,7 @@ class DroneManager(unittest.TestCase):
                                      num_processes=1,
                                      drone_hostnames_allowed=None)
 
-        self.assert_(self.mock_drone.was_call_queued(
+        self.assertTrue(self.mock_drone.was_call_queued(
             'write_to_file',
             os.path.join(self._DRONE_RESULTS_DIR, attached_path),
             contents))
@@ -270,7 +270,7 @@ class DroneManager(unittest.TestCase):
         self.manager.copy_results_on_drone(self.mock_drone_process,
                                            self._SOURCE_PATH,
                                            self._DESTINATION_PATH)
-        self.assert_(self.mock_drone.was_call_queued(
+        self.assertTrue(self.mock_drone.was_call_queued(
             'copy_file_or_directory',
             os.path.join(self._DRONE_RESULTS_DIR, self._SOURCE_PATH),
             os.path.join(self._DRONE_RESULTS_DIR, self._DESTINATION_PATH)))
@@ -278,7 +278,7 @@ class DroneManager(unittest.TestCase):
     def test_copy_to_results_repository(self):
         self.manager.copy_to_results_repository(self.mock_drone_process,
                                                 self._SOURCE_PATH)
-        self.assert_(self.mock_drone.was_file_sent(
+        self.assertTrue(self.mock_drone.was_file_sent(
             self.results_drone,
             os.path.join(self._DRONE_RESULTS_DIR, self._SOURCE_PATH),
             os.path.join(self._RESULTS_DIR, self._SOURCE_PATH)))
@@ -290,14 +290,14 @@ class DroneManager(unittest.TestCase):
 
         # write to results repository
         self.manager.write_lines_to_file(file_path, lines)
-        self.assert_(self.results_drone.was_call_queued(
+        self.assertTrue(self.results_drone.was_call_queued(
             'write_to_file', os.path.join(self._RESULTS_DIR, file_path),
             written_data))
 
         # write to a drone
         self.manager.write_lines_to_file(
             file_path, lines, paired_with_process=self.mock_drone_process)
-        self.assert_(self.mock_drone.was_call_queued(
+        self.assertTrue(self.mock_drone.was_call_queued(
             'write_to_file',
             os.path.join(self._DRONE_RESULTS_DIR, file_path), written_data))
 

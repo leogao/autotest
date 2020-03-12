@@ -21,14 +21,14 @@ class parser(object):
         self.line_buffer = status_lib.line_buffer()
         # create and prime the parser state machine
         self.state = self.state_iterator(self.line_buffer)
-        self.state.next()
+        next(self.state)
 
     def process_lines(self, lines):
         """ Feed 'lines' into the parser state machine, and return
         a list of all the new test results produced."""
         self.line_buffer.put_multiple(lines)
         try:
-            return self.state.next()
+            return next(self.state)
         except StopIteration:
             logging.warn("parser was called to process status lines after it "
                          "was end()ed")
@@ -45,7 +45,7 @@ class parser(object):
         # run the state machine to clear out the buffer
         self.finished = True
         try:
-            return self.state.next()
+            return next(self.state)
         except StopIteration:
             logging.warn("parser was end()ed multiple times")
             logging.warn("Current traceback:\n%s", traceback.format_exc())

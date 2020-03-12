@@ -5,7 +5,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.frontend import setup_django_environment  # pylint: disable=W0611
 from autotest.frontend import test_utils
 from autotest.client.shared.test_utils import mock
@@ -79,18 +79,18 @@ class DelayedCallTaskTest(unittest.TestCase):
         self.assertEqual(0, test_callback.calls, "callback called early")
         delay_task.poll()  # time 35.01
         self.assertEqual(1, test_callback.calls)
-        self.assert_(delay_task.is_done())
-        self.assert_(delay_task.success)
-        self.assert_(not delay_task.aborted)
+        self.assertTrue(delay_task.is_done())
+        self.assertTrue(delay_task.success)
+        self.assertTrue(not delay_task.aborted)
         self.god.check_playback()
 
     def test_delayed_call_abort(self):
         delay_task = scheduler_models.DelayedCallTask(
             delay_seconds=987654, callback=lambda: None)
         delay_task.abort()
-        self.assert_(delay_task.aborted)
-        self.assert_(delay_task.is_done())
-        self.assert_(not delay_task.success)
+        self.assertTrue(delay_task.aborted)
+        self.assertTrue(delay_task.is_done())
+        self.assertTrue(not delay_task.success)
         self.god.check_playback()
 
 
@@ -109,8 +109,8 @@ class DBObjectTest(BaseSchedulerModelsTest):
                          host._compare_fields_in_row(row_data))
 
     def test_compare_fields_in_row_datetime_ignores_microseconds(self):
-        datetime_with_us = datetime.datetime(2009, 10, 07, 12, 34, 56, 7890)
-        datetime_without_us = datetime.datetime(2009, 10, 07, 12, 34, 56, 0)
+        datetime_with_us = datetime.datetime(2009, 10, 0o7, 12, 34, 56, 7890)
+        datetime_without_us = datetime.datetime(2009, 10, 0o7, 12, 34, 56, 0)
 
         class TestTable(scheduler_models.DBObject):
             _table_name = 'test_table'
@@ -124,7 +124,7 @@ class DBObjectTest(BaseSchedulerModelsTest):
         self._do_query('UPDATE afe_hosts SET hostname="host2-updated" '
                        'WHERE id=2')
         host_b = scheduler_models.Host(id=2, always_query=True)
-        self.assert_(host_a is host_b, 'Cached instance not returned.')
+        self.assertTrue(host_a is host_b, 'Cached instance not returned.')
         self.assertEqual(host_a.hostname, 'host2-updated',
                          'Database was not re-queried')
 
@@ -132,7 +132,7 @@ class DBObjectTest(BaseSchedulerModelsTest):
         host_a._compare_fields_in_row = lambda _: self.fail('eek! a query!')
         host_a._update_fields_from_row = host_a._compare_fields_in_row
         host_c = scheduler_models.Host(id=2, always_query=False)
-        self.assert_(host_a is host_c, 'Cached instance not returned')
+        self.assertTrue(host_a is host_c, 'Cached instance not returned')
 
     def test_delete(self):
         host = scheduler_models.Host(id=3)
@@ -301,10 +301,10 @@ class JobTest(BaseSchedulerModelsTest):
         self.assertFalse(job._atomic_and_has_started())
 
     def _check_special_task(self, task, task_type, queue_entry_id=None):
-        self.assertEquals(task.task, task_type)
-        self.assertEquals(task.host.id, 1)
+        self.assertEqual(task.task, task_type)
+        self.assertEqual(task.host.id, 1)
         if queue_entry_id:
-            self.assertEquals(task.queue_entry.id, queue_entry_id)
+            self.assertEqual(task.queue_entry.id, queue_entry_id)
 
     def test_run_asynchronous(self):
         self._create_job(hosts=[1, 2])
@@ -320,7 +320,7 @@ class JobTest(BaseSchedulerModelsTest):
 
         task = self._test_pre_job_tasks_helper()
 
-        self.assertEquals(task, None)
+        self.assertEqual(task, None)
 
     def test_run_synchronous_verify(self):
         self._create_job(hosts=[1, 2], synchronous=True)
@@ -336,7 +336,7 @@ class JobTest(BaseSchedulerModelsTest):
 
         task = self._test_pre_job_tasks_helper()
 
-        self.assertEquals(task, None)
+        self.assertEqual(task, None)
 
     def test_run_atomic_group_already_started(self):
         self._create_job(hosts=[5, 6], atomic_group=1, synchronous=True)

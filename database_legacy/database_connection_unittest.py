@@ -6,7 +6,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import settings
 from autotest.client.shared.test_utils import mock
 from autotest.database_legacy import database_connection
@@ -71,7 +71,7 @@ class DatabaseConnectionTest(unittest.TestCase):
         db.connect(db_type=_DB_TYPE, host=_HOST, username=_USER,
                    password=_PASS, db_name=_DB_NAME)
 
-        self.assertEquals(self._db_type, _DB_TYPE)
+        self.assertEqual(self._db_type, _DB_TYPE)
         self.god.check_playback()
 
     def test_settings(self):
@@ -80,7 +80,7 @@ class DatabaseConnectionTest(unittest.TestCase):
 
         db.connect()
 
-        self.assertEquals(self._db_type, _DB_TYPE)
+        self.assertEqual(self._db_type, _DB_TYPE)
         self.god.check_playback()
 
     def _expect_reconnect(self, fail=False):
@@ -92,7 +92,7 @@ class DatabaseConnectionTest(unittest.TestCase):
     def _expect_fail_and_reconnect(self, num_reconnects, fail_last=False):
         self._fake_backend.connect.expect_call(**_CONNECT_KWARGS).and_raises(
             FakeDatabaseError())
-        for i in xrange(num_reconnects):
+        for i in range(num_reconnects):
             time.sleep.expect_call(_RECONNECT_DELAY)
             if i < num_reconnects - 1:
                 self._expect_reconnect(fail=True)

@@ -19,7 +19,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 
 class JSONRPCException(Exception):
@@ -46,9 +46,9 @@ class ServiceProxy(object):
         postdata = encoder.JSONEncoder().encode({"method": self.__serviceName,
                                                  'params': args + (kwargs,),
                                                  'id': 'jsonrpc'})
-        request = urllib2.Request(self.__serviceURL, data=postdata,
+        request = urllib.request.Request(self.__serviceURL, data=postdata,
                                   headers=self.__headers)
-        respdata = urllib2.urlopen(request).read()
+        respdata = urllib.request.urlopen(request).read()
         try:
             resp = decoder.JSONDecoder().decode(respdata)
         except ValueError:

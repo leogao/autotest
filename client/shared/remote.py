@@ -10,10 +10,10 @@ import time
 
 import aexpect
 
-import data_dir
-import error
-import rss_client
-import utils
+from . import data_dir
+from . import error
+from . import rss_client
+from . import utils
 
 
 class LoginError(Exception):
@@ -905,7 +905,7 @@ class RemoteFile(object):
         to the value contained in pattern2repl_dict.
         """
         lines = self._read_local()
-        for pattern, repl in pattern2repl_dict.items():
+        for pattern, repl in list(pattern2repl_dict.items()):
             for index in range(len(lines)):
                 line = lines[index]
                 lines[index] = re.sub(pattern, repl, line)
@@ -936,7 +936,7 @@ class RemoteFile(object):
         to the end of file.
         """
         lines = self._read_local()
-        for pattern, repl in pattern2repl_dict.items():
+        for pattern, repl in list(pattern2repl_dict.items()):
             no_line_match = True
             for index in range(len(lines)):
                 line = lines[index]

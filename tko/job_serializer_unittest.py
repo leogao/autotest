@@ -9,7 +9,7 @@ Mostly test if the serialized object has the expected content.
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 import datetime
 import os
 import sys
@@ -19,11 +19,11 @@ import unittest
 # Check the Makefile on this directory
 # for information on how to install the
 # dependencies for this unittest.
-import commands
+import subprocess
 cwd = os.getcwd()
 module_dir = os.path.dirname(sys.modules[__name__].__file__)
 os.chdir(module_dir)
-commands.getoutput('make')
+subprocess.getoutput('make')
 os.chdir(cwd)
 
 try:
@@ -188,7 +188,7 @@ class JobSerializerUnittest(unittest.TestCase):
         in microseconds.
         """
         t = mktime(dTime.timetuple()) + 1e-6 * dTime.microsecond
-        self.assertEqual(long(t), stime / 1000)
+        self.assertEqual(int(t), stime / 1000)
 
     def check_iteration(self, tko_iterations, pb_iterations):
         """Check if the iteration objects are the same.
@@ -218,7 +218,7 @@ class JobSerializerUnittest(unittest.TestCase):
         """Check if the contents of the dictionary are the same as a
         repeated keyval pair.
         """
-        for key, value in dictionary.iteritems():
+        for key, value in dictionary.items():
             self.assertTrue(key in keyval)
             self.assertEqual(str(value), keyval[key])
 
@@ -315,11 +315,11 @@ class ReadBackGetterTest(JobSerializerUnittest):
         """
 
         t = mktime(dTime.timetuple()) + 1e-6 * dTime.microsecond
-        if isinstance(sTime, (int, long)):
-            self.assertEqual(long(t * 1000), sTime)
+        if isinstance(sTime, int):
+            self.assertEqual(int(t * 1000), sTime)
         else:
             t1 = mktime(sTime.timetuple()) + 1e-6 * sTime.microsecond
-            self.assertEqual(long(t * 1000), long(t1 * 1000))
+            self.assertEqual(int(t * 1000), int(t1 * 1000))
 
     def check_iteration(self, iterations, newiterations):
         """Check if the iteration objects are the same.

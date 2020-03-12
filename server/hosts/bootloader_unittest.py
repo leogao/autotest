@@ -6,7 +6,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client.shared.test_utils import mock
 from autotest.client.shared import error
@@ -62,7 +62,7 @@ class test_bootloader(unittest.TestCase):
         # assert the playback is correct
         self.god.check_playback()
         # assert the final dest is correct
-        self.assertEquals(loader._boottool_path, BOOTTOOL_DST)
+        self.assertEqual(loader._boottool_path, BOOTTOOL_DST)
 
     def test_get_path_automatically_installs(self):
         BOOTTOOL_DST = "/unittest/tmp/boottool"
@@ -74,7 +74,7 @@ class test_bootloader(unittest.TestCase):
         # set up the recording
         mock_install.expect_call()
         # run the test
-        self.assertEquals(loader._get_boottool_path(), BOOTTOOL_DST)
+        self.assertEqual(loader._get_boottool_path(), BOOTTOOL_DST)
         self.god.check_playback()
 
     def test_install_is_only_called_once(self):
@@ -87,9 +87,9 @@ class test_bootloader(unittest.TestCase):
         # set up the recording
         mock_install.expect_call()
         # run the test
-        self.assertEquals(loader._get_boottool_path(), BOOTTOOL_DST)
+        self.assertEqual(loader._get_boottool_path(), BOOTTOOL_DST)
         self.god.check_playback()
-        self.assertEquals(loader._get_boottool_path(), BOOTTOOL_DST)
+        self.assertEqual(loader._get_boottool_path(), BOOTTOOL_DST)
         self.god.check_playback()
 
 

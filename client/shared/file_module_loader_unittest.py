@@ -23,7 +23,7 @@ import sys
 import unittest
 from tempfile import mkstemp
 
-import file_module_loader
+from . import file_module_loader
 
 
 class TestFileModuleLoader(unittest.TestCase):

@@ -1,8 +1,8 @@
-import ConfigParser
-import HTMLParser
+import configparser
+import html.parser
 import logging
 import os
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from autotest.client import os_dep, utils
 
@@ -15,7 +15,7 @@ except ImportError:
 DEFAULT_KOJI_TAG = None
 
 
-class KojiDirIndexParser(HTMLParser.HTMLParser):
+class KojiDirIndexParser(html.parser.HTMLParser):
 
     '''
     Parser for HTML directory index pages, specialized to look for RPM links
@@ -25,7 +25,7 @@ class KojiDirIndexParser(HTMLParser.HTMLParser):
         '''
         Initializes a new KojiDirListParser instance
         '''
-        HTMLParser.HTMLParser.__init__(self)
+        html.parser.HTMLParser.__init__(self)
         self.package_file_names = []
 
     def handle_starttag(self, tag, attrs):
@@ -159,7 +159,7 @@ class KojiClient(object):
             if not self.is_config_valid():
                 raise ValueError('Koji config "%s" is not valid' % self.config)
 
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         config.read(self.config)
 
         basename = os.path.basename(self.command)
@@ -173,7 +173,7 @@ class KojiClient(object):
         :return: only the options used for session setup
         '''
         session_options = {}
-        for name, value in self.config_options.items():
+        for name, value in list(self.config_options.items()):
             if name in ('user', 'password', 'debug_xmlrpc', 'debug'):
                 session_options[name] = value
         return session_options
@@ -196,7 +196,7 @@ class KojiClient(object):
                          'not fatal but indicates an unexpected situation',
                          self.command)
 
-        if self.command not in self.CONFIG_MAP.keys():
+        if self.command not in list(self.CONFIG_MAP.keys()):
             logging.error('Koji command "%s" does not have a configuration '
                           'file associated to it', self.command)
             koji_command_ok = False
@@ -219,7 +219,7 @@ class KojiClient(object):
             logging.error('Koji config "%s" is not readable', self.config)
             koji_config_ok = False
 
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         config.read(self.config)
         basename = os.path.basename(self.command)
         if not config.has_section(basename):
@@ -382,7 +382,7 @@ class KojiClient(object):
         '''
         Gets the base url for packages in Koji
         '''
-        if self.config_options.has_key('pkgurl'):
+        if 'pkgurl' in self.config_options:
             return self.config_options['pkgurl']
         else:
             return "%s/%s" % (self.config_options['topurl'],
@@ -457,7 +457,7 @@ class KojiClient(object):
                                        pkg.user,
                                        pkg.task)
         index_parser = KojiDirIndexParser()
-        index_parser.feed(urllib.urlopen(index_url).read())
+        index_parser.feed(urllib.request.urlopen(index_url).read())
 
         if pkg.subpackages:
             for p in pkg.subpackages:

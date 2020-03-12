@@ -9,41 +9,41 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.cli import cli_mock
 
 
 class label_list_unittest(cli_mock.cli_unittest):
-    values = [{u'id': 180,          # Valid label
-               u'platform': False,
-               u'name': u'label0',
-               u'invalid': False,
-               u'kernel_config': u'',
-               u'only_if_needed': False},
-              {u'id': 338,          # Valid label
-               u'platform': False,
-               u'name': u'label1',
-               u'invalid': False,
-               u'kernel_config': u'',
-               u'only_if_needed': False},
-              {u'id': 340,          # Invalid label
-               u'platform': False,
-               u'name': u'label2',
-               u'invalid': True,
-               u'kernel_config': u'',
-               u'only_if_needed': False},
-              {u'id': 350,          # Valid platform
-               u'platform': True,
-               u'name': u'plat0',
-               u'invalid': False,
-               u'kernel_config': u'',
-               u'only_if_needed': False},
-              {u'id': 420,          # Invalid platform
-               u'platform': True,
-               u'name': u'plat1',
-               u'invalid': True,
-               u'kernel_config': u'',
-               u'only_if_needed': False}]
+    values = [{'id': 180,          # Valid label
+               'platform': False,
+               'name': 'label0',
+               'invalid': False,
+               'kernel_config': '',
+               'only_if_needed': False},
+              {'id': 338,          # Valid label
+               'platform': False,
+               'name': 'label1',
+               'invalid': False,
+               'kernel_config': '',
+               'only_if_needed': False},
+              {'id': 340,          # Invalid label
+               'platform': False,
+               'name': 'label2',
+               'invalid': True,
+               'kernel_config': '',
+               'only_if_needed': False},
+              {'id': 350,          # Valid platform
+               'platform': True,
+               'name': 'plat0',
+               'invalid': False,
+               'kernel_config': '',
+               'only_if_needed': False},
+              {'id': 420,          # Invalid platform
+               'platform': True,
+               'name': 'plat1',
+               'invalid': True,
+               'kernel_config': '',
+               'only_if_needed': False}]
 
     def test_label_list_labels_only(self):
         self.run_cmd(argv=['atest', 'label', 'list', '--ignore_site_file'],

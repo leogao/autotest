@@ -7,7 +7,7 @@ Convenience functions for use by tests or whomever.
 Note that this file is mixed in by utils.py - note very carefully the
 precedence order defined there
 """
-import commands
+import subprocess
 import fnmatch
 import logging
 import os
@@ -356,7 +356,7 @@ def get_cpu_vendor_name():
     }
 
     cpu_info = get_cpu_info()
-    for vendor, identifiers in vendors_map.items():
+    for vendor, identifiers in list(vendors_map.items()):
         for identifier in identifiers:
             if list_grep(cpu_info, identifier):
                 return vendor
@@ -462,8 +462,8 @@ def dump_object(object):
 
     kind of like dir()
     """
-    for item in object.__dict__.iteritems():
-        print item
+    for item in object.__dict__.items():
+        print(item)
         try:
             (key, value) = item
             dump_object(value)
@@ -559,7 +559,7 @@ def cpu_online_map():
 
 
 def check_glibc_ver(ver):
-    glibc_ver = commands.getoutput('ldd --version').splitlines()[0]
+    glibc_ver = subprocess.getoutput('ldd --version').splitlines()[0]
     glibc_ver = re.search(r'(\d+\.\d+(\.\d+)?)', glibc_ver).group()
     if utils.compare_versions(glibc_ver, ver) == -1:
         raise error.TestError("Glibc too old (%s). Glibc >= %s is needed." %
@@ -790,7 +790,7 @@ def get_loaded_modules():
 def get_cpu_vendor():
     cpuinfo = open('/proc/cpuinfo').read()
     vendors = re.findall(r'(?m)^vendor_id\s*:\s*(\S+)\s*$', cpuinfo)
-    for i in xrange(1, len(vendors)):
+    for i in range(1, len(vendors)):
         if vendors[i] != vendors[0]:
             raise error.TestError('multiple cpu vendors found: ' + str(vendors))
     return vendors[0]
@@ -900,7 +900,7 @@ def get_uptime():
     """
 
     cmd = "/bin/cat /proc/uptime"
-    (status, output) = commands.getstatusoutput(cmd)
+    (status, output) = subprocess.getstatusoutput(cmd)
     if status == 0:
         return output.split()[0]
     else:

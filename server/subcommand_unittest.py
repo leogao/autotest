@@ -6,7 +6,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.test_utils import mock
 from autotest.server import subcommand
 
@@ -42,12 +42,12 @@ class subcommand_test(unittest.TestCase):
         def check_attributes(cmd, func, args, subdir=None, debug=None,
                              pid=None, returncode=None, fork_hooks=[],
                              join_hooks=[]):
-            self.assertEquals(cmd.func, func)
-            self.assertEquals(cmd.args, args)
-            self.assertEquals(cmd.subdir, subdir)
-            self.assertEquals(cmd.debug, debug)
-            self.assertEquals(cmd.pid, pid)
-            self.assertEquals(cmd.returncode, returncode)
+            self.assertEqual(cmd.func, func)
+            self.assertEqual(cmd.args, args)
+            self.assertEqual(cmd.subdir, subdir)
+            self.assertEqual(cmd.debug, debug)
+            self.assertEqual(cmd.pid, pid)
+            self.assertEqual(cmd.returncode, returncode)
             #self.assertEquals(cmd.fork_hooks, fork_hooks)
             #self.assertEquals(cmd.join_hooks, join_hooks)
 
@@ -88,7 +88,7 @@ class subcommand_test(unittest.TestCase):
     def test_fork_start_parent(self):
         cmd = self._setup_fork_start_parent()
 
-        self.assertEquals(cmd.pid, 1000)
+        self.assertEqual(cmd.pid, 1000)
         self.god.check_playback()
 
     def _setup_fork_start_child(self):
@@ -157,7 +157,7 @@ class subcommand_test(unittest.TestCase):
 
         (subcommand.os.waitpid.expect_call(1000, subcommand.os.WNOHANG)
          .and_raises(subcommand.os.error('waitpid')))
-        self.assertEquals(cmd.poll(), None)
+        self.assertEqual(cmd.poll(), None)
         self.god.check_playback()
 
     def test_poll_finished_success(self):
@@ -165,7 +165,7 @@ class subcommand_test(unittest.TestCase):
 
         (subcommand.os.waitpid.expect_call(1000, subcommand.os.WNOHANG)
          .and_return((1000, 0)))
-        self.assertEquals(cmd.poll(), 0)
+        self.assertEqual(cmd.poll(), 0)
         self.god.check_playback()
 
     def test_poll_finished_failure(self):
@@ -185,7 +185,7 @@ class subcommand_test(unittest.TestCase):
         (subcommand.os.waitpid.expect_call(1000, 0)
          .and_return((1000, 0)))
 
-        self.assertEquals(cmd.wait(), 0)
+        self.assertEqual(cmd.wait(), 0)
         self.god.check_playback()
 
     def test_wait_failure(self):
@@ -214,7 +214,7 @@ class subcommand_test(unittest.TestCase):
 
         cmd.wait.expect_call().and_return(0)
 
-        self.assertEquals(cmd.fork_waitfor(), 0)
+        self.assertEqual(cmd.fork_waitfor(), 0)
         self.god.check_playback()
 
     def test_fork_waitfor_success(self):
@@ -223,14 +223,14 @@ class subcommand_test(unittest.TestCase):
         timeout = 10
 
         subcommand.time.time.expect_call().and_return(1)
-        for i in xrange(timeout):
+        for i in range(timeout):
             subcommand.time.time.expect_call().and_return(i + 1)
             cmd.poll.expect_call().and_return(None)
             subcommand.time.sleep.expect_call(1)
         subcommand.time.time.expect_call().and_return(i + 2)
         cmd.poll.expect_call().and_return(0)
 
-        self.assertEquals(cmd.fork_waitfor(timeout=timeout), 0)
+        self.assertEqual(cmd.fork_waitfor(timeout=timeout), 0)
         self.god.check_playback()
 
     def test_fork_waitfor_failure(self):
@@ -239,14 +239,14 @@ class subcommand_test(unittest.TestCase):
         timeout = 10
 
         subcommand.time.time.expect_call().and_return(1)
-        for i in xrange(timeout):
+        for i in range(timeout):
             subcommand.time.time.expect_call().and_return(i + 1)
             cmd.poll.expect_call().and_return(None)
             subcommand.time.sleep.expect_call(1)
         subcommand.time.time.expect_call().and_return(i + 3)
         subcommand.utils.nuke_pid.expect_call(cmd.pid)
 
-        self.assertEquals(cmd.fork_waitfor(timeout=timeout), None)
+        self.assertEqual(cmd.fork_waitfor(timeout=timeout), None)
         self.god.check_playback()
 
 
@@ -334,7 +334,7 @@ class parallel_test(unittest.TestCase):
          .and_return(error))
         tasklist[1].result_pickle.close.expect_call()
 
-        self.assertEquals(subcommand.parallel(tasklist, return_results=True),
+        self.assertEqual(subcommand.parallel(tasklist, return_results=True),
                           [6, error])
         self.god.check_playback()
 
@@ -373,7 +373,7 @@ class test_parallel_simple(unittest.TestCase):
         result = 1000
         func.expect_call(3).and_return(result)
 
-        self.assertEquals(subcommand.parallel_simple(func, (3,),
+        self.assertEqual(subcommand.parallel_simple(func, (3,),
                                                      return_results=True),
                           [result])
         self.god.check_playback()
@@ -383,7 +383,7 @@ class test_parallel_simple(unittest.TestCase):
 
         args = []
         cmds = []
-        for i in xrange(count):
+        for i in range(count):
             arg = i + 1
             args.append(arg)
 

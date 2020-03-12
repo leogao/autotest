@@ -1,14 +1,14 @@
-import BaseHTTPServer
+import http.server
 import cgi
 import fcntl
 import logging
 import threading
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.scheduler import drone_manager, scheduler_config
 
 _PORT = 13467
@@ -29,7 +29,7 @@ _FOOTER = """
 """
 
 
-class StatusServerRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class StatusServerRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def _send_headers(self):
         self.send_response(200, 'OK')
@@ -96,12 +96,12 @@ class StatusServerRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(_FOOTER)
 
 
-class StatusServer(BaseHTTPServer.HTTPServer):
+class StatusServer(http.server.HTTPServer):
 
     def __init__(self):
         address = ('', _PORT)
         # HTTPServer is an old-style class :(
-        BaseHTTPServer.HTTPServer.__init__(self, address,
+        http.server.HTTPServer.__init__(self, address,
                                            StatusServerRequestHandler)
         self._shutting_down = False
         self._drone_manager = drone_manager.instance()
@@ -117,7 +117,7 @@ class StatusServer(BaseHTTPServer.HTTPServer):
         logging.info('Shutting down server...')
         self._shutting_down = True
         # make one last request to awaken the server thread and make it exit
-        urllib.urlopen('http://localhost:%s' % _PORT)
+        urllib.request.urlopen('http://localhost:%s' % _PORT)
 
     def _serve_until_shutdown(self):
         logging.info('Status server running on %s', self.server_address)

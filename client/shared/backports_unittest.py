@@ -25,7 +25,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import backports
 from autotest.client.shared.backports.collections import namedtuple
 
@@ -50,22 +50,22 @@ class TestBackports(unittest.TestCase):
         self.assertTrue(backports.all(["True", 1, True]))
 
     def test_bin(self):
-        self.assertEquals(backports.bin(170), '0b10101010')
+        self.assertEqual(backports.bin(170), '0b10101010')
 
     def test_many_bin(self):
         try:
-            for n in xrange(10000):
+            for n in range(10000):
                 # pylint: disable=E0602
-                self.assertEquals(backports.bin(n), bin(n))
+                self.assertEqual(backports.bin(n), bin(n))
             # pylint: disable=E0602
-            self.assertEquals(backports.bin(sys.maxint), bin(sys.maxint))
+            self.assertEqual(backports.bin(sys.maxsize), bin(sys.maxsize))
         except NameError:
             # NameError will occur on Python versions that lack bin()
             pass
 
     def test_next(self):
-        self.assertEquals(backports.next((x * 2 for x in range(3, 5))), 6)
-        self.assertEquals(backports.next((x * 2 for x in range(3, 5) if x > 100),
+        self.assertEqual(backports.next((x * 2 for x in range(3, 5))), 6)
+        self.assertEqual(backports.next((x * 2 for x in range(3, 5) if x > 100),
                                          "default"), "default")
 
     def test_next_extra_arg(self):
@@ -80,7 +80,7 @@ class TestBackports(unittest.TestCase):
         Verify that instances can be pickled
         '''
         p = Point(x=10, y=20)
-        self.assertEquals(p, pickle.loads(pickle.dumps(p, -1)))
+        self.assertEqual(p, pickle.loads(pickle.dumps(p, -1)))
 
     def test_namedtuple_override(self):
         '''
@@ -99,9 +99,9 @@ class TestBackports(unittest.TestCase):
         p1 = HypotPoint(3, 4)
         p2 = HypotPoint(14, 5)
         p3 = HypotPoint(9. / 7, 6)
-        self.assertEquals(p1.hypot, 5.0)
-        self.assertAlmostEquals(p2.hypot, 14.866068747318506)
-        self.assertAlmostEquals(p3.hypot, 6.136209027118437)
+        self.assertEqual(p1.hypot, 5.0)
+        self.assertAlmostEqual(p2.hypot, 14.866068747318506)
+        self.assertAlmostEqual(p3.hypot, 6.136209027118437)
 
     def test_namedtuple_optimize(self):
         """
@@ -116,7 +116,7 @@ class TestBackports(unittest.TestCase):
                 return self._make(_map(kwds.get, ('x', 'y'), self))
 
         p = OptimizedPoint(11, 22)._replace(x=100)
-        self.assertEquals(p.x, 100)
+        self.assertEqual(p.x, 100)
 
 
 if __name__ == '__main__':

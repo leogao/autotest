@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import StringIO
+import io
 import logging
 import os
 import shutil
@@ -10,7 +10,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client import job, setup_job
 from autotest.client import utils
@@ -126,7 +126,7 @@ class test_setup_job(unittest.TestCase):
         self.jobtag = "jobtag"
 
         # get rid of stdout and logging
-        sys.stdout = StringIO.StringIO()
+        sys.stdout = io.StringIO()
         logging_manager.configure_logging(logging_config.TestingConfig())
         logging.disable(logging.CRITICAL)
 
@@ -211,7 +211,7 @@ class test_setup_job(unittest.TestCase):
         self.construct_job()
         dummy = "asdf"
         ret = self.job.relative_path(os.path.join(self.job.resultdir, dummy))
-        self.assertEquals(ret, dummy)
+        self.assertEqual(ret, dummy)
 
     def test_setup_dirs_raise(self):
         self.construct_job()

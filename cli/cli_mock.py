@@ -10,7 +10,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.cli import atest, rpc
 from autotest.frontend.afe import rpc_client_lib
 from autotest.frontend.afe.json_rpc import proxy
@@ -53,10 +53,10 @@ class cli_unittest(unittest.TestCase):
 
     def assertWords(self, string, to_find=[], not_in=[]):
         for word in to_find:
-            self.assert_(string.find(word) >= 0,
+            self.assertTrue(string.find(word) >= 0,
                          "Could not find '%s' in: %s" % (word, string))
         for word in not_in:
-            self.assert_(string.find(word) < 0,
+            self.assertTrue(string.find(word) < 0,
                          "Found (and shouldn't have) '%s' in: %s" % (word,
                                                                      string))
 

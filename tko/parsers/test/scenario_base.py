@@ -1,7 +1,7 @@
 """Base support for parser scenario testing.
 """
 
-import ConfigParser
+import configparser
 import difflib
 import itertools
 import os
@@ -15,7 +15,7 @@ from os import path
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import utils, autotemp
 from autotest.tko import status_lib
 from autotest.tko.parsers.test import templates
@@ -66,8 +66,8 @@ class ParserException(object):
           orig: Exception; To copy
         """
         self.classname = orig.__class__.__name__
-        print "Copying exception:", self.classname
-        for key, val in orig.__dict__.iteritems():
+        print("Copying exception:", self.classname)
+        for key, val in orig.__dict__.items():
             setattr(self, key, val)
 
     def __eq__(self, other):
@@ -102,7 +102,7 @@ class ParserTestResult(object):
         Args:
             orig: testobj; Framework test result instance to copy.
         """
-        for key, val in orig.__dict__.iteritems():
+        for key, val in orig.__dict__.items():
             if key == 'kernel':
                 setattr(self, key, dict(val.__dict__))
             elif key == 'iterations':
@@ -163,7 +163,7 @@ def compare_parser_results(left, right):
         if type(obj) is list:
             return [
                 '%d) %s' % pair
-                for pair in itertools.izip(itertools.count(), obj)]
+                for pair in zip(itertools.count(), obj)]
         else:
             return ['i) %s' % obj]
 
@@ -238,15 +238,15 @@ class BaseScenarioTestCase(unittest_hotfix.TestCase):
     def test_status_version(self):
         """Ensure basic sanity."""
         self.skipIf(not self.harness)
-        self.assertEquals(
+        self.assertEqual(
             self.harness.status_version, self.expected_status_version)
 
 
 def shelve_open(filename, flag='c', protocol=None, writeback=False):
     """A more system-portable wrapper around shelve.open, with the exact
     same arguments and interpretation."""
-    import dumbdbm
-    return shelve.Shelf(dumbdbm.open(filename, flag), protocol, writeback)
+    import dbm.dumb
+    return shelve.Shelf(dbm.dumb.open(filename, flag), protocol, writeback)
 
 
 def new_parser_harness(results_dirpath):
@@ -352,9 +352,9 @@ def write_config(package_dirpath, **properties):
       package_dirpath: str; Path to scenario package directory.
       properties: dict; Key value entries to write to to config file.
     """
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     config.add_section(TEST)
-    for key, val in properties.iteritems():
+    for key, val in properties.items():
         config.set(TEST, key, val)
 
     config_filepath = path.join(package_dirpath, CONFIG_FILENAME)
@@ -372,7 +372,7 @@ def load_config(package_dirpath):
     Returns:
       ConfigParser.RawConfigParser;
     """
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     config_filepath = path.join(package_dirpath, CONFIG_FILENAME)
     config.read(config_filepath)
     return config

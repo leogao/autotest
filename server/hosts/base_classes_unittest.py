@@ -4,7 +4,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client.shared import settings
 from autotest.client.shared.test_utils import mock
@@ -65,7 +65,7 @@ class test_host_class(unittest.TestCase):
             "HOSTS", "wait_up_processes", default="").and_return("")
 
         host = base_classes.Host()
-        self.assertEquals(host.get_wait_up_processes(), set())
+        self.assertEqual(host.get_wait_up_processes(), set())
         self.god.check_playback()
 
     def test_get_wait_up_ignores_whitespace(self):
@@ -73,7 +73,7 @@ class test_host_class(unittest.TestCase):
             "HOSTS", "wait_up_processes", default="").and_return("  ")
 
         host = base_classes.Host()
-        self.assertEquals(host.get_wait_up_processes(), set())
+        self.assertEqual(host.get_wait_up_processes(), set())
         self.god.check_playback()
 
     def test_get_wait_up_single_process(self):
@@ -81,7 +81,7 @@ class test_host_class(unittest.TestCase):
             "HOSTS", "wait_up_processes", default="").and_return("proc1")
 
         host = base_classes.Host()
-        self.assertEquals(host.get_wait_up_processes(),
+        self.assertEqual(host.get_wait_up_processes(),
                           set(["proc1"]))
         self.god.check_playback()
 
@@ -91,7 +91,7 @@ class test_host_class(unittest.TestCase):
             "proc1,proc2,proc3")
 
         host = base_classes.Host()
-        self.assertEquals(host.get_wait_up_processes(),
+        self.assertEqual(host.get_wait_up_processes(),
                           set(["proc1", "proc2", "proc3"]))
         self.god.check_playback()
 
@@ -101,7 +101,7 @@ class test_host_class(unittest.TestCase):
             "proc1,proc2,proc1")
 
         host = base_classes.Host()
-        self.assertEquals(host.get_wait_up_processes(),
+        self.assertEqual(host.get_wait_up_processes(),
                           set(["proc1", "proc2"]))
         self.god.check_playback()
 

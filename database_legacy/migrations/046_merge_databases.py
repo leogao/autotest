@@ -1,7 +1,7 @@
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.database_legacy import db_utils, migrate
 
 TKO_MIGRATION_NAME = '031_rename_tko_tables'
@@ -9,7 +9,7 @@ migrations_module = __import__('autotest.tko.migrations', globals(),
                                locals(), [TKO_MIGRATION_NAME])
 tko_migration = getattr(migrations_module, TKO_MIGRATION_NAME)
 
-TABLE_NAMES = tko_migration.RENAMES_UP.values()
+TABLE_NAMES = list(tko_migration.RENAMES_UP.values())
 
 
 def migrate_up(manager):
@@ -23,7 +23,7 @@ def migrate_up(manager):
         tko_manager.initialize_and_fill_test_db()
 
     if not manager.force:
-        response = raw_input(
+        response = input(
             'This migration will merge the autotest_web and tko databases. '
             'Following the migration, the tko database will be dropped. '
             'Any user-added tables in tko will NOT be migrated. This '

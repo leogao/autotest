@@ -8,7 +8,7 @@ import sys
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.settings import settings, SettingsError
 
 
@@ -29,13 +29,13 @@ def main(args):
         try:
             section, var = entry.split('.')
         except ValueError:
-            print "Invalid SECTION.varable supplied: " + entry
+            print("Invalid SECTION.varable supplied: " + entry)
             usage()
 
         try:
-            print settings.get_value(section, var)
+            print(settings.get_value(section, var))
         except SettingsError:
-            print "Error reading %s.%s" % (section, var)
+            print("Error reading %s.%s" % (section, var))
 
 
 if __name__ == '__main__':

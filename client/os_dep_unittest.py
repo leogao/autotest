@@ -453,7 +453,7 @@ class TestLibrary(unittest.TestCase):
 class TestUniqueList(unittest.TestCase):
 
     def test_unique_list(self):
-        thous = range(1, 1000)
+        thous = list(range(1, 1000))
         lst = list(itertools.chain(thous, thous))
         assert thous == os_dep.unique_not_false_list(lst)
         lst = list(itertools.chain(thous, reversed(thous)))

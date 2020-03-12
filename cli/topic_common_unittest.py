@@ -7,12 +7,12 @@
 import os
 import sys
 import unittest
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.cli import cli_mock, topic_common, rpc
 
 
@@ -26,11 +26,11 @@ class topic_common_misc_tests(unittest.TestCase):
         self.assertRaises(KeyError, get_item_key, {}, 'a.')
         self.assertRaises(ValueError, get_item_key, {'a': {}}, 'a.')
         self.assertRaises(KeyError, get_item_key, {'a': {}}, 'a.b')
-        self.assertEquals(2, get_item_key({'a.b': 2, 'a': {}}, 'a.b'))
-        self.assertEquals(9, get_item_key({'a': {'b': 9}}, 'a.b'))
-        self.assertEquals(3, get_item_key({'a': {'b': {'c': 3}}}, 'a.b.c'))
-        self.assertEquals(5, get_item_key({'a': 5}, 'a'))
-        self.assertEquals({'b': 9}, get_item_key({'a': {'b': 9}}, 'a'))
+        self.assertEqual(2, get_item_key({'a.b': 2, 'a': {}}, 'a.b'))
+        self.assertEqual(9, get_item_key({'a': {'b': 9}}, 'a.b'))
+        self.assertEqual(3, get_item_key({'a': {'b': {'c': 3}}}, 'a.b.c'))
+        self.assertEqual(5, get_item_key({'a': 5}, 'a'))
+        self.assertEqual({'b': 9}, get_item_key({'a': {'b': 9}}, 'a'))
 
 
 class item_parse_info_unittest(cli_mock.cli_unittest):
@@ -305,18 +305,18 @@ class atest_unittest(cli_mock.cli_unittest):
                           self.atest.invalid_arg, 'This is bad')
         (output, err) = self.god.unmock_io()
         self.god.check_playback()
-        self.assert_(err.find('This is bad') >= 0)
+        self.assertTrue(err.find('This is bad') >= 0)
 
     def test_invalid_arg_continue(self):
         # The string will be placed into self.atest.failed
         self.atest.invalid_arg('This is sort of ok')
-        self.assert_('This is sort of ok' in self.atest.failed.keys())
+        self.assertTrue('This is sort of ok' in list(self.atest.failed.keys()))
 
     def test_failure_continue(self):
         self.atest.failure('This is partly bad', item='item0',
                            what_failed='something important')
         err = self.atest.failed['something important']
-        self.assert_('This is partly bad' in err.keys())
+        self.assertTrue('This is partly bad' in list(err.keys()))
 
     def test_failure_continue_multiple_different_errors(self):
         self.atest.failure('This is partly bad', item='item0',
@@ -324,11 +324,11 @@ class atest_unittest(cli_mock.cli_unittest):
         self.atest.failure('This is really bad', item='item0',
                            what_failed='something really important')
         err = self.atest.failed['something important']
-        self.assert_('This is partly bad' in err)
-        self.assert_('This is really bad' not in err)
+        self.assertTrue('This is partly bad' in err)
+        self.assertTrue('This is really bad' not in err)
         err = self.atest.failed['something really important']
-        self.assert_('This is partly bad' not in err)
-        self.assert_('This is really bad' in err)
+        self.assertTrue('This is partly bad' not in err)
+        self.assertTrue('This is really bad' in err)
 
     def test_failure_continue_multiple_same_errors(self):
         self.atest.failure('This is partly bad', item='item0',
@@ -336,10 +336,10 @@ class atest_unittest(cli_mock.cli_unittest):
         self.atest.failure('This is really bad', item='item1',
                            what_failed='something important')
         errs = self.atest.failed['something important']
-        self.assert_('This is partly bad' in errs)
-        self.assert_('This is really bad' in errs)
-        self.assert_(set(['item0']) in errs.values())
-        self.assert_(set(['item1']) in errs.values())
+        self.assertTrue('This is partly bad' in errs)
+        self.assertTrue('This is really bad' in errs)
+        self.assertTrue(set(['item0']) in list(errs.values()))
+        self.assertTrue(set(['item1']) in list(errs.values()))
 
     def test_failure_continue_multiple_errors_mixed(self):
         self.atest.failure('This is partly bad', item='item0',
@@ -349,16 +349,16 @@ class atest_unittest(cli_mock.cli_unittest):
         self.atest.failure('This is really bad', item='item1',
                            what_failed='something important')
         errs = self.atest.failed['something important']
-        self.assert_('This is partly bad' in errs)
-        self.assert_('This is really bad' in errs)
-        self.assert_(set(['item0']) in errs.values())
-        self.assert_(set(['item1']) in errs.values())
+        self.assertTrue('This is partly bad' in errs)
+        self.assertTrue('This is really bad' in errs)
+        self.assertTrue(set(['item0']) in list(errs.values()))
+        self.assertTrue(set(['item1']) in list(errs.values()))
 
         errs = self.atest.failed['something really important']
-        self.assert_('This is really bad' in errs)
-        self.assert_('This is partly bad' not in errs)
-        self.assert_(set(['item0']) in errs.values())
-        self.assert_(set(['item1']) not in errs.values())
+        self.assertTrue('This is really bad' in errs)
+        self.assertTrue('This is partly bad' not in errs)
+        self.assertTrue(set(['item0']) in list(errs.values()))
+        self.assertTrue(set(['item1']) not in list(errs.values()))
 
     def test_failure_continue_multiple_errors_mixed_same_error(self):
         self.atest.failure('This is partly bad', item='item0',
@@ -368,15 +368,15 @@ class atest_unittest(cli_mock.cli_unittest):
         self.atest.failure('This is partly bad', item='item1',
                            what_failed='something important')
         errs = self.atest.failed['something important']
-        self.assert_('This is partly bad' in errs)
-        self.assert_('This is really bad' not in errs)
-        self.assert_(set(['item0', 'item1']) in errs.values())
+        self.assertTrue('This is partly bad' in errs)
+        self.assertTrue('This is really bad' not in errs)
+        self.assertTrue(set(['item0', 'item1']) in list(errs.values()))
 
         errs = self.atest.failed['something really important']
-        self.assert_('This is really bad' in errs)
-        self.assert_('This is partly bad' not in errs)
-        self.assert_(set(['item0']) in errs.values())
-        self.assert_(set(['item1']) not in errs.values())
+        self.assertTrue('This is really bad' in errs)
+        self.assertTrue('This is partly bad' not in errs)
+        self.assertTrue(set(['item0']) in list(errs.values()))
+        self.assertTrue(set(['item1']) not in list(errs.values()))
 
     def test_failure_exit(self):
         self.atest.kill_on_failure = True
@@ -386,7 +386,7 @@ class atest_unittest(cli_mock.cli_unittest):
                           self.atest.failure, 'This is partly bad')
         (output, err) = self.god.unmock_io()
         self.god.check_playback()
-        self.assert_(err.find('This is partly bad') >= 0)
+        self.assertTrue(err.find('This is partly bad') >= 0)
 
     def test_failure_exit_item(self):
         self.atest.kill_on_failure = True
@@ -729,28 +729,28 @@ class atest_unittest(cli_mock.cli_unittest):
     def test_execute_rpc_bad_server(self):
         self.atest.afe = rpc.afe_comm('http://does_not_exist')
         self.god.mock_io()
-        rpc.afe_comm.run.expect_call('myop').and_raises(urllib2.URLError("<urlopen error (-2, 'Name or service not known')>"))
+        rpc.afe_comm.run.expect_call('myop').and_raises(urllib.error.URLError("<urlopen error (-2, 'Name or service not known')>"))
         sys.exit.expect_call(1).and_raises(cli_mock.ExitException)
         self.assertRaises(cli_mock.ExitException,
                           self.atest.execute_rpc, 'myop')
         (output, err) = self.god.unmock_io()
         self.god.check_playback()
-        self.assert_(err.find('http://does_not_exist') >= 0)
+        self.assertTrue(err.find('http://does_not_exist') >= 0)
 
     #
     # Print Unit tests
     #
     def __test_print_fields(self, func, expected, **dargs):
-        if not dargs.has_key('items'):
+        if 'items' not in dargs:
             dargs['items'] = [{'hostname': 'h0',
                                'platform': 'p0',
-                               'labels': [u'l0', u'l1'],
+                               'labels': ['l0', 'l1'],
                                'locked': 1,
                                'id': 'id0',
                                'name': 'name0'},
                               {'hostname': 'h1',
                                'platform': 'p1',
-                               'labels': [u'l2', u'l3'],
+                               'labels': ['l2', 'l3'],
                                'locked': 0,
                                'id': 'id1',
                                'name': 'name1'}]
@@ -869,7 +869,7 @@ class atest_unittest(cli_mock.cli_unittest):
                                          'name': 'name0'},
                                         {'hostname': 'h1',
                                          'platform': 'p1',
-                                         'labels': [u'l2', u'l3'],
+                                         'labels': ['l2', 'l3'],
                                          'locked': 0,
                                          'id': 'id1',
                                          'name': 'name1'}],

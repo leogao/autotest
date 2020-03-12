@@ -15,8 +15,8 @@ poirier@google.com (Benjamin Poirier),
 stutsman@google.com (Ryan Stutsman)
 """
 
-import cPickle
-import cStringIO
+import pickle
+import io
 import logging
 import os
 import re
@@ -256,7 +256,7 @@ class Host(object):
             if not use_cache or filename not in cached_files:
                 output = self.run('cat \'%s\'' % filename,
                                   stdout_tee=open('/dev/null', 'w')).stdout
-                fd = cStringIO.StringIO(output)
+                fd = io.StringIO(output)
 
                 if not use_cache:
                     return fd
@@ -284,7 +284,7 @@ class Host(object):
         Raise: error.AutoservHostError if unfiltered unmounted partition found
         """
 
-        print 'Checking if non-swap partitions are mounted...'
+        print('Checking if non-swap partitions are mounted...')
 
         unmounted = partition.get_unmounted_partition_list(root_part,
                                                            filter_func=filter_func, open_func=self.get_open_func())
@@ -561,7 +561,7 @@ class Host(object):
                   "cPickle.dump(glob.glob(sys.argv[1]), sys.stdout, 0)'")
         output = self.run(SCRIPT, args=(glob,), stdout_tee=None,
                           timeout=60).stdout
-        return cPickle.loads(output)
+        return pickle.loads(output)
 
     def symlink_closure(self, paths):
         """
@@ -587,10 +587,10 @@ class Host(object):
                   "        if link_to not in closure.keys():\n"
                   "            paths[link_to] = None\n"
                   "cPickle.dump(closure.keys(), sys.stdout, 0)'")
-        input_data = cPickle.dumps(dict((path, None) for path in paths), 0)
+        input_data = pickle.dumps(dict((path, None) for path in paths), 0)
         output = self.run(SCRIPT, stdout_tee=None, stdin=input_data,
                           timeout=60).stdout
-        return cPickle.loads(output)
+        return pickle.loads(output)
 
     def cleanup_kernels(self, boot_dir='/boot'):
         """
@@ -603,7 +603,7 @@ class Host(object):
         # find all the vmlinuz images referenced by the bootloader
         boot_info = self.bootloader.get_entries()
         used_kernver = []
-        for boot in boot_info.itervalues():
+        for boot in boot_info.values():
             k = os.path.basename(boot['kernel'])[len('vmlinuz-'):]
             if k not in used_kernver:
                 used_kernver.append(k)

@@ -145,7 +145,7 @@ class Iscsi(object):
         """
         sessions = iscsi_get_sessions()
         login = False
-        if self.target in map(lambda x: x[1], sessions):
+        if self.target in [x[1] for x in sessions]:
             login = True
         return login
 

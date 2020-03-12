@@ -3,8 +3,8 @@ import os
 
 import aexpect
 
-import remote
-import utils
+from . import remote
+from . import utils
 
 
 def get_public_key():

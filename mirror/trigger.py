@@ -105,12 +105,12 @@ class map_action(base_action):
 
             # dictionary of (test-name,kernel-config)-><list-of-machines>
             jobs = {}
-            for machine, info in self._tests_map.iteritems():
+            for machine, info in self._tests_map.items():
                 config_paths = info.kernel_configs
                 kernel_config = '/boot/config'
 
                 if config_paths:
-                    kvers = config_paths.keys()
+                    kvers = list(config_paths.keys())
                     close = self._closest_kver_leq(kvers, kernel)
                     kernel_config = config_paths[close]
 
@@ -118,7 +118,7 @@ class map_action(base_action):
                     jobs.setdefault((test, kernel_config), [])
                     jobs[(test, kernel_config)].append(machine)
 
-            for (test, kernel_config), hosts in jobs.iteritems():
+            for (test, kernel_config), hosts in jobs.items():
                 c = self._generate_control(test, kernel, kernel_config)
                 self._schedule_job(self._jobname_pattern % kernel, c, hosts)
 

@@ -42,13 +42,13 @@ def _wrap_generator_with_readonly(generator):
         generator_obj = generator(*args, **kwargs)
         readonly_connection.connection().set_django_connection()
         try:
-            first_value = generator_obj.next()
+            first_value = next(generator_obj)
         finally:
             readonly_connection.connection().unset_django_connection()
         yield first_value
 
         while True:
-            yield generator_obj.next()
+            yield next(generator_obj)
 
     wrapper_generator.__name__ = generator.__name__
     return wrapper_generator
@@ -418,7 +418,7 @@ class ExtendedManager(dbmodels.Manager):
         :return: a pivot iterator - see _get_pivot_iterator()
         """
         filter_data = {foreign_key_field.name + '__pk__in':
-                       base_objects_by_id.keys()}
+                       list(base_objects_by_id.keys())}
         for related_object in related_model.objects.filter(**filter_data):
             # lookup base object in the dict, rather than grabbing it from the
             # related object.  we need to return instances from the dict, not
@@ -447,7 +447,7 @@ class ExtendedManager(dbmodels.Manager):
                    to_field=pivot_to_field,
                    table=pivot_table,
                    id_list=','.join(str(id_) for id_
-                                    in base_objects_by_id.iterkeys()))
+                                    in base_objects_by_id.keys()))
         cursor = readonly_connection.connection().cursor()
         cursor.execute(query)
         return cursor.fetchall()
@@ -596,7 +596,7 @@ class ModelExtensions(object):
         """
         new_data = dict(data)
         field_dict = cls.get_field_dict()
-        for name, obj in field_dict.iteritems():
+        for name, obj in field_dict.items():
             if data.get(name) is not None:
                 continue
             if obj.default is not dbmodels.fields.NOT_PROVIDED:
@@ -685,7 +685,7 @@ class ModelExtensions(object):
         cls = type(self)
         field_dict = self.get_field_dict()
         manager = cls.get_valid_manager()
-        for field_name, field_obj in field_dict.iteritems():
+        for field_name, field_obj in field_dict.items():
             if not field_obj.unique:
                 continue
 
@@ -736,7 +736,7 @@ class ModelExtensions(object):
     def do_validate(self):
         errors = self._validate()
         unique_errors = self._validate_unique()
-        for field_name, error in unique_errors.iteritems():
+        for field_name, error in unique_errors.items():
             errors.setdefault(field_name, error)
         if errors:
             raise ValidationError(errors)
@@ -763,7 +763,7 @@ class ModelExtensions(object):
         data.
         """
         data = self.prepare_data_args(data, kwargs)
-        for field_name, value in data.iteritems():
+        for field_name, value in data.items():
             setattr(self, field_name, value)
         self.do_validate()
         self.save()
@@ -883,7 +883,7 @@ class ModelExtensions(object):
         Like query_objects, but return a list of dictionaries.
         """
         query = cls.query_objects(filter_data, initial_query=initial_query)
-        extra_fields = query.query.extra_select.keys()
+        extra_fields = list(query.query.extra_select.keys())
         field_dicts = [model_object.get_object_dict(extra_fields=extra_fields)
                        for model_object in query]
         return field_dicts
@@ -899,9 +899,9 @@ class ModelExtensions(object):
         else:
             manager = cls.objects
 
-        if isinstance(id_or_name, (int, long)):
+        if isinstance(id_or_name, int):
             return manager.get(pk=id_or_name)
-        if isinstance(id_or_name, basestring) and hasattr(cls, 'name_field'):
+        if isinstance(id_or_name, str) and hasattr(cls, 'name_field'):
             return manager.get(**{cls.name_field: id_or_name})
         raise ValueError(
             'Invalid positional argument: %s (%s)' % (id_or_name,
@@ -928,7 +928,7 @@ class ModelExtensions(object):
         extra_fields: list of extra attribute names to include, in addition to
         the fields defined on this object.
         """
-        fields = self.get_field_dict().keys()
+        fields = list(self.get_field_dict().keys())
         if extra_fields:
             fields += extra_fields
         object_dict = dict((field_name, getattr(self, field_name))
@@ -949,7 +949,7 @@ class ModelExtensions(object):
         """
         See on_attribute_changed.
         """
-        assert not isinstance(attributes, basestring)
+        assert not isinstance(attributes, str)
         self._recorded_attributes = dict((attribute, getattr(self, attribute))
                                          for attribute in attributes)
 
@@ -957,11 +957,11 @@ class ModelExtensions(object):
         """
         See on_attribute_changed.
         """
-        for attribute, original_value in self._recorded_attributes.iteritems():
+        for attribute, original_value in self._recorded_attributes.items():
             new_value = getattr(self, attribute)
             if original_value != new_value:
                 self.on_attribute_changed(attribute, original_value)
-        self._record_attributes(self._recorded_attributes.keys())
+        self._record_attributes(list(self._recorded_attributes.keys()))
 
     def on_attribute_changed(self, attribute, old_value):
         """

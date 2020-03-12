@@ -1,11 +1,11 @@
 # Copyright 2009 Google Inc. Released under the GPL v2
 
-import HTMLParser
+import html.parser
 import os
 import re
 import time
-import urllib2
-import urlparse
+import urllib.request, urllib.error, urllib.parse
+import urllib.parse
 
 from autotest.client.shared import utils
 from autotest.mirror import database
@@ -26,7 +26,7 @@ class source(object):
         from "files".
         """
         old_files = self.database.get_dictionary()
-        return dict(filter(lambda x: x[0] not in old_files, files.iteritems()))
+        return dict([x for x in iter(files.items()) if x[0] not in old_files])
 
     def get_new_files(self):
         raise NotImplementedError('get_new_files not implemented')
@@ -88,10 +88,10 @@ class rsync_source(source):
         return self._get_new_files(files)
 
 
-class _ahref_parser(HTMLParser.HTMLParser):
+class _ahref_parser(html.parser.HTMLParser):
 
     def reset(self, url=None, pattern=None):
-        HTMLParser.HTMLParser.reset(self)
+        html.parser.HTMLParser.reset(self)
         self.url = url
         self.pattern = pattern
         self.links = []
@@ -101,13 +101,13 @@ class _ahref_parser(HTMLParser.HTMLParser):
             for name, value in attrs:
                 if name == 'href':
                     # compose absolute URL if relative "href" found
-                    url = urlparse.urljoin(self.url, value)
+                    url = urllib.parse.urljoin(self.url, value)
                     if self.pattern.match(url):
                         self.links.append(url)
 
     def get_ahref_list(self, url, pattern):
         self.reset(url, pattern)
-        self.feed(urllib2.urlopen(url).read())
+        self.feed(urllib.request.urlopen(url).read())
         self.close()
 
         return self.links
@@ -150,10 +150,10 @@ class url_source(source):
         from the document pointed to by the given url.
         """
         try:
-            info = urllib2.urlopen(url).info()
+            info = urllib.request.urlopen(url).info()
         except IOError as err:
             # file is referenced but does not exist
-            print 'WARNING: %s' % err
+            print('WARNING: %s' % err)
             return None
 
         size = info.get('content-length')
@@ -173,7 +173,7 @@ class url_source(source):
 
         files = {}
         for url, pattern in self.urls:
-            links = parser.get_ahref_list(urlparse.urljoin(self.prefix, url),
+            links = parser.get_ahref_list(urllib.parse.urljoin(self.prefix, url),
                                           pattern)
             for link in links:
                 item = self._get_item(link)

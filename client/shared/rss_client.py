@@ -240,11 +240,11 @@ class FileTransferClient(object):
             msg = self._receive_msg()
         except FileTransferError:
             # No error message -- re-raise original exception
-            raise e[0], e[1], e[2]
+            raise e[0](e[1]).with_traceback(e[2])
         if msg == RSS_ERROR:
             errmsg = self._receive_packet()
             raise FileTransferServerError(errmsg)
-        raise e[0], e[1], e[2]
+        raise e[0](e[1]).with_traceback(e[2])
 
 
 class FileUploadClient(FileTransferClient):
@@ -503,7 +503,7 @@ def main():
     logger = None
     if options.verbose:
         def p(s):
-            print s
+            print(s)
         logger = p
 
     if options.download:

@@ -5,7 +5,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.test_utils import mock
 from autotest.tko import models
 from autotest.tko.parsers import version_0
@@ -130,8 +130,8 @@ class test_status_line(unittest.TestCase):
     def test_handles_start(self):
         line = version_0.status_line(0, "START", "----", "test",
                                      "", {})
-        self.assertEquals(line.type, "START")
-        self.assertEquals(line.status, None)
+        self.assertEqual(line.type, "START")
+        self.assertEqual(line.status, None)
 
     def test_fails_info(self):
         self.assertRaises(AssertionError,
@@ -142,15 +142,15 @@ class test_status_line(unittest.TestCase):
         for stat in self.statuses:
             line = version_0.status_line(0, stat, "----", "test",
                                          "", {})
-            self.assertEquals(line.type, "STATUS")
-            self.assertEquals(line.status, stat)
+            self.assertEqual(line.type, "STATUS")
+            self.assertEqual(line.status, stat)
 
     def test_handles_endstatus(self):
         for stat in self.statuses:
             line = version_0.status_line(0, "END " + stat, "----",
                                          "test", "", {})
-            self.assertEquals(line.type, "END")
-            self.assertEquals(line.status, stat)
+            self.assertEqual(line.type, "END")
+            self.assertEqual(line.status, stat)
 
     def test_fails_on_bad_status(self):
         for stat in self.statuses:
@@ -165,36 +165,36 @@ class test_status_line(unittest.TestCase):
                                      {"key1": "value",
                                       "key2": "another value",
                                       "key3": "value3"})
-        self.assertEquals(line.indent, 5)
-        self.assertEquals(line.status, "GOOD")
-        self.assertEquals(line.subdir, "subdir_name")
-        self.assertEquals(line.testname, "test_name")
-        self.assertEquals(line.reason, "my reason here")
-        self.assertEquals(line.optional_fields,
+        self.assertEqual(line.indent, 5)
+        self.assertEqual(line.status, "GOOD")
+        self.assertEqual(line.subdir, "subdir_name")
+        self.assertEqual(line.testname, "test_name")
+        self.assertEqual(line.reason, "my reason here")
+        self.assertEqual(line.optional_fields,
                           {"key1": "value", "key2": "another value",
                            "key3": "value3"})
 
     def test_parses_blank_subdir(self):
         line = version_0.status_line(0, "GOOD", "----", "test",
                                      "", {})
-        self.assertEquals(line.subdir, None)
+        self.assertEqual(line.subdir, None)
 
     def test_parses_blank_testname(self):
         line = version_0.status_line(0, "GOOD", "subdir", "----",
                                      "", {})
-        self.assertEquals(line.testname, None)
+        self.assertEqual(line.testname, None)
 
     def test_parse_line_smoketest(self):
         input_data = ("\t\t\tGOOD\t----\t----\t"
                       "field1=val1\tfield2=val2\tTest Passed")
         line = version_0.status_line.parse_line(input_data)
-        self.assertEquals(line.indent, 3)
-        self.assertEquals(line.type, "STATUS")
-        self.assertEquals(line.status, "GOOD")
-        self.assertEquals(line.subdir, None)
-        self.assertEquals(line.testname, None)
-        self.assertEquals(line.reason, "Test Passed")
-        self.assertEquals(line.optional_fields,
+        self.assertEqual(line.indent, 3)
+        self.assertEqual(line.type, "STATUS")
+        self.assertEqual(line.status, "GOOD")
+        self.assertEqual(line.subdir, None)
+        self.assertEqual(line.testname, None)
+        self.assertEqual(line.reason, "Test Passed")
+        self.assertEqual(line.optional_fields,
                           {"field1": "val1", "field2": "val2"})
 
     def test_parse_line_handles_newline(self):
@@ -203,13 +203,13 @@ class test_status_line(unittest.TestCase):
         for suffix in ("", "\n"):
             line = version_0.status_line.parse_line(input_data +
                                                     suffix)
-            self.assertEquals(line.indent, 2)
-            self.assertEquals(line.type, "STATUS")
-            self.assertEquals(line.status, "GOOD")
-            self.assertEquals(line.subdir, None)
-            self.assertEquals(line.testname, None)
-            self.assertEquals(line.reason, "No newline here!")
-            self.assertEquals(line.optional_fields,
+            self.assertEqual(line.indent, 2)
+            self.assertEqual(line.type, "STATUS")
+            self.assertEqual(line.status, "GOOD")
+            self.assertEqual(line.subdir, None)
+            self.assertEqual(line.testname, None)
+            self.assertEqual(line.reason, "No newline here!")
+            self.assertEqual(line.optional_fields,
                               {"field1": "val1",
                                "field2": "val2"})
 
@@ -218,53 +218,53 @@ class test_status_line(unittest.TestCase):
                       "embedded\nnew lines\n")
 
         line = version_0.status_line.parse_line(input_data)
-        self.assertEquals(line.indent, 1)
-        self.assertEquals(line.type, "END")
-        self.assertEquals(line.status, "FAIL")
-        self.assertEquals(line.subdir, None)
-        self.assertEquals(line.testname, "test")
-        self.assertEquals(line.reason, "Status\nwith\nembedded\nnew lines")
-        self.assertEquals(line.optional_fields, {"field1": "val1"})
+        self.assertEqual(line.indent, 1)
+        self.assertEqual(line.type, "END")
+        self.assertEqual(line.status, "FAIL")
+        self.assertEqual(line.subdir, None)
+        self.assertEqual(line.testname, "test")
+        self.assertEqual(line.reason, "Status\nwith\nembedded\nnew lines")
+        self.assertEqual(line.optional_fields, {"field1": "val1"})
 
     def test_parse_line_fails_on_untabbed_lines(self):
         input_data = "   GOOD\trandom\tfields\tof text"
         line = version_0.status_line.parse_line(input_data)
-        self.assertEquals(line, None)
+        self.assertEqual(line, None)
         line = version_0.status_line.parse_line(input_data.lstrip())
-        self.assertEquals(line.indent, 0)
-        self.assertEquals(line.type, "STATUS")
-        self.assertEquals(line.status, "GOOD")
-        self.assertEquals(line.subdir, "random")
-        self.assertEquals(line.testname, "fields")
-        self.assertEquals(line.reason, "of text")
-        self.assertEquals(line.optional_fields, {})
+        self.assertEqual(line.indent, 0)
+        self.assertEqual(line.type, "STATUS")
+        self.assertEqual(line.status, "GOOD")
+        self.assertEqual(line.subdir, "random")
+        self.assertEqual(line.testname, "fields")
+        self.assertEqual(line.reason, "of text")
+        self.assertEqual(line.optional_fields, {})
 
     def test_parse_line_fails_on_incomplete_lines(self):
         input_data = "\t\tGOOD\tfield\tsecond field"
         complete_data = input_data + "\tneeded last field"
         line = version_0.status_line.parse_line(input_data)
-        self.assertEquals(line, None)
+        self.assertEqual(line, None)
         line = version_0.status_line.parse_line(complete_data)
-        self.assertEquals(line.indent, 2)
-        self.assertEquals(line.type, "STATUS")
-        self.assertEquals(line.status, "GOOD")
-        self.assertEquals(line.subdir, "field")
-        self.assertEquals(line.testname, "second field")
-        self.assertEquals(line.reason, "needed last field")
-        self.assertEquals(line.optional_fields, {})
+        self.assertEqual(line.indent, 2)
+        self.assertEqual(line.type, "STATUS")
+        self.assertEqual(line.status, "GOOD")
+        self.assertEqual(line.subdir, "field")
+        self.assertEqual(line.testname, "second field")
+        self.assertEqual(line.reason, "needed last field")
+        self.assertEqual(line.optional_fields, {})
 
     def test_parse_line_handles_tabs_in_reason(self):
         input_data = ("\tEND FAIL\t----\ttest\tfield1=val1\tfield2=val2\tReason"
                       " with\ta\tcouple\ttabs")
 
         line = version_0.status_line.parse_line(input_data)
-        self.assertEquals(line.indent, 1)
-        self.assertEquals(line.type, "END")
-        self.assertEquals(line.status, "FAIL")
-        self.assertEquals(line.subdir, None)
-        self.assertEquals(line.testname, "test")
-        self.assertEquals(line.reason, "Reason with\ta\tcouple\ttabs")
-        self.assertEquals(line.optional_fields, {"field1": "val1",
+        self.assertEqual(line.indent, 1)
+        self.assertEqual(line.type, "END")
+        self.assertEqual(line.status, "FAIL")
+        self.assertEqual(line.subdir, None)
+        self.assertEqual(line.testname, "test")
+        self.assertEqual(line.reason, "Reason with\ta\tcouple\ttabs")
+        self.assertEqual(line.optional_fields, {"field1": "val1",
                                                  "field2": "val2"})
 
 

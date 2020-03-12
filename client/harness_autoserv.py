@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 import logging
 import os
 
@@ -32,7 +32,7 @@ class harness_autoserv(harness.harness):
         # was written.
         try:
             settings.get_section_values(["CLIENT", "COMMON"])
-        except ConfigParser.NoSectionError:
+        except configparser.NoSectionError:
             logging.error("Empty CLIENT or COMMON configuration session. "
                           "global_config.ini missing. This probably means "
                           "a bug on the server code. Please verify.")

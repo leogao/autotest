@@ -2,7 +2,7 @@
 # Copyright 2008 Google Inc.
 # Released under the GPLv2
 
-import Queue
+import queue
 import threading
 
 
@@ -15,16 +15,16 @@ class ThreadPool:
 
     def __init__(self, function, numthreads=40):
         assert(numthreads > 0)
-        self.threads = Queue.Queue(0)
+        self.threads = queue.Queue(0)
         self.function = function
         self.numthreads = 0
-        self.queue = Queue.Queue(0)
+        self.queue = queue.Queue(0)
         self._start_threads(numthreads)
 
     def wait(self):
         """ Checks to see if any threads are still working and
             blocks until worker threads all complete. """
-        for x in xrange(self.numthreads):
+        for x in range(self.numthreads):
             self.queue.put('die')
         # As only spawned threads are allowed to add new ones,
         # we can safely wait for the thread queue to be empty
@@ -37,7 +37,7 @@ class ThreadPool:
                 if thread.isAlive():
                     thread.join()
                 dead += 1
-            except Queue.Empty:
+            except queue.Empty:
                 assert(dead == self.numthreads)
                 return
 
@@ -55,7 +55,7 @@ class ThreadPool:
     def _start_threads(self, nthreads):
         """ Start up threads to spawn workers. """
         self.numthreads += nthreads
-        for i in xrange(nthreads):
+        for i in range(nthreads):
             thread = threading.Thread(target=self._new_worker)
             thread.setDaemon(True)
             self.threads.put(thread)
@@ -72,5 +72,5 @@ class ThreadPool:
                 self.function(data)
             except Exception as full_error:
                 # Put a catch all here.
-                print ('Unexpected failure in the thread calling %s: %s' %
+                print('Unexpected failure in the thread calling %s: %s' %
                        (self.function.__name__, full_error))

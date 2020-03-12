@@ -3,12 +3,12 @@
 """Tests for drone_utility."""
 
 import unittest
-from cStringIO import StringIO
+from io import StringIO
 
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.settings import settings
 from autotest.client.shared.test_utils import mock
 from autotest.scheduler import drone_utility

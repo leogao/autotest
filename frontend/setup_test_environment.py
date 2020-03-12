@@ -4,7 +4,7 @@ from django.core import management
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 # we need to set DATABASE_ENGINE now, at import time, before the Django database
 # system gets initialized.
@@ -108,4 +108,4 @@ def print_queries():
     interest from the command line.
     """
     for query in connection.queries:
-        print query['sql'] + ';\n'
+        print(query['sql'] + ';\n')

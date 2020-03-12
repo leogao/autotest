@@ -10,7 +10,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.test_utils import mock
 from autotest.client.shared import boottool, distro
 from autotest.client import kernel, job, utils, kernelexpand
@@ -197,7 +197,7 @@ class TestKernel(unittest.TestCase):
         self.construct_kernel()
 
         ret_val = self.kernel.kernelexpand("/path/to/kernel")
-        self.assertEquals(ret_val, ["/path/to/kernel"])
+        self.assertEqual(ret_val, ["/path/to/kernel"])
         self.god.check_playback()
 
     def test_kernel_expand2(self):
@@ -210,7 +210,7 @@ class TestKernel(unittest.TestCase):
                                                 'mirror').and_return('patches')
 
         # run
-        self.assertEquals(self.kernel.kernelexpand(kernel), 'patches')
+        self.assertEqual(self.kernel.kernelexpand(kernel), 'patches')
         self.god.check_playback()
 
     def test_kernel_expand3(self):
@@ -231,7 +231,7 @@ class TestKernel(unittest.TestCase):
                                                 mirrors).and_return('patches')
 
         # run
-        self.assertEquals(self.kernel.kernelexpand(kernel), 'patches')
+        self.assertEqual(self.kernel.kernelexpand(kernel), 'patches')
         self.god.check_playback()
 
     def test_extract1(self):
@@ -339,7 +339,7 @@ class TestKernel(unittest.TestCase):
             local_patches.append((patch, dest, 'md5sum'))
 
         # run and check
-        self.assertEquals(self.kernel.get_patches(patches), local_patches)
+        self.assertEqual(self.kernel.get_patches(patches), local_patches)
         self.god.check_playback()
 
     def test_apply_patches(self):
@@ -382,7 +382,7 @@ class TestKernel(unittest.TestCase):
 
         # run and test
         self.kernel.apply_patches(patches)
-        self.assertEquals(self.kernel.applied_patches, applied_patches)
+        self.assertEqual(self.kernel.applied_patches, applied_patches)
         self.god.check_playback()
 
     def test_get_kernel_tree1(self):
@@ -578,14 +578,14 @@ class TestKernel(unittest.TestCase):
         utils.get_current_kernel_arch.expect_call().and_return("i386")
 
         # run and check
-        self.assertEquals(self.kernel.get_kernel_build_arch(), "i386")
+        self.assertEqual(self.kernel.get_kernel_build_arch(), "i386")
         self.god.check_playback()
 
     def test_get_kernel_build_arch2(self):
         self.construct_kernel()
 
         # run and check
-        self.assertEquals(self.kernel.get_kernel_build_arch('i586'), "i386")
+        self.assertEqual(self.kernel.get_kernel_build_arch('i586'), "i386")
         self.god.check_playback()
 
     def test_get_kernel_build_release(self):
@@ -618,7 +618,7 @@ class TestKernel(unittest.TestCase):
             ("AwesomeRelease", "1.0"))
 
         # run and check
-        self.assertEquals(self.kernel.get_kernel_build_ident(),
+        self.assertEqual(self.kernel.get_kernel_build_ident(),
                           "AwesomeRelease::1.0")
         self.god.check_playback()
 

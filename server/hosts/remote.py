@@ -5,7 +5,7 @@ import logging
 import os
 import socket
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from autotest.client.shared import error
 from autotest.client.shared.settings import settings
@@ -161,7 +161,7 @@ class RemoteHost(base_classes.Host):
                 if wait:
                     warning_msg = ('Machine failed to respond to hard reset '
                                    'attempt (%s/%s)')
-                    for attempt in xrange(num_attempts - 1):
+                    for attempt in range(num_attempts - 1):
                         try:
                             self.wait_for_restart(timeout, log_failure=False,
                                                   old_boot_id=old_boot_id,
@@ -295,7 +295,7 @@ class RemoteHost(base_classes.Host):
                 self.bootloader.add_args(label, kernel_args)
 
         # define a function for the reboot and run it in a group
-        print "Reboot: initiating reboot"
+        print("Reboot: initiating reboot")
 
         def reboot():
             self.record("GOOD", None, "reboot.start")
@@ -389,7 +389,7 @@ class RemoteHost(base_classes.Host):
             all_labels = keyvals.get('labels', '')
             if all_labels:
                 all_labels = all_labels.split(',')
-                return [urllib.unquote(label) for label in all_labels]
+                return [urllib.parse.unquote(label) for label in all_labels]
         return []
 
     def delete_tmp_dir(self, tmpdir):

@@ -2,8 +2,8 @@ import copy
 import getpass
 import logging
 import pprint
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 
 import httplib2
 from autotest.client.shared import utils
@@ -15,7 +15,7 @@ _request_headers = {}
 
 def _get_request_headers(uri):
     # ParseResult is subscriptable, ignore E1136
-    server = urlparse.urlparse(uri)[0:2]    # pylint: disable=E1136
+    server = urllib.parse.urlparse(uri)[0:2]    # pylint: disable=E1136
     if server in _request_headers:
         return _request_headers[server]
 
@@ -28,7 +28,7 @@ def _get_request_headers(uri):
 
 def _clear_request_headers(uri):
     # ParseResult is subscriptable, ignore E1136
-    server = urlparse.urlparse(uri)[0:2]    # pylint: disable=E1136
+    server = urllib.parse.urlparse(uri)[0:2]    # pylint: disable=E1136
     if server in _request_headers:
         del _request_headers[server]
 
@@ -68,7 +68,7 @@ class Resource(object):
     def __init__(self, representation_dict, http):
         self._http = http
         assert 'href' in representation_dict
-        for key, value in representation_dict.iteritems():
+        for key, value in representation_dict.items():
             setattr(self, str(key), value)
 
     def __repr__(self):
@@ -91,7 +91,7 @@ class Resource(object):
             return [self._read_representation(element) for element in value]
         if isinstance(value, dict):
             converted_dict = dict((key, self._read_representation(sub_value))
-                                  for key, sub_value in value.iteritems())
+                                  for key, sub_value in value.items())
             if 'href' in converted_dict:
                 return type(self)(converted_dict, http=self._http)
             return converted_dict
@@ -103,14 +103,14 @@ class Resource(object):
             return [self._write_representation(element) for element in value]
         if isinstance(value, dict):
             return dict((key, self._write_representation(sub_value))
-                        for key, sub_value in value.iteritems())
+                        for key, sub_value in value.items())
         if isinstance(value, Resource):
             return value._representation()
         return value
 
     def _representation(self):
         return dict((key, self._write_representation(value))
-                    for key, value in self.__dict__.iteritems() if not
+                    for key, value in self.__dict__.items() if not
                     key.startswith('_') and not callable(value))
 
     def _do_request(self, method, uri, query_parameters, encoded_body):
@@ -120,7 +120,7 @@ class Resource(object):
                 uri_parts += '&'
             else:
                 uri_parts += '?'
-            uri_parts += urllib.urlencode(query_parameters, doseq=True)
+            uri_parts += urllib.parse.urlencode(query_parameters, doseq=True)
         full_uri = ''.join(uri_parts)
 
         if encoded_body:
@@ -176,7 +176,7 @@ class Resource(object):
         """This effectively lets us treat dicts as MultiValueDicts."""
         if hasattr(mapping, 'iterlists'):  # mapping is already a MultiValueDict
             return mapping.iterlists()
-        return ((key, (value,)) for key, value in mapping.iteritems())
+        return ((key, (value,)) for key, value in mapping.items())
 
     def get(self, query_parameters=None, **kwarg_query_parameters):
         """

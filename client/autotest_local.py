@@ -6,7 +6,7 @@ try:
     autodir = os.path.join(rootdir, 'client')
     autodirbin = os.path.join(rootdir, 'client', 'bin')
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
     autodirbin = os.path.realpath(sys.argv[0])
     autodir = os.path.dirname(autodirbin)
     sys.path.insert(0, autodirbin)
@@ -49,13 +49,13 @@ class AutotestLocalApp:
             if os.path.isdir(self.options.test_directory):
                 os.environ['CUSTOM_DIR'] = self.options.test_directory
             else:
-                print "The custom directory specifed does not exist, ignoring it..."
+                print("The custom directory specifed does not exist, ignoring it...")
 
         self.args = self.cmd_parser.parse_args(args, self.options)
 
         # Check for a control file if not in prebuild mode.
         if len(args) != 1 and self.options.client_test_setup is None:
-            print "Missing control file!"
+            print("Missing control file!")
             self.usage()
 
     def main(self):

@@ -256,7 +256,7 @@ class DBObject(object):
         self._assert_row_length(row)
         differences = {}
         datetime_cmp_fmt = '%Y-%m-%d %H:%M:%S'  # Leave off the microseconds.
-        for field, row_value in itertools.izip(self._fields, row):
+        for field, row_value in zip(self._fields, row):
             current_value = getattr(self, field)
             if (isinstance(current_value, datetime.datetime) and
                     isinstance(row_value, datetime.datetime)):
@@ -276,7 +276,7 @@ class DBObject(object):
         self._assert_row_length(row)
 
         self._valid_fields = set()
-        for field, value in itertools.izip(self._fields, row):
+        for field, value in zip(self._fields, row):
             setattr(self, field, value)
             self._valid_fields.add(field)
 
@@ -672,7 +672,7 @@ class HostQueueEntry(DBObject):
         keyval_list = job_stats['keyval_dict_list']
         if keyval_list:
             for kv in keyval_list:
-                k, v = kv.items()[0]
+                k, v = list(kv.items())[0]
                 body += "%s:\n" % k
                 for part in v.split():
                     body += "  %s\n" % part
@@ -711,7 +711,7 @@ class HostQueueEntry(DBObject):
         status_counts = models.Job.objects.get_status_counts(
             [self.job.id])[self.job.id]
         status = ', '.join('%d %s' % (count, status) for status, count
-                           in status_counts.iteritems())
+                           in status_counts.items())
 
         subject, body = self._get_status_email_contents(status, summary, None)
 
@@ -934,7 +934,7 @@ class Job(DBObject):
             status_translate = {"GOOD": "PASS", "TEST_NA": "SKIP"}
             if rows:
                 label = rows[0][1]
-                if label in status_translate.keys():
+                if label in list(status_translate.keys()):
                     label = status_translate[label]
                 formatted_row += "%s (%s):\n" % (label, len(rows))
                 for row in rows:
@@ -1045,7 +1045,7 @@ class Job(DBObject):
 
         keyval_dict_list = []
         keyval_list = self.get_keyval_list()
-        print "DBG: kv list obtained from get_keyval_list: %s" % keyval_list
+        print("DBG: kv list obtained from get_keyval_list: %s" % keyval_list)
         if keyval_list:
             for kv in keyval_list:
                 keyval_dict = {}

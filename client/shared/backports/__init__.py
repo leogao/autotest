@@ -24,13 +24,13 @@ def next(*args):
     """
     if len(args) == 2:
         try:
-            return args[0].next()
+            return args[0].__next__()
         except StopIteration:
             return args[1]
     elif len(args) > 2:
         raise TypeError("next expected at most 2 arguments, %s" % len(args))
     else:
-        return args[0].next()
+        return args[0].__next__()
 
 # pylint: disable=W0622
 # noinspection PyShadowingBuiltins

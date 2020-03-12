@@ -6,7 +6,7 @@ Module for testing config file changes.
 @license: GPL v2
 """
 
-import commands
+import subprocess
 import os
 import shutil
 
@@ -87,7 +87,7 @@ def extract_config_changes(file_paths, compared_file_paths=[]):
         else:
             command = "diff -U 0 -b " + temp_file_path + " " + file_paths[i]
 
-        (_, output) = commands.getstatusoutput(command)
+        (_, output) = subprocess.getstatusoutput(command)
         lines = output.split('\n')
         changes[file_paths[i]] = parse_unified_diff_output(lines)
     return changes
@@ -108,7 +108,7 @@ def assert_config_change_dict(actual_result, expected_result):
                          not_present_removes)
     """
     change_diffs = {}
-    for file_path, actual_changes in actual_result.items():
+    for file_path, actual_changes in list(actual_result.items()):
         expected_changes = expected_result[file_path]
 
         actual_adds = actual_changes[0]
@@ -138,7 +138,7 @@ def assert_config_change(actual_result, expected_result):
     were detected.
     """
     change_diffs = assert_config_change_dict(actual_result, expected_result)
-    for file_change in change_diffs.values():
+    for file_change in list(change_diffs.values()):
         for line_change in file_change:
             if len(line_change) != 0:
                 return False
@@ -150,7 +150,7 @@ def print_change_diffs(change_diffs):
     Pretty prints the output of the evaluate_config_changes function
     """
     diff_strings = []
-    for file_path, change_diff in change_diffs.items():
+    for file_path, change_diff in list(change_diffs.items()):
         if not (change_diff[0] or change_diff[1] or
                 change_diff[2] or change_diff[3]):
             continue

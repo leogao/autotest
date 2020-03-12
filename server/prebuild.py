@@ -7,7 +7,7 @@ import os
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client import setup_job as client_setup_job
 
 

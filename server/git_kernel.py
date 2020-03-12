@@ -7,7 +7,7 @@ import os
 
 from autotest.client.shared import git
 
-import source_kernel
+from . import source_kernel
 
 
 class GitKernel(git.GitRepoHelper):

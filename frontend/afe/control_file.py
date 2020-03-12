@@ -10,7 +10,7 @@ import re
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.frontend.afe import model_logic
 from autotest.client.shared.settings import settings
 import autotest.frontend.settings as frontend_settings
@@ -295,7 +295,7 @@ def _get_tests_stanza(raw_control_files, is_server, prepend, append,
         step_template = CLIENT_STEP_TEMPLATE
         footer = ''
 
-    header = ''.join(step_template % i for i in xrange(len(steps)))
+    header = ''.join(step_template % i for i in range(len(steps)))
     return header + '\n' + '\n\n'.join(steps) + footer
 
 

@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
-import StringIO
+import io
 import unittest
 
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client import fsinfo
 from autotest.client.shared.test_utils import mock
 
@@ -21,7 +21,7 @@ class fsionfo_test(unittest.TestCase):
         self.god.unstub_all()
 
     def _create_test_file(self, filename, contents):
-        test_file = StringIO.StringIO(contents)
+        test_file = io.StringIO(contents)
         fsinfo.open.expect_call(filename, 'r').and_return(test_file)
 
     def test_ext_mkfs_options(self):
@@ -49,7 +49,7 @@ class fsionfo_test(unittest.TestCase):
         mkfs_option = {}
         fsinfo.ext_mkfs_options(tune2fs_dict, mkfs_option)
 
-        for option, value in expected_option.iteritems():
+        for option, value in expected_option.items():
             self.assertEqual(value, mkfs_option[option])
 
     def test_xfs_mkfs_options(self):
@@ -96,7 +96,7 @@ class fsionfo_test(unittest.TestCase):
                            '-l size': 10485760}
         mkfs_option = {}
         fsinfo.xfs_mkfs_options(tune2fs_dict, mkfs_option)
-        for option, value in expected_option.iteritems():
+        for option, value in expected_option.items():
             self.assertEqual(value, mkfs_option[option])
 
     def test_opt_string2dict(self):

@@ -6,7 +6,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.server import utils
 
 
@@ -24,8 +24,8 @@ class UtilsTest(unittest.TestCase):
 
     def test_form_cell_mappings(self):
         (ntuples, failures) = utils.form_ntuples_from_machines(self.machines)
-        self.assertEquals(self.ntuples, ntuples)
-        self.assertEquals(self.failures, failures)
+        self.assertEqual(self.ntuples, ntuples)
+        self.assertEqual(self.failures, failures)
 
     # parse_machine() test cases
     def test_parse_machine_good(self):
@@ -46,11 +46,11 @@ class UtilsTest(unittest.TestCase):
                     )
 
         for machine, result in gooddata:
-            self.assertEquals(utils.parse_machine(machine), result)
+            self.assertEqual(utils.parse_machine(machine), result)
 
     def test_parse_machine_override(self):
         '''Test that parse_machine() defaults can be overridden'''
-        self.assertEquals(utils.parse_machine('host', 'bob', 'foo', 1234, 'rhel6'),
+        self.assertEqual(utils.parse_machine('host', 'bob', 'foo', 1234, 'rhel6'),
                           ('host', 'bob', 'foo', 1234, 'rhel6'))
 
     def test_parse_machine_bad(self):

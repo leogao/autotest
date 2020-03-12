@@ -48,7 +48,7 @@ class defaultdict(dict):
             args = tuple()
         else:
             args = self.default_factory,
-        return type(self), args, None, None, self.iteritems()
+        return type(self), args, None, None, iter(self.items())
 
     def copy(self):
         return self.__copy__()
@@ -60,7 +60,7 @@ class defaultdict(dict):
     def __deepcopy__(self, memo):
         import copy
         return type(self)(self.default_factory,
-                          copy.deepcopy(self.iteritems()))
+                          copy.deepcopy(iter(self.items())))
 
     def __repr__(self):
         return 'defaultdict(%s, %s)' % (self.default_factory,

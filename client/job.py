@@ -497,7 +497,7 @@ class base_client_job(base_job.base_job):
                 raise error.TestError("Dependency %s does not exist" % dep)
 
             os.chdir(dep_dir)
-            if execfile('%s.py' % dep, {}) is None:
+            if exec(compile(open('%s.py' % dep, "rb").read(), '%s.py' % dep, 'exec'), {}) is None:
                 logging.info('Dependency %s successfully built', dep)
 
     def _runtest(self, url, tag, timeout, args, dargs):
@@ -999,7 +999,7 @@ class base_client_job(base_job.base_job):
         # defined globally can be used as a next step.
         if callable(fn):
             fn = fn.__name__
-        if not isinstance(fn, types.StringTypes):
+        if not isinstance(fn, (str,)):
             raise StepError("Next steps must be functions or "
                             "strings containing the function name")
         ancestry = copy.copy(self._current_step_ancestry)
@@ -1107,7 +1107,7 @@ class base_client_job(base_job.base_job):
                                'args': self.args}
         exec(JOB_PREAMBLE, global_control_vars, global_control_vars)
         try:
-            execfile(self.control, global_control_vars, global_control_vars)
+            exec(compile(open(self.control, "rb").read(), self.control, 'exec'), global_control_vars, global_control_vars)
         except error.TestNAError as detail:
             self.record(detail.exit_status, None, self.control, str(detail))
         except SystemExit:

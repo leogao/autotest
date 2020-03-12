@@ -3,7 +3,7 @@
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 import unittest
 
 from autotest.frontend import setup_django_environment  # pylint: disable=W0611
@@ -41,9 +41,9 @@ class TestResultTest(TkoResourceTestCase):
 
     def test_entry(self):
         response = self.request('get', 'test_results/1')
-        self.assertEquals(response['test_name'], 'mytest1')
-        self.assertEquals(response['status'], 'GOOD')
-        self.assertEquals(response['reason'], '')
+        self.assertEqual(response['test_name'], 'mytest1')
+        self.assertEqual(response['status'], 'GOOD')
+        self.assertEqual(response['reason'], '')
 
 
 if __name__ == '__main__':

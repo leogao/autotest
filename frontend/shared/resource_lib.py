@@ -1,7 +1,7 @@
 import cgi
 import re
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import django.core.exceptions
 import simplejson
@@ -30,7 +30,7 @@ class _InputDict(dict):
 
     @classmethod
     def remove_unspecified_fields(cls, field_dict):
-        return dict((key, value) for key, value in field_dict.iteritems()
+        return dict((key, value) for key, value in field_dict.items()
                     if value is not _NO_VALUE_SPECIFIED)
 
 
@@ -142,7 +142,7 @@ class Resource(object):
         if query_params:
             full_query_params.update(query_params)
         if full_query_params:
-            path += '?' + urllib.urlencode(full_query_params.lists(),
+            path += '?' + urllib.parse.urlencode(full_query_params.lists(),
                                            doseq=True)
         return self._request.build_absolute_uri(path)
 
@@ -163,13 +163,13 @@ class Resource(object):
             view_method, args, kwargs = urlresolvers.resolve(uri)
         except http.Http404:
             raise exceptions.BadRequest('Unable to resolve URI %s' % uri)
-        resource_class = view_method.im_self  # class owning this classmethod
+        resource_class = view_method.__self__  # class owning this classmethod
         return resource_class.from_uri_args(self._request, **kwargs)
 
     def resolve_link(self, link):
         if isinstance(link, dict):
             uri = link['href']
-        elif isinstance(link, basestring):
+        elif isinstance(link, str):
             uri = link
         else:
             raise exceptions.BadRequest('Unable to understand link %s' % link)
@@ -208,7 +208,7 @@ class Resource(object):
         elif content_type == 'application/x-www-form-urlencoded':
             cgi_dict = cgi.parse_qs(raw_data)  # django won't do this for PUT
             raw_dict = {}
-            for key, values in cgi_dict.items():
+            for key, values in list(cgi_dict.items()):
                 value = values[-1]  # take last value if multiple were given
                 try:
                     # attempt to parse numbers, booleans and nulls
@@ -354,7 +354,7 @@ class Collection(Resource):
     def __init__(self, request):
         super(Collection, self).__init__(request)
         assert self.entry_class is not None
-        if isinstance(self.entry_class, basestring):
+        if isinstance(self.entry_class, str):
             type(self).entry_class = _resolve_class_path(self.entry_class)
 
         self._query_processor = query_lib.QueryProcessor()
@@ -482,26 +482,26 @@ class Relationship(Entry):
             assert isinstance(self.entries[name], self.related_classes[name])
 
         # just grab the request from one of the entries
-        some_entry = self.entries.itervalues().next()
+        some_entry = next(iter(self.entries.values()))
         super(Relationship, self).__init__(some_entry._request)
 
     @classmethod
     def from_uri_args(cls, request, **kwargs):
         # kwargs contains URI args for each entry
         entries = {}
-        for name, entry_class in cls.related_classes.iteritems():
+        for name, entry_class in cls.related_classes.items():
             entries[name] = entry_class.from_uri_args(request, **kwargs)
         return cls(**entries)
 
     def _uri_args(self):
         kwargs = {}
-        for name, entry in self.entries.iteritems():
+        for name, entry in self.entries.items():
             kwargs.update(entry._uri_args())
         return kwargs
 
     def short_representation(self):
         rep = self.link()
-        for name, entry in self.entries.iteritems():
+        for name, entry in self.entries.items():
             rep[name] = entry.short_representation()
         return rep
 
@@ -515,7 +515,7 @@ class Relationship(Entry):
         """
         this_model = type(instance)
         models = [entry_class.model for entry_class
-                  in cls.related_classes.values()]
+                  in list(cls.related_classes.values())]
         if isinstance(instance, models[0]):
             this_model, other_model = models
         else:
@@ -535,7 +535,7 @@ class Relationship(Entry):
 
     def _delete_entry(self):
         # choose order arbitrarily
-        entry, other_entry = self.entries.itervalues()
+        entry, other_entry = iter(self.entries.values())
         related_manager = self._get_related_manager(entry.instance)
         related_manager.remove(other_entry.instance)
 
@@ -569,7 +569,7 @@ class RelationshipCollection(Collection):
 
         if fixed_entry is not None:
             self._set_fixed_entry(fixed_entry)
-            entry_uri_arg = self.fixed_entry._uri_args().values()[0]
+            entry_uri_arg = list(self.fixed_entry._uri_args().values())[0]
             self._query_params[self.fixed_name] = entry_uri_arg
 
     def _set_fixed_entry(self, entry):
@@ -581,7 +581,7 @@ class RelationshipCollection(Collection):
         other resource handling code) or from read_query_parameters() (when a
         request is made directly for the collection.
         """
-        names = self.related_classes.keys()
+        names = list(self.related_classes.keys())
         if isinstance(entry, self.related_classes[names[0]]):
             self.fixed_name, self.unfixed_name = names
         else:
@@ -595,7 +595,7 @@ class RelationshipCollection(Collection):
     def _query_parameters_accepted(self):
         return [(name, 'Show relationships for this %s' % entry_class.__name__)
                 for name, entry_class
-                in self.related_classes.iteritems()]
+                in self.related_classes.items()]
 
     def _resolve_query_param(self, name, uri_arg):
         entry_class = self.related_classes[name]
@@ -607,7 +607,7 @@ class RelationshipCollection(Collection):
             raise exceptions.BadRequest(
                 'You must specify one of the parameters %s and %s'
                 % tuple(self.related_classes.keys()))
-        query_items = self._query_params.items()
+        query_items = list(self._query_params.items())
         fixed_entry = self._resolve_query_param(*query_items[0])
         self._set_fixed_entry(fixed_entry)
 

@@ -4,7 +4,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.database_legacy import database_connection, migrate
 
 # Which section of the global config to pull info from.  We won't actually use
@@ -48,7 +48,7 @@ class DummyMigration(object):
         self.do_migration(self.version, 'down')
 
 
-MIGRATIONS = [DummyMigration(n) for n in xrange(1, NUM_MIGRATIONS + 1)]
+MIGRATIONS = [DummyMigration(n) for n in range(1, NUM_MIGRATIONS + 1)]
 
 
 class TestableMigrationManager(migrate.MigrationManager):
@@ -76,30 +76,30 @@ class MigrateManagerTest(unittest.TestCase):
 
     def test_sync(self):
         self.manager.do_sync_db()
-        self.assertEquals(self.manager.get_db_version(), NUM_MIGRATIONS)
-        self.assertEquals(DummyMigration.get_migrations_done(),
+        self.assertEqual(self.manager.get_db_version(), NUM_MIGRATIONS)
+        self.assertEqual(DummyMigration.get_migrations_done(),
                           [(1, 'up'), (2, 'up'), (3, 'up')])
 
         DummyMigration.clear_migrations_done()
         self.manager.do_sync_db(0)
-        self.assertEquals(self.manager.get_db_version(), 0)
-        self.assertEquals(DummyMigration.get_migrations_done(),
+        self.assertEqual(self.manager.get_db_version(), 0)
+        self.assertEqual(DummyMigration.get_migrations_done(),
                           [(3, 'down'), (2, 'down'), (1, 'down')])
 
     def test_sync_one_by_one(self):
-        for version in xrange(1, NUM_MIGRATIONS + 1):
+        for version in range(1, NUM_MIGRATIONS + 1):
             self.manager.do_sync_db(version)
-            self.assertEquals(self.manager.get_db_version(),
+            self.assertEqual(self.manager.get_db_version(),
                               version)
-            self.assertEquals(
+            self.assertEqual(
                 DummyMigration.get_migrations_done()[-1],
                 (version, 'up'))
 
-        for version in xrange(NUM_MIGRATIONS - 1, -1, -1):
+        for version in range(NUM_MIGRATIONS - 1, -1, -1):
             self.manager.do_sync_db(version)
-            self.assertEquals(self.manager.get_db_version(),
+            self.assertEqual(self.manager.get_db_version(),
                               version)
-            self.assertEquals(
+            self.assertEqual(
                 DummyMigration.get_migrations_done()[-1],
                 (version + 1, 'down'))
 
@@ -107,7 +107,7 @@ class MigrateManagerTest(unittest.TestCase):
         self.manager.do_sync_db()
         DummyMigration.clear_migrations_done()
         self.manager.do_sync_db()
-        self.assertEquals(DummyMigration.get_migrations_done(), [])
+        self.assertEqual(DummyMigration.get_migrations_done(), [])
 
 
 class DummyMigrationManager(object):
@@ -129,7 +129,7 @@ class MigrationTest(unittest.TestCase):
         migration.migrate_up(self.manager)
         migration.migrate_down(self.manager)
 
-        self.assertEquals(self.manager.calls, ['foo', 'bar'])
+        self.assertEqual(self.manager.calls, ['foo', 'bar'])
 
     def test_migration_with_methods(self):
         class DummyMigration(object):

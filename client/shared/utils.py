@@ -11,7 +11,7 @@ inheritance with, just a collection of static methods.
 #
 # Copyright 2008 Google Inc. Released under the GPL v2
 
-import StringIO
+import io
 import glob
 import logging
 import os
@@ -31,8 +31,8 @@ import tarfile
 import textwrap
 import time
 import traceback
-import urllib2
-import urlparse
+import urllib.request, urllib.error, urllib.parse
+import urllib.parse
 import warnings
 from threading import Thread, Event, Lock
 
@@ -45,7 +45,7 @@ from autotest.client.shared import error, logging_manager
 from autotest.client.shared import progressbar
 from autotest.client.shared.settings import settings
 from autotest.client import os_dep
-import commands
+import subprocess
 import fcntl
 import getpass
 
@@ -105,7 +105,7 @@ class BgJob(object):
 
         # allow for easy stdin input by string, we'll let subprocess create
         # a pipe for stdin input and we'll write to it in the wait loop
-        if isinstance(stdin, basestring):
+        if isinstance(stdin, str):
             self.string_stdin = stdin
             stdin = subprocess.PIPE
         else:
@@ -191,14 +191,14 @@ class AsyncJob(BgJob):
             self.stdin_thread.start()
 
         self.stdout_lock = Lock()
-        self.stdout_file = StringIO.StringIO()
+        self.stdout_file = io.StringIO()
         self.stdout_thread = Thread(target=AsyncJob._fd_drainer, name=("%s-stdout" % command),
                                     args=(self.sp.stdout, [self.stdout_file, self.stdout_tee],
                                           self.stdout_lock))
         self.stdout_thread.daemon = True
 
         self.stderr_lock = Lock()
-        self.stderr_file = StringIO.StringIO()
+        self.stderr_file = io.StringIO()
         self.stderr_thread = Thread(target=AsyncJob._fd_drainer, name=("%s-stderr" % command),
                                     args=(self.sp.stderr, [self.stderr_file, self.stderr_tee],
                                           self.stderr_lock))
@@ -399,7 +399,7 @@ def get_field(data, param, linestart="", sep=" "):
     if find is not None:
         return re.split("%s" % sep, find.group(1))[param]
     else:
-        print "There is no line which starts with %s in data." % linestart
+        print("There is no line which starts with %s in data." % linestart)
         return None
 
 
@@ -434,7 +434,7 @@ def matrix_to_string(matrix, header=None):
             lengths.append(len(column))
     for row in matrix:
         for i, column in enumerate(row):
-            column = unicode(column).encode("utf-8")
+            column = str(column).encode("utf-8")
             cl = len(column)
             try:
                 ml = lengths[i]
@@ -648,7 +648,7 @@ class FileFieldMonitor(object):
         if logging:
             self.log.append(value)
         if not self.mode_diff:
-            value = map(lambda x, y: x + y, value, self.old_value)
+            value = list(map(lambda x, y: x + y, value, self.old_value))
 
         self.old_value = value
         self.num_of_get_value += 1
@@ -684,10 +684,9 @@ class FileFieldMonitor(object):
                 self.end_event.set()
                 self.monitor.join()
             if (self.mode_diff):
-                self.value = map(lambda x, y: x - y, self.log[-1], self.log[0])
+                self.value = list(map(lambda x, y: x - y, self.log[-1], self.log[0]))
             else:
-                self.value = map(lambda x: x / self.num_of_get_value,
-                                 self.value)
+                self.value = [x / self.num_of_get_value for x in self.value]
 
     def get_status(self):
         """
@@ -699,8 +698,8 @@ class FileFieldMonitor(object):
             self.stop()
         if self.mode_diff:
             for i in range(len(self.log) - 1):
-                self.log[i] = (map(lambda x, y: x - y,
-                                   self.log[i + 1], self.log[i]))
+                self.log[i] = (list(map(lambda x, y: x - y,
+                                   self.log[i + 1], self.log[i])))
             if self.log:
                 self.log.pop()
         return (self.value, self.test_time, self.log, self.time_step)
@@ -709,7 +708,7 @@ class FileFieldMonitor(object):
 def is_url(path):
     """Return true if path looks like a URL"""
     # for now, just handle http and ftp
-    url_parts = urlparse.urlparse(path)
+    url_parts = urllib.parse.urlparse(path)
     return (url_parts[0] in ('http', 'ftp', 'git'))  # pylint: disable=E1136
 
 
@@ -720,7 +719,7 @@ def urlopen(url, data=None, timeout=5):
     old_timeout = socket.getdefaulttimeout()
     socket.setdefaulttimeout(timeout)
     try:
-        return urllib2.urlopen(url, data=data)
+        return urllib.request.urlopen(url, data=data)
     finally:
         socket.setdefaulttimeout(old_timeout)
 
@@ -797,7 +796,7 @@ def unmap_url(srcdir, src, destdir='.'):
                             (after retrieving it)
     """
     if is_url(src):
-        url_parts = urlparse.urlparse(src)
+        url_parts = urllib.parse.urlparse(src)
         # ParseResult is subscriptable, ignore E1136
         filename = os.path.basename(url_parts[2])  # pylint: disable=E1136
         dest = os.path.join(destdir, filename)
@@ -900,7 +899,7 @@ def run(command, timeout=None, ignore_status=False,
 
     :raise CmdError: the exit code of the command execution was not 0
     """
-    if isinstance(args, basestring):
+    if isinstance(args, str):
         raise TypeError('Got a string for the "args" keyword argument, '
                         'need a sequence.')
 
@@ -1002,7 +1001,7 @@ class InterruptedThread(Thread):
                     s = error.exception_context(self._e[1])
                     s = error.join_contexts(error.get_context(), s)
                     error.set_exception_context(self._e[1], s)
-                    raise self._e[0], self._e[1], self._e[2]
+                    raise self._e[0](self._e[1]).with_traceback(self._e[2])
             else:
                 return self._retval
         finally:
@@ -1026,7 +1025,7 @@ def join_bg_jobs(bg_jobs, timeout=None):
     """
     ret, timeout_error = 0, False
     for bg_job in bg_jobs:
-        bg_job.output_prepare(StringIO.StringIO(), StringIO.StringIO())
+        bg_job.output_prepare(io.StringIO(), io.StringIO())
 
     try:
         # We are holding ends to stdin, stdout pipes
@@ -1293,7 +1292,7 @@ class ForAll(list):
 
     def __getattr__(self, name):
         def wrapper(*args, **kargs):
-            return map(lambda o: o.__getattribute__(name)(*args, **kargs), self)
+            return [o.__getattribute__(name)(*args, **kargs) for o in self]
         return wrapper
 
 
@@ -1311,7 +1310,7 @@ class ForAllP(list):
                                                  args=args, kwargs=kargs))
             for t in threads:
                 t.start()
-            return map(lambda t: t.join(), threads)
+            return [t.join() for t in threads]
         return wrapper
 
 
@@ -1382,10 +1381,10 @@ def strip_unicode(input):
         return [strip_unicode(i) for i in input]
     elif type(input) == dict:
         output = {}
-        for key in input.keys():
+        for key in list(input.keys()):
             output[str(key)] = strip_unicode(input[key])
         return output
-    elif type(input) == unicode:
+    elif type(input) == str:
         return str(input)
     else:
         return input
@@ -1652,9 +1651,9 @@ def get_num_logical_cpus_per_socket(run_function=run):
     throw a CmdError exception.
     """
     siblings = run_function('grep "^siblings" /proc/cpuinfo').stdout.rstrip()
-    num_siblings = map(int,
+    num_siblings = list(map(int,
                        re.findall(r'^siblings\s*:\s*(\d+)\s*$',
-                                  siblings, re.M))
+                                  siblings, re.M)))
     if len(num_siblings) == 0:
         raise error.TestError('Unable to find siblings info in /proc/cpuinfo')
     if min(num_siblings) != max(num_siblings):
@@ -1988,7 +1987,7 @@ def get_relative_path(path, reference):
     ref_list = reference.split(os.path.sep)[1:]
 
     # find the longest leading common path
-    for i in xrange(min(len(path_list), len(ref_list))):
+    for i in range(min(len(path_list), len(ref_list))):
         if path_list[i] != ref_list[i]:
             # decrement i so when exiting this loop either by no match or by
             # end of range we are one step behind
@@ -2155,7 +2154,7 @@ def ask(question, auto=False):
     if auto:
         logging.info("%s (y/n) y" % question)
         return "y"
-    return raw_input("%s INFO | %s (y/n) " %
+    return input("%s INFO | %s (y/n) " %
                      (time.strftime("%H:%M:%S", time.localtime()), question))
 
 
@@ -2224,7 +2223,7 @@ def interactive_download(url, output_file, title='', chunk_size=100 * 1024):
     '''
     output_dir = os.path.dirname(output_file)
     output_file = open(output_file, 'w+b')
-    input_file = urllib2.urlopen(url)
+    input_file = urllib.request.urlopen(url)
 
     try:
         file_size = int(input_file.headers['Content-Length'])
@@ -2251,7 +2250,7 @@ def interactive_download(url, output_file, title='', chunk_size=100 * 1024):
             output_file.write(data)
         else:
             progress_bar.update(file_size)
-            print
+            print()
             break
 
     output_file.close()
@@ -2733,7 +2732,7 @@ def unique(llist):
     except TypeError:
         return None
     else:
-        return u.keys()
+        return list(u.keys())
 
 
 def find_command(cmd):
@@ -2795,7 +2794,7 @@ def kill_process_tree(pid, sig=signal.SIGKILL):
     """
     if not safe_kill(pid, signal.SIGSTOP):
         return
-    children = commands.getoutput("ps --ppid=%d -o pid=" % pid).split()
+    children = subprocess.getoutput("ps --ppid=%d -o pid=" % pid).split()
     for child in children:
         kill_process_tree(int(child), sig)
     safe_kill(pid, sig)
@@ -3046,7 +3045,7 @@ def get_full_pci_id(pci_id):
     :param pci_id: PCI ID of a device.
     """
     cmd = "lspci -D | awk '/%s/ {print $1}'" % pci_id
-    status, full_id = commands.getstatusoutput(cmd)
+    status, full_id = subprocess.getstatusoutput(cmd)
     if status != 0:
         return None
     return full_id
@@ -3059,7 +3058,7 @@ def get_vendor_from_pci_id(pci_id):
     :param pci_id: PCI ID of a device.
     """
     cmd = "lspci -n | awk '/%s/ {print $3}'" % pci_id
-    return re.sub(":", " ", commands.getoutput(cmd))
+    return re.sub(":", " ", subprocess.getoutput(cmd))
 
 
 def parallel(targets):
@@ -3416,13 +3415,13 @@ def get_unique_name(check, prefix="", suffix="", length=None, skip=None):
     """
     if length:
         _name = "_".join([_ for _ in (prefix, '%s', suffix) if _])
-        for _ in xrange(1000):
+        for _ in range(1000):
             name = _name % generate_random_string(length)
             if check(name):
                 return name
     else:
         _name = "_".join([_ for _ in (prefix, '%s', suffix) if _])
-        for i in xrange(skip, skip + 1000):
+        for i in range(skip, skip + 1000):
             name = _name % i
             if check(name):
                 return name

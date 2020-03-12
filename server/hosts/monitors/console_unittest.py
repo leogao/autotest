@@ -2,7 +2,7 @@
 
 """Tests for console.py"""
 
-import StringIO
+import io
 import os
 import shutil
 import signal
@@ -12,7 +12,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client.shared.test_utils import mock
 from autotest.server.hosts.monitors import console
@@ -48,7 +48,7 @@ class console_test(unittest.TestCase):
     def test_logfile_close_signal_handler(self):
         self.god.stub_function(os, 'exit')
         os.exit.expect_call(1)
-        logfile = StringIO.StringIO()
+        logfile = io.StringIO()
         console._set_logfile_close_signal_handler(logfile)
         try:
             self.assertFalse(logfile.closed)

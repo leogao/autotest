@@ -10,7 +10,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.cli import cli_mock, user
 
 
@@ -64,15 +64,15 @@ class user_list_unittest(cli_mock.cli_unittest):
         self.run_cmd(argv=['atest', 'user', 'list'],
                      rpcs=[('get_users', {},
                             True,
-                            [{u'access_level': 0,
-                              u'login': u'user0',
-                              u'id': 41},
-                             {u'access_level': 0,
-                              u'login': u'user5',
-                              u'id': 42},
-                             {u'access_level': 2,
-                              u'login': u'user0',
-                              u'id': 3}])],
+                            [{'access_level': 0,
+                              'login': 'user0',
+                              'id': 41},
+                             {'access_level': 0,
+                              'login': 'user5',
+                              'id': 42},
+                             {'access_level': 2,
+                              'login': 'user0',
+                              'id': 3}])],
                      out_words_ok=['user0', 'user5'],
                      out_words_no=['1', '3', '41', '42'])
 
@@ -80,9 +80,9 @@ class user_list_unittest(cli_mock.cli_unittest):
         self.run_cmd(argv=['atest', 'user', 'list', 'user0'],
                      rpcs=[('get_users', {'login__in': ['user0']},
                             True,
-                            [{u'access_level': 2,
-                              u'login': u'user0',
-                              u'id': 3}])],
+                            [{'access_level': 2,
+                              'login': 'user0',
+                              'id': 3}])],
                      out_words_ok=['user0'],
                      out_words_no=['2', '3'])
 
@@ -90,9 +90,9 @@ class user_list_unittest(cli_mock.cli_unittest):
         self.run_cmd(argv=['atest', 'user', 'list', '--acl', 'acl0'],
                      rpcs=[('get_users', {'aclgroup__name__in': ['acl0']},
                             True,
-                            [{u'access_level': 2,
-                              u'login': u'user0',
-                              u'id': 3}])],
+                            [{'access_level': 2,
+                              'login': 'user0',
+                              'id': 3}])],
                      out_words_ok=['user0'],
                      out_words_no=['2', '3'])
 
@@ -100,9 +100,9 @@ class user_list_unittest(cli_mock.cli_unittest):
         self.run_cmd(argv=['atest', 'user', 'list', '--access_level', '2'],
                      rpcs=[('get_users', {'access_level__in': ['2']},
                             True,
-                            [{u'access_level': 2,
-                              u'login': u'user0',
-                              u'id': 3}])],
+                            [{'access_level': 2,
+                              'login': 'user0',
+                              'id': 3}])],
                      out_words_ok=['user0'],
                      out_words_no=['2', '3'])
 
@@ -110,15 +110,15 @@ class user_list_unittest(cli_mock.cli_unittest):
         self.run_cmd(argv=['atest', 'user', 'list', '--verbose'],
                      rpcs=[('get_users', {},
                             True,
-                            [{u'access_level': 0,
-                              u'login': u'user0',
-                              u'id': 41},
-                             {u'access_level': 0,
-                              u'login': u'user5',
-                              u'id': 42},
-                             {u'access_level': 5,
-                              u'login': u'user0',
-                              u'id': 3}])],
+                            [{'access_level': 0,
+                              'login': 'user0',
+                              'id': 41},
+                             {'access_level': 0,
+                              'login': 'user5',
+                              'id': 42},
+                             {'access_level': 5,
+                              'login': 'user0',
+                              'id': 3}])],
                      out_words_ok=['user0', 'user5', '41', '42', '0', '5'])
 
     def test_execute_list_all_with_user_verbose(self):
@@ -127,12 +127,12 @@ class user_list_unittest(cli_mock.cli_unittest):
                            '-v'],
                      rpcs=[('get_users', {'login__in': ['user0', 'user1']},
                             True,
-                            [{u'access_level': 2,
-                              u'login': u'user0',
-                              u'id': 3},
-                             {u'access_level': 5,
-                              u'login': u'user1',
-                              u'id': 4}])],
+                            [{'access_level': 2,
+                              'login': 'user0',
+                              'id': 3},
+                             {'access_level': 5,
+                              'login': 'user1',
+                              'id': 4}])],
                      out_words_ok=['user0', 'user1', '3', '4', '5'])
         ufile.clean()
 
@@ -140,9 +140,9 @@ class user_list_unittest(cli_mock.cli_unittest):
         self.run_cmd(argv=['atest', 'user', 'list', '--acl', 'acl0', '-v'],
                      rpcs=[('get_users', {'aclgroup__name__in': ['acl0']},
                             True,
-                            [{u'access_level': 2,
-                              u'login': u'user0',
-                              u'id': 3}])],
+                            [{'access_level': 2,
+                              'login': 'user0',
+                              'id': 3}])],
                      out_words_ok=['user0', '3', '2'])
 
     def test_execute_list_all_with_access_level_verbose(self):
@@ -150,9 +150,9 @@ class user_list_unittest(cli_mock.cli_unittest):
                            '--access_level', '2', '-v'],
                      rpcs=[('get_users', {'access_level__in': ['2']},
                             True,
-                            [{u'access_level': 2,
-                              u'login': u'user0',
-                              u'id': 3}])],
+                            [{'access_level': 2,
+                              'login': 'user0',
+                              'id': 3}])],
                      out_words_ok=['user0', '2', '3'])
 
 

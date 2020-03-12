@@ -10,7 +10,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client import sysinfo
 from autotest.client import utils as client_utils
@@ -286,7 +286,7 @@ class TestBaseAutotest(unittest.TestCase):
         self.host.run.expect_call('test -w /another/path')
 
         autodir = autotest_remote.Autotest.get_installed_autodir(self.host)
-        self.assertEquals(autodir, '/another/path')
+        self.assertEqual(autodir, '/another/path')
 
     def test_get_install_dir(self):
         self._stub_get_client_autodir_paths()
@@ -299,7 +299,7 @@ class TestBaseAutotest(unittest.TestCase):
         self.host.run.expect_call('test -w /another/path')
 
         install_dir = autotest_remote.Autotest.get_install_dir(self.host)
-        self.assertEquals(install_dir, '/another/path')
+        self.assertEqual(install_dir, '/another/path')
 
     def test_client_logger_process_line_log_copy_collection_failure(self):
         collector = autotest_remote.log_collector.expect_new(self.host, '', '')
@@ -360,20 +360,20 @@ class test_autotest_mixin(unittest.TestCase):
     def test_passes(self):
         self.job.state_dict['test_result'] = True
         self.assertEqual(True, self.mixin.run_test('sleeptest', seconds=1))
-        self.assert_("job.run_test('sleeptest', seconds=1)\n"
+        self.assertTrue("job.run_test('sleeptest', seconds=1)\n"
                      in self.control_file)
         self.assertEqual(self.mixin, self.host)
 
     def test_fails_clean(self):
         self.job.state_dict['test_result'] = False
         self.assertEqual(False, self.mixin.run_test('sleeptest', seconds='2'))
-        self.assert_("job.run_test('sleeptest', seconds='2')\n"
+        self.assertTrue("job.run_test('sleeptest', seconds='2')\n"
                      in self.control_file)
         self.assertEqual(self.mixin, self.host)
 
     def test_fails_with_exception(self):
         self.assertEqual(False, self.mixin.run_test('sleeptest'))
-        self.assert_("job.run_test('sleeptest')\n" in self.control_file)
+        self.assertTrue("job.run_test('sleeptest')\n" in self.control_file)
         self.assertEqual(self.mixin, self.host)
 
 

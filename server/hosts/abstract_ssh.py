@@ -22,7 +22,7 @@ def _make_ssh_cmd_default(user="root", port=22, opts='', hosts_file='/dev/null',
                     "-o UserKnownHostsFile=%s -o BatchMode=yes "
                     "-o ConnectTimeout=%d -o ServerAliveInterval=%d "
                     "-l %s -p %d")
-    assert isinstance(connect_timeout, (int, long))
+    assert isinstance(connect_timeout, int)
     assert connect_timeout > 0  # can't disable the timeout
     return base_command % (opts, hosts_file, connect_timeout,
                            alive_interval, user, port)
@@ -200,7 +200,7 @@ class AbstractSSHHost(SiteHost):
         umask = os.umask(0)
         os.umask(umask)
 
-        max_privs = 0777 & ~umask
+        max_privs = 0o777 & ~umask
 
         def set_file_privs(filename):
             file_stat = os.stat(filename)
@@ -208,8 +208,8 @@ class AbstractSSHHost(SiteHost):
             file_privs = max_privs
             # if the original file permissions do not have at least one
             # executable bit then do not set it anywhere
-            if not file_stat.st_mode & 0111:
-                file_privs &= ~0111
+            if not file_stat.st_mode & 0o111:
+                file_privs &= ~0o111
 
             os.chmod(filename, file_privs)
 
@@ -265,7 +265,7 @@ class AbstractSSHHost(SiteHost):
         # Start a master SSH connection if necessary.
         self.start_master_ssh()
 
-        if isinstance(source, basestring):
+        if isinstance(source, str):
             source = [source]
         dest = os.path.abspath(dest)
 
@@ -340,7 +340,7 @@ class AbstractSSHHost(SiteHost):
         # Start a master SSH connection if necessary.
         self.start_master_ssh()
 
-        if isinstance(source, basestring):
+        if isinstance(source, str):
             source_is_dir = os.path.isdir(source)
             source = [source]
         remote_dest = self._encode_remote_paths([dest])

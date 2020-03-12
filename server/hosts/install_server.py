@@ -4,7 +4,7 @@ Install server interfaces, for autotest client machine OS provisioning.
 import logging
 import os
 import time
-import xmlrpclib
+import xmlrpc.client
 
 from autotest.client.shared import error
 
@@ -42,7 +42,7 @@ class CobblerInterface(object):
         self.password = kwargs['password']
         self.fallback_profile = kwargs['fallback_profile']
         if self.xmlrpc_url:
-            self.server = xmlrpclib.Server(self.xmlrpc_url)
+            self.server = xmlrpc.client.Server(self.xmlrpc_url)
             self.token = self.server.login(self.user, self.password)
         self.num_attempts = int(kwargs.get('num_attempts', 2))
 
@@ -86,7 +86,7 @@ class CobblerInterface(object):
             # machines, so we need to synchronize the dhcpd file after changing
             # the value above
             self.server.sync_dhcp(self.token)
-        except xmlrpclib.Fault as err:
+        except xmlrpc.client.Fault as err:
             # older Cobbler will not recognize the above command
             if "unknown remote method" not in err.faultString:
                 logging.error("DHCP sync failed, error code: %s, error string: %s",
@@ -106,7 +106,7 @@ class CobblerInterface(object):
             # machines, so we need to synchronize the dhcpd file after changing
             # the value above
             self.server.sync_dhcp(self.token)
-        except xmlrpclib.Fault as err:
+        except xmlrpc.client.Fault as err:
             # older Cobbler will not recognize the above command
             if "unknown remote method" not in err.faultString:
                 logging.error("DHCP sync failed, error code: %s, error string: %s",

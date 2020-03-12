@@ -10,7 +10,7 @@ import subprocess
 import sys
 import tempfile
 import time
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from autotest.client.shared import utils
 
@@ -163,7 +163,7 @@ class ExternalPackage(object):
         if not self.os_requirements:
             return
         failed = False
-        for file_name, package_name in self.os_requirements.iteritems():
+        for file_name, package_name in self.os_requirements.items():
             if not os.path.exists(file_name):
                 failed = True
                 logging.error('File %s not found, %s needs it.',
@@ -428,8 +428,8 @@ class ExternalPackage(object):
         for url in self.urls:
             logging.info('Fetching %s', url)
             try:
-                url_file = urllib2.urlopen(url)
-            except (urllib2.URLError, EnvironmentError):
+                url_file = urllib.request.urlopen(url)
+            except (urllib.error.URLError, EnvironmentError):
                 logging.warning('Could not fetch %s package from %s.',
                                 self.name, url)
                 continue
@@ -494,10 +494,10 @@ class SetuptoolsPackage(ExternalPackage):
         if not egg_path:
             return False
 
-        print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n'
-        print 'About to run sudo to install setuptools', self.version
-        print 'on your system for use by', sys.executable, '\n'
-        print '!! ^C within', self.SUDO_SLEEP_DELAY, 'seconds to abort.\n'
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n')
+        print('About to run sudo to install setuptools', self.version)
+        print('on your system for use by', sys.executable, '\n')
+        print('!! ^C within', self.SUDO_SLEEP_DELAY, 'seconds to abort.\n')
         time.sleep(self.SUDO_SLEEP_DELAY)
 
         # Copy the egg to the local filesystem /var/tmp so that root can

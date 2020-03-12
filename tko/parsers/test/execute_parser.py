@@ -8,7 +8,7 @@ from os import path
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.tko.parsers.test import scenario_base
 
 usage = 'usage: %prog [options] scenario_dirpath parser_result_tag'
@@ -25,7 +25,7 @@ def main():
     parser_result_tag = args[1]
 
     if not path.exists(scenario_dirpath) or not path.isdir(scenario_dirpath):
-        print 'Invalid scenarios_dirpath:', scenario_dirpath
+        print('Invalid scenarios_dirpath:', scenario_dirpath)
         parser.print_help()
         sys.exit(1)
 

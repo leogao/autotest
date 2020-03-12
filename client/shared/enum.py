@@ -52,7 +52,7 @@ class Enum(object):
 
     def choices(self):
         'Return choice list suitable for Django model choices.'
-        return zip(self.values, self.names)
+        return list(zip(self.values, self.names))
 
     def get_value(self, name):
         """

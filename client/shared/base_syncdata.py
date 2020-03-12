@@ -75,7 +75,7 @@ class SessionData(object):
         return timeout
 
     def close(self):
-        for connection in self.connection.values():
+        for connection in list(self.connection.values()):
             connection[0].close()
 
 
@@ -127,7 +127,7 @@ class SyncListenServer(object):
         Close and delete timed-out connection.
         """
         to_del = []
-        for session_id, session in self.sessions.items():
+        for session_id, session in list(self.sessions.items()):
             if session.data_lock.acquire(False):
                 if ((not session.is_finished() and not session.timeout()) or
                         session.is_finished()):
@@ -161,7 +161,7 @@ class SyncListenServer(object):
         if not session.is_finished():
             if (session.data_recv == len(session.hosts) and
                     session.timeout()):
-                for client, _ in session.connection.values():
+                for client, _ in list(session.connection.values()):
                     try:
                         net_send_object(client, session.sync_data)
                         net_recv_object(client, _DEFAULT_TIMEOUT)
@@ -184,7 +184,7 @@ class SyncListenServer(object):
 
         self.server_thread.join(2 * _DEFAULT_TIMEOUT)
         logging.debug("Server thread finished.")
-        for session in self.sessions.itervalues():
+        for session in self.sessions.values():
             session.close()
         self.listen_server.close()
         logging.debug("ListenServer closed finished.")

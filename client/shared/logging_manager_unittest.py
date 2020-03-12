@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import StringIO
+import io
 import logging
 import os
 import select
@@ -13,13 +13,13 @@ from nose.plugins.skip import SkipTest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import logging_manager, logging_config
 
 
 def skip(reason):
     def decorator(test_item):
-        if not isinstance(test_item, (type, types.ClassType)):
+        if not isinstance(test_item, type):
             @functools.wraps(test_item)
             def skip_wrapper(*args, **kwargs):
                 raise SkipTest(reason)
@@ -49,7 +49,7 @@ class PipedStringIO(object):
     _instances = set()
 
     def __init__(self):
-        self._string_io = StringIO.StringIO()
+        self._string_io = io.StringIO()
         self._read_end, self._write_end = os.pipe()
         PipedStringIO._instances.add(self)
 
@@ -168,12 +168,12 @@ class LoggingManagerTest(unittest.TestCase):
         PipedStringIO.cleanup_all_instances()
 
     def _say(self, suffix):
-        print >>self.stdout, 'print %s' % suffix
+        print('print %s' % suffix, file=self.stdout)
         if self._real_system_calls:
             os.system('echo system %s >&%s' % (suffix,
                                                self._original_stdout.fileno()))
         else:
-            print >>self.stdout, 'system %s' % suffix
+            print('system %s' % suffix, file=self.stdout)
         logging.info('logging %s', suffix)
         PipedStringIO.read_all_pipes()
 
@@ -221,15 +221,15 @@ class LoggingManagerTest(unittest.TestCase):
             # interleaving.  so compare sets of lines rather than ordered lines.
             actual_lines = set(actual_lines)
             expected_lines = set(expected_lines)
-        self.assertEquals(actual_lines, expected_lines)
+        self.assertEqual(actual_lines, expected_lines)
 
     def _check_results(self):
         # ensure our stdout was restored
-        self.assertEquals(self.stdout, self._original_stdout)
+        self.assertEqual(self.stdout, self._original_stdout)
 
         if self._real_system_calls:
             # ensure FDs were left in their original state
-            self.assertEquals(self._grab_fd_info(), self._fd_info)
+            self.assertEqual(self._grab_fd_info(), self._fd_info)
 
         self._compare_logs(self.stdout, _EXPECTED_STDOUT)
         self._compare_logs(self._log1, _EXPECTED_LOG1)
@@ -253,10 +253,10 @@ class LoggingManagerTest(unittest.TestCase):
         manager.start_logging()
 
         manager.tee_redirect_debug_dir('/fake/dir', tag='mytag')
-        print >>self.stdout, 'hello'
+        print('hello', file=self.stdout)
 
         manager.undo_redirect()
-        print >>self.stdout, 'goodbye'
+        print('goodbye', file=self.stdout)
 
         manager.stop_logging()
 
@@ -282,7 +282,7 @@ class MonkeyPatchTestCase(unittest.TestCase):
         finder = logging_manager._logging_manager_aware_logger__find_caller
         filename, lineno, caller_name = finder(logging_manager.logger)
         self.check_filename(filename)
-        self.assertEquals('test_find_caller', caller_name)
+        self.assertEqual('test_find_caller', caller_name)
 
     def _1_test_find_caller(self):
         self._0_test_find_caller()

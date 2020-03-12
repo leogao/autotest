@@ -10,7 +10,7 @@ import tempfile
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 from autotest.client.shared import utils
 from autotest.database_legacy import database_connection
@@ -66,7 +66,7 @@ class Migration(object):
             method(manager)
         else:
             sql = getattr(self.module, sql_name)
-            assert isinstance(sql, basestring)
+            assert isinstance(sql, str)
             manager.execute_script(sql)
 
     def migrate_up(self, manager):

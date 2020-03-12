@@ -5,7 +5,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared import control_data, autotemp
 
 ControlData = control_data.ControlData
@@ -38,17 +38,17 @@ class ParseControlTest(unittest.TestCase):
 
     def test_parse_control(self):
         cd = control_data.parse_control(self.control_tmp.name, True)
-        self.assertEquals(cd.author, "Author")
-        self.assertEquals(cd.dependencies, set(['console', 'power']))
-        self.assertEquals(cd.doc, "doc stuff")
-        self.assertEquals(cd.experimental, False)
-        self.assertEquals(cd.name, "nAmE")
-        self.assertEquals(cd.run_verify, False)
-        self.assertEquals(cd.sync_count, 2)
-        self.assertEquals(cd.time, "short")
-        self.assertEquals(cd.test_class, "kernel")
-        self.assertEquals(cd.test_category, "stress")
-        self.assertEquals(cd.test_type, "client")
+        self.assertEqual(cd.author, "Author")
+        self.assertEqual(cd.dependencies, set(['console', 'power']))
+        self.assertEqual(cd.doc, "doc stuff")
+        self.assertEqual(cd.experimental, False)
+        self.assertEqual(cd.name, "nAmE")
+        self.assertEqual(cd.run_verify, False)
+        self.assertEqual(cd.sync_count, 2)
+        self.assertEqual(cd.time, "short")
+        self.assertEqual(cd.test_class, "kernel")
+        self.assertEqual(cd.test_category, "stress")
+        self.assertEqual(cd.test_type, "client")
 
 
 class SetMethodTests(unittest.TestCase):
@@ -63,13 +63,13 @@ class SetMethodTests(unittest.TestCase):
     def test_bool(self):
         cd = ControlData({}, 'filename')
         cd._set_bool('foo', 'False')
-        self.assertEquals(cd.foo, False)
+        self.assertEqual(cd.foo, False)
         cd._set_bool('foo', True)
-        self.assertEquals(cd.foo, True)
+        self.assertEqual(cd.foo, True)
         cd._set_bool('foo', 'FALSE')
-        self.assertEquals(cd.foo, False)
+        self.assertEqual(cd.foo, False)
         cd._set_bool('foo', 'true')
-        self.assertEquals(cd.foo, True)
+        self.assertEqual(cd.foo, True)
         self.assertRaises(ValueError, cd._set_bool, 'foo', '')
         self.assertRaises(ValueError, cd._set_bool, 'foo', 1)
         self.assertRaises(ValueError, cd._set_bool, 'foo', [])
@@ -78,11 +78,11 @@ class SetMethodTests(unittest.TestCase):
     def test_int(self):
         cd = ControlData({}, 'filename')
         cd._set_int('foo', 0)
-        self.assertEquals(cd.foo, 0)
+        self.assertEqual(cd.foo, 0)
         cd._set_int('foo', '0')
-        self.assertEquals(cd.foo, 0)
+        self.assertEqual(cd.foo, 0)
         cd._set_int('foo', '-1', min=-2, max=10)
-        self.assertEquals(cd.foo, -1)
+        self.assertEqual(cd.foo, -1)
         self.assertRaises(ValueError, cd._set_int, 'foo', 0, min=1)
         self.assertRaises(ValueError, cd._set_int, 'foo', 1, max=0)
         self.assertRaises(ValueError, cd._set_int, 'foo', 'x')
@@ -92,38 +92,38 @@ class SetMethodTests(unittest.TestCase):
     def test_set(self):
         cd = ControlData({}, 'filename')
         cd._set_set('foo', 'a')
-        self.assertEquals(cd.foo, set(['a']))
+        self.assertEqual(cd.foo, set(['a']))
         cd._set_set('foo', 'a,b,c')
-        self.assertEquals(cd.foo, set(['a', 'b', 'c']))
+        self.assertEqual(cd.foo, set(['a', 'b', 'c']))
         cd._set_set('foo', ' a , b , c     ')
-        self.assertEquals(cd.foo, set(['a', 'b', 'c']))
+        self.assertEqual(cd.foo, set(['a', 'b', 'c']))
         cd._set_set('foo', None)
-        self.assertEquals(cd.foo, set(['None']))
+        self.assertEqual(cd.foo, set(['None']))
 
     def test_string(self):
         cd = ControlData({}, 'filename')
         cd._set_string('foo', 'a')
-        self.assertEquals(cd.foo, 'a')
+        self.assertEqual(cd.foo, 'a')
         cd._set_string('foo', 'b')
-        self.assertEquals(cd.foo, 'b')
+        self.assertEqual(cd.foo, 'b')
         cd._set_string('foo', 'B')
-        self.assertEquals(cd.foo, 'B')
+        self.assertEqual(cd.foo, 'B')
         cd._set_string('foo', 1)
-        self.assertEquals(cd.foo, '1')
+        self.assertEqual(cd.foo, '1')
         cd._set_string('foo', None)
-        self.assertEquals(cd.foo, 'None')
+        self.assertEqual(cd.foo, 'None')
         cd._set_string('foo', [])
-        self.assertEquals(cd.foo, '[]')
+        self.assertEqual(cd.foo, '[]')
 
     def test_option(self):
         options = ['a', 'b']
         cd = ControlData({}, 'filename')
         cd._set_option('foo', 'a', options)
-        self.assertEquals(cd.foo, 'a')
+        self.assertEqual(cd.foo, 'a')
         cd._set_option('foo', 'b', options)
-        self.assertEquals(cd.foo, 'b')
+        self.assertEqual(cd.foo, 'b')
         cd._set_option('foo', 'B', options)
-        self.assertEquals(cd.foo, 'B')
+        self.assertEqual(cd.foo, 'B')
         self.assertRaises(ValueError, cd._set_option,
                           'foo', 'x', options)
         self.assertRaises(ValueError, cd._set_option,

@@ -15,11 +15,11 @@ http://www.kernel.org/pub/linux/kernel/v3.x/linux-3.1.tar.bz2
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 
 import re
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from autotest.client.shared.settings import settings
 
@@ -31,35 +31,35 @@ def get_mappings_2x():
 
     MAPPINGS_2X = [
         [r'^\d+\.\d+$', '', True,
-         map(lambda x: x + 'v%(major)s/linux-%(full)s.tar.bz2', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz', GITWEB_BASE_URL.split())
+         [x + 'v%(major)s/linux-%(full)s.tar.bz2' for x in KERNEL_BASE_URL.split()] +
+         [x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz' for x in GITWEB_BASE_URL.split()]
          ],
         [r'^\d+\.\d+\.\d+$', '', True,
-         map(lambda x: x + 'v%(major)s/linux-%(full)s.tar.bz2', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz', GITWEB_BASE_URL.split())
+         [x + 'v%(major)s/linux-%(full)s.tar.bz2' for x in KERNEL_BASE_URL.split()] +
+         [x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz' for x in GITWEB_BASE_URL.split()]
          ],
         [r'^\d+\.\d+\.\d+\.\d+$', '', True,
-         map(lambda x: x + 'v%(major)s/linux-%(full)s.tar.bz2', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz', STABLE_GITWEB_BASE_URL.split())
+         [x + 'v%(major)s/linux-%(full)s.tar.bz2' for x in KERNEL_BASE_URL.split()] +
+         [x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz' for x in STABLE_GITWEB_BASE_URL.split()]
          ],
         [r'-rc\d+$', '%(minor-prev)s', True,
-         map(lambda x: x + 'v%(major)s/testing/v%(minor)s/linux-%(full)s.tar.bz2', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + 'v%(major)s/testing/linux-%(full)s.tar.bz2', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz', GITWEB_BASE_URL.split())
+         [x + 'v%(major)s/testing/v%(minor)s/linux-%(full)s.tar.bz2' for x in KERNEL_BASE_URL.split()] +
+         [x + 'v%(major)s/testing/linux-%(full)s.tar.bz2' for x in KERNEL_BASE_URL.split()] +
+         [x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz' for x in GITWEB_BASE_URL.split()]
          ],
         [r'-(git|bk)\d+$', '%(base)s', False,
-         map(lambda x: x + 'v%(major)s/snapshots/old/patch-%(full)s.bz2', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + 'v%(major)s/snapshots/patch-%(full)s.bz2', KERNEL_BASE_URL.split())
+         [x + 'v%(major)s/snapshots/old/patch-%(full)s.bz2' for x in KERNEL_BASE_URL.split()] +
+         [x + 'v%(major)s/snapshots/patch-%(full)s.bz2' for x in KERNEL_BASE_URL.split()]
          ],
         [r'-mm\d+$', '%(base)s', False,
-         map(lambda x: x + 'people/akpm/patches/' + '%(major)s/%(base)s/%(full)s/%(full)s.bz2', KERNEL_BASE_URL.split())
+         [x + 'people/akpm/patches/' + '%(major)s/%(base)s/%(full)s/%(full)s.bz2' for x in KERNEL_BASE_URL.split()]
          ],
         [r'-mjb\d+$', '%(base)s', False,
-         map(lambda x: x + 'people/mbligh/%(base)s/patch-%(full)s.bz2', KERNEL_BASE_URL.split())
+         [x + 'people/mbligh/%(base)s/patch-%(full)s.bz2' for x in KERNEL_BASE_URL.split()]
          ],
         [r'[a-f0-9]{7,40}$', '', True,
-         map(lambda x: x + ';a=snapshot;h=%(full)s;sf=tgz', GITWEB_BASE_URL.split()) +
-         map(lambda x: x + ';a=snapshot;h=%(full)s;sf=tgz', STABLE_GITWEB_BASE_URL.split())
+         [x + ';a=snapshot;h=%(full)s;sf=tgz' for x in GITWEB_BASE_URL.split()] +
+         [x + ';a=snapshot;h=%(full)s;sf=tgz' for x in STABLE_GITWEB_BASE_URL.split()]
          ]
     ]
 
@@ -73,23 +73,23 @@ def get_mappings_post_2x():
 
     MAPPINGS_POST_2X = [
         [r'^\d+\.\d+$', '', True,
-         map(lambda x: x + 'v%(major)s/linux-%(full)s.tar.bz2', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + 'v%(major)s/linux-%(full)s.tar.xz', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz', GITWEB_BASE_URL.split())
+         [x + 'v%(major)s/linux-%(full)s.tar.bz2' for x in KERNEL_BASE_URL.split()] +
+         [x + 'v%(major)s/linux-%(full)s.tar.xz' for x in KERNEL_BASE_URL.split()] +
+         [x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz' for x in GITWEB_BASE_URL.split()]
          ],
         [r'^\d+\.\d+\.\d+$', '', True,
-         map(lambda x: x + 'v%(major)s/linux-%(full)s.tar.bz2', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + 'v%(major)s/linux-%(full)s.tar.xz', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz', STABLE_GITWEB_BASE_URL.split())
+         [x + 'v%(major)s/linux-%(full)s.tar.bz2' for x in KERNEL_BASE_URL.split()] +
+         [x + 'v%(major)s/linux-%(full)s.tar.xz' for x in KERNEL_BASE_URL.split()] +
+         [x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz' for x in STABLE_GITWEB_BASE_URL.split()]
          ],
         [r'-rc\d+$', '', True,
-         map(lambda x: x + 'v%(major)s/testing/linux-%(full)s.tar.bz2', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + 'v%(major)s/testing/linux-%(full)s.tar.xz', KERNEL_BASE_URL.split()) +
-         map(lambda x: x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz', GITWEB_BASE_URL.split())
+         [x + 'v%(major)s/testing/linux-%(full)s.tar.bz2' for x in KERNEL_BASE_URL.split()] +
+         [x + 'v%(major)s/testing/linux-%(full)s.tar.xz' for x in KERNEL_BASE_URL.split()] +
+         [x + ';a=snapshot;h=refs/tags/v%(full)s;sf=tgz' for x in GITWEB_BASE_URL.split()]
          ],
         [r'[a-f0-9]{7,40}$', '', True,
-         map(lambda x: x + ';a=snapshot;h=%(full)s;sf=tgz', GITWEB_BASE_URL.split()) +
-         map(lambda x: x + ';a=snapshot;h=%(full)s;sf=tgz', STABLE_GITWEB_BASE_URL.split())
+         [x + ';a=snapshot;h=%(full)s;sf=tgz' for x in GITWEB_BASE_URL.split()] +
+         [x + ';a=snapshot;h=%(full)s;sf=tgz' for x in STABLE_GITWEB_BASE_URL.split()]
          ]
     ]
 
@@ -250,10 +250,10 @@ def mirror_kernel_components(mirrors, components):
 
 def url_accessible(url):
     try:
-        u = urllib2.urlopen(url)
+        u = urllib.request.urlopen(url)
         u.close()
         return True
-    except urllib2.HTTPError:
+    except urllib.error.HTTPError:
         return False
 
 
@@ -320,4 +320,4 @@ if __name__ == '__main__':
     # Dump them out
     for component in components:
         if component:
-            print " ".join(component)
+            print(" ".join(component))

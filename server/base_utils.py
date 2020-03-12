@@ -78,7 +78,7 @@ def get(location, local_copy=False):
         tmpfileobj.close()
         return tmpfile
 
-    if isinstance(location, types.StringTypes):
+    if isinstance(location, (str,)):
         # location is a URL
         if location.startswith('http') or location.startswith('ftp'):
             tmpfile = os.path.join(tmpdir, os.path.basename(location))
@@ -197,7 +197,7 @@ def find_pid(command):
 
 def nohup(command, stdout='/dev/null', stderr='/dev/null', background=True,
           env={}):
-    cmd = ' '.join(key + '=' + val for key, val in env.iteritems())
+    cmd = ' '.join(key + '=' + val for key, val in env.items())
     cmd += ' nohup ' + command
     cmd += ' > %s' % stdout
     if stdout == stderr:
@@ -318,7 +318,7 @@ def get_sync_control_file(control, host_name, host_num,
     sc_bar_port = port_base
     c_bar_port = port_base
     if host_num < 0:
-        print "Please provide a non negative number for the host"
+        print("Please provide a non negative number for the host")
         return None
     s_bar_port = port_base + 1 + host_num  # The set of s_bar_ports are
     # the same for a given machine

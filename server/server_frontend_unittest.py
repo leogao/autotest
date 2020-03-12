@@ -8,12 +8,12 @@
 import os
 import sys
 import unittest
-from cStringIO import StringIO
+from io import StringIO
 
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.settings import settings
 from autotest.client.shared import utils
 from autotest.client.shared.test_utils import mock
@@ -81,14 +81,14 @@ class AFETest(BaseRpcClientTest):
 
         self.god.check_playback()
 
-        self.assert_('PASSED' in fake_stdout)
-        self.assert_('WOPR' in fake_stdout)
-        self.assert_('http://chess/tko/compose_query.cgi?' in fake_stdout)
-        self.assert_('columns=test' in fake_stdout)
-        self.assert_('rows=machine_group' in fake_stdout)
-        self.assert_("condition=tag~'idFoo-%25'" in fake_stdout)
-        self.assert_('title=Report' in fake_stdout)
-        self.assert_('Sending email' in fake_stdout)
+        self.assertTrue('PASSED' in fake_stdout)
+        self.assertTrue('WOPR' in fake_stdout)
+        self.assertTrue('http://chess/tko/compose_query.cgi?' in fake_stdout)
+        self.assertTrue('columns=test' in fake_stdout)
+        self.assertTrue('rows=machine_group' in fake_stdout)
+        self.assertTrue("condition=tag~'idFoo-%25'" in fake_stdout)
+        self.assertTrue('title=Report' in fake_stdout)
+        self.assertTrue('Sending email' in fake_stdout)
 
 
 if __name__ == '__main__':

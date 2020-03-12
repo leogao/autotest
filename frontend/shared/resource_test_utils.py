@@ -61,7 +61,7 @@ class ResourceTestCase(unittest.TestCase,
             full_uri = self.URI_PREFIX + '/' + uri
 
         response = self.raw_request(method, full_uri, **kwargs)
-        self.assertEquals(
+        self.assertEqual(
             response.status_code, expected_status,
             'Requesting %s\nExpected %s, got %s: %s (headers: %s)'
             % (full_uri, expected_status, response.status_code,
@@ -79,7 +79,7 @@ class ResourceTestCase(unittest.TestCase,
         return sorted(collection, key=operator.itemgetter(attribute))
 
     def _read_attribute(self, item, attribute_or_list):
-        if isinstance(attribute_or_list, basestring):
+        if isinstance(attribute_or_list, str):
             attribute_or_list = [attribute_or_list]
         for attribute in attribute_or_list:
             item = item[attribute]
@@ -104,13 +104,13 @@ class ResourceTestCase(unittest.TestCase,
         if length is None and check_number is None:
             length = len(expected_list)
         if length is not None:
-            self.assertEquals(len(actual_list), length,
+            self.assertEqual(len(actual_list), length,
                               'Expected %s, got %s: %s'
                               % (length, len(actual_list),
                                  ', '.join(str(item) for item in actual_list)))
         if check_number:
             actual_list = actual_list[:check_number]
-        self.assertEquals(actual_list, expected_list)
+        self.assertEqual(actual_list, expected_list)
 
     def check_relationship(self, resource_uri, relationship_name,
                            other_entry_name, field, expected_values,

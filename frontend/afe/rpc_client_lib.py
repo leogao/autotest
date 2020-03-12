@@ -10,7 +10,7 @@ import os
 
 from autotest.client.shared import utils
 
-from json_rpc import proxy
+from .json_rpc import proxy
 
 
 class AuthError(Exception):

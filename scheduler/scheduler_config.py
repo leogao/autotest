@@ -1,7 +1,7 @@
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client.shared.settings import settings
 
 CONFIG_SECTION = 'SCHEDULER'
@@ -29,7 +29,7 @@ class SchedulerConfig(object):
 
     def read_config(self):
         settings.parse_config_file()
-        for field, config_option in self.FIELDS.iteritems():
+        for field, config_option in self.FIELDS.items():
             setattr(self, field, settings.get_value(CONFIG_SECTION,
                                                     config_option,
                                                     type=int))

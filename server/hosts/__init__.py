@@ -9,22 +9,22 @@ You should 'import hosts' instead of importing every available host module.
 
 
 # host abstract classes
-from base_classes import Host
-from remote import RemoteHost
+from .base_classes import Host
+from .remote import RemoteHost
 try:
     from site_host import SiteHost
 except ImportError as e:
     pass
 
 # host implementation classes
-from ssh_host import SSHHost
+from .ssh_host import SSHHost
 
 # extra logger classes
-from serial import SerialHost
-from netconsole import NetconsoleHost
+from .serial import SerialHost
+from .netconsole import NetconsoleHost
 
 # bootloader classes
-from bootloader import Bootloader
+from .bootloader import Bootloader
 
 # factory function
-from factory import create_host
+from .factory import create_host

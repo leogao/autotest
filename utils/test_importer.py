@@ -30,7 +30,7 @@ Most options should be fairly self explanatory, use --help to display them.
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 import compiler
 import logging
 import optparse

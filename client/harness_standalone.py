@@ -13,7 +13,7 @@ from autotest.client import utils
 from autotest.client.shared import error, distro
 from autotest.client.shared.settings import settings
 
-import harness
+from . import harness
 
 
 class harness_standalone(harness.harness):

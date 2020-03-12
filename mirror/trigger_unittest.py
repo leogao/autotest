@@ -6,7 +6,7 @@ import unittest
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.mirror import trigger
 from autotest.client.shared.test_utils import mock
 
@@ -24,8 +24,8 @@ class map_action_unittest(unittest.TestCase):
         configs = object()
 
         info = trigger.map_action.machine_info(tests, configs)
-        self.assertEquals(tests, info.tests)
-        self.assertEquals(configs, info.kernel_configs)
+        self.assertEqual(tests, info.tests)
+        self.assertEqual(configs, info.kernel_configs)
 
     @staticmethod
     def _make_control_dict(contents, is_server=False, synch_count=1,
@@ -91,11 +91,11 @@ class map_action_unittest(unittest.TestCase):
             # function to make sure "cmp" invariants are followed
             cmp_func = trigger.map_action._kver_cmp
             if ver1 != ver2:
-                self.assertEquals(cmp_func(ver1, ver2), -1)
-                self.assertEquals(cmp_func(ver2, ver1), 1)
+                self.assertEqual(cmp_func(ver1, ver2), -1)
+                self.assertEqual(cmp_func(ver2, ver1), 1)
             else:
-                self.assertEquals(cmp_func(ver1, ver2), 0)
-                self.assertEquals(cmp_func(ver2, ver1), 0)
+                self.assertEqual(cmp_func(ver1, ver2), 0)
+                self.assertEqual(cmp_func(ver2, ver1), 0)
 
         check_cmp('2.6.20', '2.6.20')
         check_cmp('2.6.20', '2.6.21')

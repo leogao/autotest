@@ -3,7 +3,7 @@
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 import logging
 import unittest
 
@@ -47,9 +47,9 @@ class UserCleanupTest(unittest.TestCase, test_utils.FrontendTestMixin):
         self.cleanup._reverify_dead_hosts()
 
         tasks = models.SpecialTask.objects.all()
-        self.assertEquals(len(tasks), 1)
-        self.assertEquals(tasks[0].host.id, 1)
-        self.assertEquals(tasks[0].task, models.SpecialTask.Task.VERIFY)
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0].host.id, 1)
+        self.assertEqual(tasks[0].task, models.SpecialTask.Task.VERIFY)
 
     def test_reverify_dead_hosts_limits(self):
         # limit the number of reverifies
@@ -73,11 +73,11 @@ class UserCleanupTest(unittest.TestCase, test_utils.FrontendTestMixin):
 
         tasks = models.SpecialTask.objects.all()
         # four hosts need reverifying but our max limit was set to 2
-        self.assertEquals(len(tasks), 2)
+        self.assertEqual(len(tasks), 2)
         self.assertTrue(tasks[0].host.id in (1, 4, 5, 6))
         self.assertTrue(tasks[1].host.id in (1, 4, 5, 6))
-        self.assertEquals(tasks[0].task, models.SpecialTask.Task.VERIFY)
-        self.assertEquals(tasks[1].task, models.SpecialTask.Task.VERIFY)
+        self.assertEqual(tasks[0].task, models.SpecialTask.Task.VERIFY)
+        self.assertEqual(tasks[1].task, models.SpecialTask.Task.VERIFY)
 
 
 if __name__ == '__main__':

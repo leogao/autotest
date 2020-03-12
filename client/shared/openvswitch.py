@@ -6,7 +6,7 @@ import signal
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
-    import common  # pylint: disable=W0611
+    from . import common  # pylint: disable=W0611
 from autotest.client import utils, os_dep
 from autotest.client.shared import error
 from autotest.client.shared.utils import VersionableClass
@@ -328,7 +328,7 @@ class OpenVSwitchControlCli_140(OpenVSwitchControlCli, VersionableClass):
         """
         :param trunk: list of vlans id.
         """
-        trunk = map(lambda x: str(x), trunk)
+        trunk = [str(x) for x in trunk]
         trunk = "[" + ",".join(trunk) + "]"
         self.ovs_vsctl(["set", "Port", port_name, "trunk=%s" % trunk])
 
