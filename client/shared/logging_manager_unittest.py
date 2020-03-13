@@ -279,7 +279,7 @@ class MonkeyPatchTestCase(unittest.TestCase):
         self.assertTrue(os.path.split(filename)[1] in expected)
 
     def _0_test_find_caller(self):
-        finder = logging_manager._logging_manager_aware_logger__find_caller
+        finder = logging.Logger.findCaller
         filename, lineno, caller_name = finder(logging_manager.logger)
         self.check_filename(filename)
         self.assertEqual('test_find_caller', caller_name)
@@ -291,7 +291,7 @@ class MonkeyPatchTestCase(unittest.TestCase):
         self._1_test_find_caller()
 
     def _0_test_non_reported_find_caller(self):
-        finder = logging_manager._logging_manager_aware_logger__find_caller
+        finder = logging.Logger.findCaller
         filename, lineno, caller_name = finder(logging_manager.logger)
         # Python 2.4 unittest implementation will call the unittest method in
         # file 'unittest.py', and Python >= 2.6 does the same in 'case.py'

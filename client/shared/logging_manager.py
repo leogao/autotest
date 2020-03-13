@@ -60,41 +60,9 @@ def do_not_report_as_logging_caller(func):
     return func
 
 
-# Copied from Python 2.4 logging/__init__.py Logger.findCaller and enhanced.
-# The logging code remains the same and compatible with this monkey patching
-# through at least Python version 2.6.2.
-def _logging_manager_aware_logger__find_caller(unused):
-    """
-    Find the stack frame of the caller so that we can note the source
-    file name, line number and function name.
-    """
-    f = sys._getframe(2).f_back
-    rv = "(unknown file)", 0, "(unknown function)"
-    while hasattr(f, "f_code"):
-        co = f.f_code
-        filename = os.path.normcase(co.co_filename)
-        if filename == logging._srcfile:
-            f = f.f_back
-            continue
-        # START additional code.
-        if co in _caller_code_to_skip_in_logging_stack:
-            f = f.f_back
-            continue
-        # END additional code.
-        rv = (filename, f.f_lineno, co.co_name)
-        break
-    return rv
-
-
 if sys.version_info[:2] > (2, 7):
     warnings.warn('This module has not been reviewed for Python %s' %
                   sys.version)
-
-
-# Monkey patch our way around logging's design...
-_original_logger__find_caller = logging.Logger.findCaller
-logging.Logger.findCaller = _logging_manager_aware_logger__find_caller
-
 
 class LoggingFile(object):
 
