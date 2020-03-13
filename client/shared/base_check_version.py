@@ -13,6 +13,7 @@ class base_check_python_version:
             version = sys.version_info[0:2]
         except AttributeError:
             pass  # pre 2.0, no neat way to get the exact number
+        #self.restart()
 
     def extract_version(self, path):
         match = re.search(r'/python(\d+)\.(\d+)$', path)
@@ -21,7 +22,7 @@ class base_check_python_version:
         else:
             return None
 
-    PYTHON_BIN_GLOB_STRINGS = ['/usr/bin/python2*', '/usr/local/bin/python2*']
+    PYTHON_BIN_GLOB_STRINGS = ['/usr/bin/python3*', '/usr/local/bin/python3*']
 
     def find_desired_python(self):
         """Returns the path of the desired python interpreter."""
