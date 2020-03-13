@@ -262,6 +262,9 @@ class StdLibProbe(Probe):
         version = UNKNOWN_DISTRO_VERSION
         release = UNKNOWN_DISTRO_RELEASE
         arch = UNKNOWN_DISTRO_ARCH
+        distro = UNKNOWN_DISTRO
+
+        return distro
 
         d_name, d_version_release, d_codename = platform.dist()
         if d_name:
