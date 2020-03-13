@@ -59,11 +59,6 @@ def do_not_report_as_logging_caller(func):
     _caller_code_to_skip_in_logging_stack.add(func.__code__)
     return func
 
-
-if sys.version_info[:2] > (2, 7):
-    warnings.warn('This module has not been reviewed for Python %s' %
-                  sys.version)
-
 class LoggingFile(object):
 
     """
