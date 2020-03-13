@@ -141,13 +141,13 @@ class BgJob(object):
             # read in all the data we can from pipe and then stop
             data = []
             while select.select([pipe], [], [], 0)[0]:
-                data.append(os.read(pipe.fileno(), 1024))
+                data.append(os.read(pipe.fileno(), 1024).decode())
                 if len(data[-1]) == 0:
                     break
             data = "".join(data)
         else:
             # perform a single read
-            data = os.read(pipe.fileno(), 1024)
+            data = os.read(pipe.fileno(), 1024).decode()
         buf.write(data)
         tee.write(data)
 
