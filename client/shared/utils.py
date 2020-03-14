@@ -372,7 +372,7 @@ def read_one_line(filename):
 
 
 def read_file(filename):
-    f = open(filename)
+    f = open(filename, 'r')
     try:
         return f.read()
     finally:
@@ -505,7 +505,7 @@ def read_keyval(path):
         path = os.path.join(path, 'keyval')
     keyval = {}
     if os.path.exists(path):
-        for line in open(path):
+        for line in open(path, 'r'):
             line = re.sub('#.*', '', line).rstrip()
             if not re.search(r'^[-\.\w]+=', line):
                 raise ValueError('Invalid format line: %s' % line)
@@ -817,11 +817,13 @@ def update_version(srcdir, preserve_srcdir, new_version, install,
     """
     versionfile = os.path.join(srcdir, '.version')
     install_needed = True
-
     if os.path.exists(versionfile):
-        old_version = pickle.load(open(versionfile))
-        if old_version == new_version:
-            install_needed = False
+        try:
+            old_version = pickle.load(open(versionfile, 'rb'))
+            if old_version == new_version:
+                install_needed = False
+        except:
+            pass
 
     if install_needed:
         if not preserve_srcdir and os.path.exists(srcdir):
@@ -862,7 +864,7 @@ def update_version(srcdir, preserve_srcdir, new_version, install,
             shutil.copyfile(patch_src, patch_dst)
 
         install(*args, **dargs)
-        pickle.dump(new_version, open(versionfile, 'w'))
+        pickle.dump(new_version, open(versionfile, 'wb'))
 
 
 def get_stderr_level(stderr_is_expected):
@@ -1683,7 +1685,7 @@ def merge_trees(src, dest):
         # src & dest are files in both trees, append src to dest
         destfile = open(dest, "a")
         try:
-            srcfile = open(src)
+            srcfile = open(src, 'r')
             try:
                 destfile.write(srcfile.read())
             finally:
