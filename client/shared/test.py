@@ -43,11 +43,11 @@ class base_test(object):
         self.outputdir = outputdir
         self.tagged_testname = os.path.basename(self.outputdir)
         self.resultsdir = os.path.join(self.outputdir, 'results')
-        os.mkdir(self.resultsdir)
+        os.makedirs(self.resultsdir, exist_ok=True)
         self.profdir = os.path.join(self.outputdir, 'profiling')
-        os.mkdir(self.profdir)
+        os.makedirs(self.profdir, exist_ok=True)
         self.debugdir = os.path.join(self.outputdir, 'debug')
-        os.mkdir(self.debugdir)
+        os.makedirs(self.debugdir, exist_ok=True)
         if getpass.getuser() == 'root':
             self.configure_crash_handler()
         else:
