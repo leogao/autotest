@@ -50,7 +50,6 @@ def fork_start(tmp, l):
         finally:
             # clear exception information to allow garbage collection of
             # objects referenced by the exception's traceback
-            sys.exc_clear()
             gc.collect()
             os._exit(1)
     else:
@@ -65,7 +64,7 @@ def _check_for_subprocess_exception(temp_dir, pid):
     ename = temp_dir + "/debug/error-%d" % pid
     if os.path.exists(ename):
         try:
-            e = pickle.load(file(ename, 'r'))
+            e = pickle.load(open(ename, 'rb'))
         except ImportError:
             logging.error("Unknown exception to unpickle. Exception must be"
                           " defined in error module.")
