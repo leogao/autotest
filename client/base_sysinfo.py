@@ -352,7 +352,7 @@ class base_sysinfo(object):
                 current_inode = os.stat(logpath).st_ino
                 if current_inode == self._messages_inode:
                     bytes_to_skip = self._messages_size
-            in_messages = open(logpath)
+            in_messages = open(logpath, 'rb')
             out_file_basename = os.path.basename(logpath) + ".gz"
             out_file_name = os.path.join(logdir, out_file_basename)
             out_messages = gzip.GzipFile(out_file_name, "w")
@@ -403,7 +403,7 @@ class base_sysinfo(object):
         # grab the total avail memory, not used by sys tables
         path = os.path.join(test_sysinfodir, "reboot_current", "meminfo")
         if os.path.exists(path):
-            mem_data = open(path).read()
+            mem_data = open(path, 'r').read()
             match = re.search(r"^MemTotal:\s+(\d+) kB$", mem_data,
                               re.MULTILINE)
             if match:
