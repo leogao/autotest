@@ -2,6 +2,8 @@
 #
 # autotest <control file> - run the autotest control file specified.
 #
+import sys
+sys.path.append('/var/lib')
 try:
     import autotest.common as common  # pylint: disable=W0611
 except ImportError:
