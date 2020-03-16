@@ -24,7 +24,7 @@ def generate_random_string(length):
     """
     r = random.SystemRandom()
     str = ""
-    chars = string.letters + string.digits
+    chars = string.ascii_letters + string.digits
     while length > 0:
         str += r.choice(chars)
         length -= 1
