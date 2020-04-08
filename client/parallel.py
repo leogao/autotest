@@ -62,7 +62,7 @@ def fork_start(tmp, l):
 
 def _check_for_subprocess_exception(temp_dir, pid):
     ename = temp_dir + "/debug/error-%d" % pid
-    if os.path.exists(ename):
+    if os.path.exists(ename) and os.path.getsize(ename) > 0:
         try:
             e = pickle.load(open(ename, 'rb'))
         except ImportError:
