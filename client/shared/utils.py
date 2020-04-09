@@ -1098,7 +1098,10 @@ def _wait_for_commands(bg_jobs, start_time, timeout):
             # we can write PIPE_BUF bytes without blocking
             # POSIX requires PIPE_BUF is >= 512
             bg_job = reverse_dict[file_obj]
-            file_obj.write(bg_job.string_stdin[:512])
+            msg = bg_job.string_stdin[:512]
+            if type(msg) == str:
+                msg = msg.encode()
+            file_obj.write(msg)
             bg_job.string_stdin = bg_job.string_stdin[512:]
             # no more input data, close stdin, remove it from the select set
             if not bg_job.string_stdin:
