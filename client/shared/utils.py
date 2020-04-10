@@ -246,6 +246,8 @@ class AsyncJob(BgJob):
             acquire()
             try:
                 for f in writable_objs:
+                    if type(tmp) == bytes:
+                        tmp = tmp.decode()
                     f.write(tmp)
             finally:
                 release()
